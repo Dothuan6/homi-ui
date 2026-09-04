@@ -63,7 +63,7 @@ const Buyer = {
     // (a) Form · (b) OTP inline · (c) lỗi field · (g) SMS lỗi
     const draft = Store.s().buyerDraft || {};
     const html = `
-      <div class="buyer-split">
+      <div class="buyer-split buyer-split-rev">
         <aside class="buyer-side stack">
         ${this.pkgHeader(pkg)}
         <div class="card"><div class="card-body">
