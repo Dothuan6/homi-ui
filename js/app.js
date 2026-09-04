@@ -107,14 +107,20 @@ const App = {
   buyerShell: function(content, o) {
     const opt = o || {};
     const seller = Store.refSeller();
+    const cur = (this.current || '').split('?')[0];
+    const nav = (code, label, ico) => `<a href="#${code}" class="${cur === code ? 'is-active' : ''}">${UI.icon(ico, 18)}<span>${label}</span></a>`;
     return `<div class="buyer">
       <header class="buyer-header"><div class="buyer-header-inner">
-        <a href="#A-01" class="brand" onclick="event.preventDefault()" aria-label="HOMI365">${UI.logo({ size: 34 })}</a>
-        ${opt.right || `<a class="btn btn-ghost btn-sm" href="#A-04">${UI.icon('search', 18)} Tra cứu đơn</a>`}
+        <a href="#HOME" class="brand" aria-label="HOMI365 — trang giới thiệu">${UI.logo({ size: 34 })}</a>
+        <nav class="buyer-nav" aria-label="Điều hướng">${nav('A-04', 'Tra cứu đơn hàng', 'search')}${nav('A-05', 'Đăng nhập seller', 'key')}</nav>
       </div></header>
       ${opt.showRef && seller ? `<div class="ref-bar">Người giới thiệu: <strong>${UI.esc(seller.fullName)}</strong> · mã <span class="mono">${UI.esc(seller.refCode)}</span></div>` : ''}
-      <main class="buyer-main" id="buyer-main">${content}</main>
-      <footer class="buyer-footer">${UI.esc(CONFIG.brand.company)} · Hỗ trợ ${UI.esc(CONFIG.brand.supportHotline)} (${UI.esc(CONFIG.brand.supportHours)})<br><a href="#HOME">Trang giới thiệu prototype</a> · <a href="#A-05">Đăng nhập seller</a> · <a href="#D-00">Quản trị</a></footer>
+      <main class="buyer-main ${opt.narrow ? 'buyer-main-narrow' : ''}" id="buyer-main">${content}</main>
+      <footer class="site-footer"><div class="site-footer-inner">
+        <div>${UI.logo({ size: 28 })}<p class="mt-2">${UI.esc(CONFIG.brand.company)}</p><p>Hỗ trợ <strong>${UI.esc(CONFIG.brand.supportHotline)}</strong> · ${UI.esc(CONFIG.brand.supportHours)}</p></div>
+        <div><div class="footer-title">Khách hàng</div><a href="#A-04">Tra cứu đơn hàng</a><a href="#A-05">Đăng nhập seller</a><a href="#HOME">Trang giới thiệu prototype</a></div>
+        <div><div class="footer-title">Quản trị</div><a href="#D-00">Đăng nhập quản trị</a><a href="./styleguide.html">Bộ thành phần giao diện</a></div>
+      </div></footer>
     </div>`;
   },
 
@@ -211,7 +217,7 @@ const App = {
       </div>
       <div class="alert alert-neutral">${UI.icon('info', 18)}<div class="text-sm">Muốn xem lại từ đầu với dữ liệu gốc: <button class="btn-link" onclick="if (confirm('Nạp lại toàn bộ dữ liệu mẫu? Mọi thao tác đã làm sẽ mất.')) Store.reset()">nạp lại dữ liệu mẫu</button>. Bộ thành phần giao diện: <a href="./styleguide.html">styleguide</a>.</div></div>
     </div>`;
-    return `<div class="buyer" style="--buyer-max: 960px">
+    return `<div class="buyer">
       <header class="buyer-header"><div class="buyer-header-inner">${UI.logo({ size: 34 })}<span class="text-sm text-muted">Prototype v2 · 04/09/2026</span></div></header>
       <main class="buyer-main">${content}</main>
       <footer class="buyer-footer">${UI.esc(CONFIG.brand.company)}</footer></div>`;

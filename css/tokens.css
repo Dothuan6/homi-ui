@@ -96,8 +96,8 @@
 
   /* --- Layout --- */
   --tap: 44px;             /* vùng bấm tối thiểu */
-  --buyer-max: 520px;      /* khung màn nhóm A */
-  --seller-max: 1040px;    /* khung nội dung nhóm C */
+  --buyer-max: 1120px;     /* khung màn nhóm A (website-first) */
+  --seller-max: 1200px;    /* khung nội dung nhóm C */
   --sidebar-w: 220px;      /* sidebar admin */
   --transition: .18s cubic-bezier(.4, 0, .2, 1);
 }

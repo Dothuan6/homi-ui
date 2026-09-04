@@ -4,6 +4,10 @@
  * Trạng thái mock bằng query ?state= (xem Demo navigator).
  */
 const Buyer = {
+  /** Panel giới thiệu bên trái cho màn có form (A-04, A-05) — website-first. */
+  introPanel: function(title, desc, steps) {
+    return `<div class="intro-panel"><h1>${title}</h1><p>${desc}</p><ol class="intro-steps">${steps.map(t => `<li>${t}</li>`).join('')}</ol></div>`;
+  },
 
   pkgHeader: function(pkg) {
     return `<div class="pkg">
@@ -31,7 +35,7 @@ const Buyer = {
         <p class="text-muted">${locked ? 'Tài khoản người giới thiệu đang bị tạm khoá. Vui lòng liên hệ người đã gửi link cho bạn hoặc bộ phận hỗ trợ.' : 'Gói sản phẩm chỉ mua được qua link giới thiệu của seller HOMI365. Vui lòng mở lại đúng link bạn nhận được (dạng <span class="mono">' + UI.esc(CONFIG.brand.baseUrl) + '/r/…</span>).'}</p>
         <div class="alert alert-neutral" style="text-align:left">${UI.icon('phone', 20)}<div>Hỗ trợ: <strong>${UI.esc(CONFIG.brand.supportHotline)}</strong> (${UI.esc(CONFIG.brand.supportHours)})</div></div>
         <div class="actions actions-row"><a class="btn btn-secondary btn-lg" href="#A-04">${UI.icon('search', 18)} Tra cứu đơn hàng đã mua</a><a class="btn btn-primary btn-lg" href="#HOME">Về trang giới thiệu prototype</a></div>
-      </div></div>`);
+      </div></div>`, { narrow: true });
     }
 
     // (f) Gói ngưng bán
@@ -41,7 +45,7 @@ const Buyer = {
         <h1>Sản phẩm tạm ngưng bán</h1>
         <p class="text-muted">Gói sản phẩm đang được tạm tắt bán để cập nhật. Vui lòng quay lại sau hoặc liên hệ người giới thiệu của bạn${seller ? ' (<strong>' + UI.esc(seller.fullName) + '</strong>)' : ''}.</p>
         <div class="actions"><a class="btn btn-secondary btn-lg" href="#A-04">Tra cứu đơn hàng</a></div>
-      </div></div>`, { showRef: true });
+      </div></div>`, { showRef: true, narrow: true });
     }
 
     // (d) SĐT đã mua gói (BR-03)
@@ -53,18 +57,21 @@ const Buyer = {
         <p class="text-muted">Mỗi số điện thoại chỉ được sở hữu <strong>1 gói</strong>. Số <span class="mono">${UI.esc(RULES.maskPhone(phone))}</span> đã có đơn hàng thanh toán thành công, nên không thể tạo đơn mới.</p>
         <div class="alert alert-info" style="text-align:left">${UI.icon('info', 20)}<div>Bạn có thể tra cứu đơn đã mua, xem mã kích hoạt hoặc kích hoạt tài khoản seller bằng chính số điện thoại này. Cần mua thêm gói cho người thân? Liên hệ hỗ trợ ${UI.esc(CONFIG.brand.supportHotline)} để được cấp ngoại lệ.</div></div>
         <div class="actions actions-row"><a class="btn btn-secondary btn-lg" href="#A-01">Nhập số khác</a><a class="btn btn-primary btn-lg" href="#A-04?phone=${UI.esc(phone)}">Tra cứu đơn hàng</a></div>
-      </div></div>`, { showRef: true });
+      </div></div>`, { showRef: true, narrow: true });
     }
 
     // (a) Form · (b) OTP inline · (c) lỗi field · (g) SMS lỗi
     const draft = Store.s().buyerDraft || {};
     const html = `
-      <div class="stack">
+      <div class="buyer-split">
+        <aside class="buyer-side stack">
         ${this.pkgHeader(pkg)}
         <div class="card"><div class="card-body">
           <p class="text-sm text-muted">${UI.esc(pkg.desc)}</p>
           <ul class="pkg-benefits">${pkg.benefits.map(b => `<li>${UI.icon('check', 16)}<span>${UI.esc(b)}</span></li>`).join('')}</ul>
         </div></div>
+        <div class="card card-tint"><div class="card-body ref-card"><span class="avatar" aria-hidden="true">${UI.esc(RULES.initials(seller.fullName))}</span><div><div class="text-sm text-muted">Người giới thiệu</div><div class="text-strong">${UI.esc(seller.fullName)}</div><div class="text-caption mono">Mã ${UI.esc(seller.refCode)}</div></div></div></div>
+        </aside>
 
         <div class="card" id="a01-card">
           <div class="card-head"><h2>Thông tin nhận hàng</h2><span class="text-sm text-muted">Bước 1/3</span></div>
@@ -84,7 +91,7 @@ const Buyer = {
         </div>
       </div>`;
     this._a01State = state;
-    return App.buyerShell(html, { showRef: true });
+    return App.buyerShell(html, { showRef: false });
   },
 
   a01Validate: function() {
@@ -173,7 +180,7 @@ const Buyer = {
     if (order.status === 'PAID' || order.status === 'AWAITING_RECONCILE' || order.status === 'REJECTED') { App.navigate('A-03', { replace: true }); return ''; }
 
     const expired = order.status === 'EXPIRED' || new Date(order.expiresAt).getTime() <= Date.now();
-    if (expired) { Store.expireOrder(order.id); return App.buyerShell(this.a02Expired(order), { showRef: true }); }
+    if (expired) { Store.expireOrder(order.id); return App.buyerShell(this.a02Expired(order), { showRef: true, narrow: true }); }
 
     const pkg = Store.pkg(order.packageId);
     const view = q.get('view') || 'choose';
@@ -182,18 +189,22 @@ const Buyer = {
     else if (view === 'bank') body = this.a02Bank(order);
     else body = this.a02Choose(order);
 
-    const html = `<div class="stack">
-      <div class="card"><div class="card-body">
+    const html = `<div class="buyer-split buyer-split-rev buyer-side-first">
+      <div class="stack">
+        ${order.status === 'FAILED' ? `<div class="alert alert-error" role="alert">${UI.icon('x-circle', 22)}<div><span class="alert-title">Thanh toán không thành công</span>${UI.esc(order.failReason || 'Giao dịch bị huỷ hoặc cổng trả lỗi.')} Bạn có thể chọn lại phương thức khi đơn còn thời hạn.</div></div>` : ''}
+        ${body}
+        <div class="demo-hint">Mô phỏng: <button class="btn-link" onclick="Buyer.a02SimExpire('${order.id}')">hết thời gian giữ đơn</button> (thực tế đơn tự hết hạn sau ${CONFIG.order.holdSeconds / 60} phút)</div>
+      </div>
+      <aside class="buyer-side"><div class="card"><div class="card-body">
         <div class="order-summary">
           <div><div class="text-sm text-muted">Mã đơn hàng</div><div class="order-id">${UI.esc(order.id)}</div>
-            <div class="text-sm mt-2">${UI.esc(pkg.fullName)}</div></div>
+            <div class="text-sm mt-2">${UI.esc(pkg.fullName)}</div>
+            <div class="text-sm text-muted mt-1">Giao tới: ${UI.esc(order.fullName)} · ${UI.esc(RULES.maskPhone(order.phone))}</div></div>
           ${UI.countdown.markup('a02-countdown')}
         </div>
         <div class="total-row"><span>Số tiền cần thanh toán</span><span class="total-amt">${UI.money(order.price)}</span></div>
-      </div></div>
-      ${order.status === 'FAILED' ? `<div class="alert alert-error" role="alert">${UI.icon('x-circle', 22)}<div><span class="alert-title">Thanh toán không thành công</span>${UI.esc(order.failReason || 'Giao dịch bị huỷ hoặc cổng trả lỗi.')} Bạn có thể chọn lại phương thức khi đơn còn thời hạn.</div></div>` : ''}
-      ${body}
-      <div class="demo-hint">Mô phỏng: <button class="btn-link" onclick="Buyer.a02SimExpire('${order.id}')">hết thời gian giữ đơn</button> (thực tế đơn tự hết hạn sau ${CONFIG.order.holdSeconds / 60} phút)</div>
+        <p class="text-caption mt-3">Đơn được giữ trong ${CONFIG.order.holdSeconds / 60} phút. Hết thời gian, đơn tự huỷ và bạn có thể đặt lại.</p>
+      </div></div></aside>
     </div>`;
     App.after(() => UI.countdown.mount('a02-countdown', order.expiresAt, { onExpire: () => { Store.expireOrder(order.id); App.reload(); } }));
     return App.buyerShell(html, { showRef: true });
@@ -283,13 +294,14 @@ const Buyer = {
     if (!order) { App.navigate('A-01', { replace: true }); return ''; }
     const pkg = Store.pkg(order.packageId);
     let body;
-    if (order.status === 'PAID') body = state === 'later' || q.get('later') ? this.a03Later(order) : (order.licenseCode ? this.a03Paid(order, pkg) : this.a03NoCode(order));
+    let wide = false;
+    if (order.status === 'PAID') { const later = state === 'later' || q.get('later'); body = later ? this.a03Later(order) : (order.licenseCode ? this.a03Paid(order, pkg) : this.a03NoCode(order)); wide = !later && !!order.licenseCode; }
     else if (order.status === 'FAILED') body = this.a03Failed(order);
     else if (order.status === 'AWAITING_RECONCILE') body = this.a03Awaiting(order);
     else if (order.status === 'REJECTED') body = this.a03Rejected(order);
     else if (order.status === 'EXPIRED') body = this.a02Expired(order);
     else { App.navigate('A-02', { replace: true }); return ''; }
-    return App.buyerShell(body, { showRef: false });
+    return App.buyerShell(body, { showRef: false, narrow: !wide });
   },
 
   orderInfoBlock: function(order, opts) {
@@ -308,7 +320,7 @@ const Buyer = {
   a03Paid: function(order, pkg) {
     const existing = Store.userByPhone(order.phone);
     const isSeller = existing && existing.type === 'seller';
-    return `<div class="stack">
+    return `<div class="buyer-split buyer-split-rev">
       <div class="card"><div class="card-body">
         <div class="result-hero"><div class="result-icon is-success">${UI.icon('check-circle', 40)}</div><h1>Thanh toán thành công</h1><p>Cảm ơn bạn đã mua ${UI.esc(pkg.name)}. Đồng hồ HW01 sẽ được giao tới địa chỉ đã đăng ký.</p></div>
         <div class="code-box code-box-lg code-box-navy mt-4"><div class="grow"><span class="code-label">Mã kích hoạt của bạn</span><span class="code-value">${UI.esc(order.licenseCode)}</span></div>
@@ -317,7 +329,7 @@ const Buyer = {
         <div class="mt-4">${this.orderInfoBlock(order)}</div>
       </div></div>
 
-      <div class="card card-tint"><div class="card-body">
+      <aside class="buyer-side"><div class="card card-tint"><div class="card-body">
         <div class="row"><span class="result-icon is-info" style="width:44px;height:44px;margin:0">${UI.icon('gift', 22)}</span>
           <div class="grow"><h2 style="font-size:var(--fs-lg)">${isSeller ? 'Bạn đã có tài khoản seller' : 'Tạo tài khoản seller — nhận hoa hồng khi giới thiệu'}</h2>
           <p class="text-sm text-muted">${isSeller ? 'Đăng nhập để xem gói và mã kích hoạt trong mục Gói của tôi.' : 'Không cần nhập lại thông tin. Bạn sẽ có link giới thiệu riêng và nhận hoa hồng ' + RULES.formatPercent(Store.currentPolicy().tiers[0].rate) + ' cho mỗi đơn F1.'}</p></div></div>
@@ -326,7 +338,7 @@ const Buyer = {
           <button class="btn btn-secondary btn-lg" onclick="Buyer.a03Later('${order.id}', true)">Để sau</button>
           <button class="btn btn-primary btn-lg" onclick="Buyer.a03CreateSeller('${order.id}')">${UI.icon('user', 18)} Tạo tài khoản</button>`}
         </div>
-      </div></div>
+      </div></div></aside>
     </div>`;
   },
   a03CreateSeller: function(orderId) {
@@ -410,9 +422,9 @@ const Buyer = {
   A04: function(q) {
     const mode = this._a04Mode || 'phone';
     const prefill = q.get('phone') || '';
-    const html = `<div class="stack">
-      <div><h1>Tra cứu đơn hàng</h1><p class="text-muted">Xem trạng thái thanh toán, giao hàng và mã kích hoạt của đơn đã mua.</p></div>
-      <div class="card"><div class="card-body" id="a04-body">
+    const html = `<div class="buyer-split">
+      <aside class="buyer-side">${this.introPanel('Tra cứu đơn hàng', 'Xem trạng thái thanh toán, giao hàng và mã kích hoạt của đơn đã mua — không cần đăng nhập.', ['Nhập số điện thoại đã mua và xác thực OTP, hoặc nhập mã đơn hàng.', 'Xem trạng thái thanh toán, giao hàng và mã kích hoạt (chỉ khi xác thực OTP).', 'Nếu đã thanh toán mà chưa có tài khoản, kích hoạt tài khoản seller ngay tại đây.'])}</aside>
+      <div class="stack"><div class="card"><div class="card-body" id="a04-body">
         <div class="seg mb-4" role="tablist">
           <button role="tab" aria-selected="${mode === 'phone'}" class="${mode === 'phone' ? 'is-active' : ''}" onclick="Buyer._a04Mode='phone'; App.reload()">Số điện thoại + OTP</button>
           <button role="tab" aria-selected="${mode === 'order'}" class="${mode === 'order' ? 'is-active' : ''}" onclick="Buyer._a04Mode='order'; App.reload()">Mã đơn hàng</button>
@@ -430,8 +442,8 @@ const Buyer = {
           </form>`}
       </div></div>
       <div class="demo-hint">SĐT mẫu có đơn: <strong>${Store.user('U101').phone}</strong> (chưa có TK seller) · <strong>0908123456</strong> (seller) · mã đơn: <strong>${UI.esc(Store.orders().find(o => o.status === 'PAID').id)}</strong></div>
-    </div>`;
-    return App.buyerShell(html, { right: `<a class="btn btn-ghost btn-sm" href="#A-05">${UI.icon('key', 18)} Đăng nhập seller</a>` });
+    </div></div>`;
+    return App.buyerShell(html);
   },
   a04Phone: function(e) {
     e.preventDefault();
@@ -489,8 +501,9 @@ const Buyer = {
   A05: function(q) {
     const reason = q.get('reason'); const next = q.get('next') || 'C-01';
     this._a05Next = next;
-    const html = `<div class="stack">
-      <div class="text-center"><h1>Đăng nhập seller</h1><p class="text-muted">Chỉ cần số điện thoại đã mua gói. Không dùng mật khẩu.</p></div>
+    const html = `<div class="buyer-split">
+      <aside class="buyer-side">${this.introPanel('Đăng nhập seller', 'Chỉ cần số điện thoại đã mua gói. Không dùng mật khẩu.', ['Nhập số điện thoại và nhận mã OTP qua SMS.', 'Vào Dashboard: link giới thiệu, thống kê, bảng kê hoa hồng, ví & rút tiền.', 'Đã mua gói nhưng chưa có tài khoản? Dùng chính số đó để kích hoạt.'])}</aside>
+      <div class="stack">
       ${reason === 'expired' ? `<div class="alert alert-warning" role="alert">${UI.icon('clock', 20)}<div><span class="alert-title">Phiên đăng nhập đã hết hạn</span>Vui lòng đăng nhập lại. Sau khi đăng nhập bạn sẽ quay về trang đang xem.</div></div>` : ''}
       <div class="card"><div class="card-body" id="a05-body">
         <form novalidate onsubmit="Buyer.a05Submit(event)">
@@ -502,8 +515,8 @@ const Buyer = {
       </div></div>
       <p class="text-center text-sm text-muted">Chưa có tài khoản? Mua gói qua link giới thiệu, sau đó dùng chính số điện thoại đó để đăng nhập.<br><a href="#D-00">Quản trị viên đăng nhập tại đây</a></p>
       <div class="demo-hint">SĐT mẫu: <strong>0908123456</strong> seller · <strong>${Store.user('U101').phone}</strong> có đơn chưa TK · <strong>0977000111</strong> bị khoá · <strong>0999999999</strong> chưa đăng ký · <strong>0900000000</strong> admin</div>
-    </div>`;
-    return App.buyerShell(html, { right: `<a class="btn btn-ghost btn-sm" href="#A-04">${UI.icon('search', 18)} Tra cứu đơn</a>` });
+    </div></div>`;
+    return App.buyerShell(html);
   },
   a05Submit: function(e) {
     e.preventDefault();

@@ -1,13 +1,51 @@
 /* ============================================================
-   Nhóm A · Người mua — mobile-first (>= 360px), khung tối đa 520px
+   Nhóm A · Người mua — website-first (khung 1120px, 2 cột từ 900px),
+   co về 1 cột trên mobile (>= 360px)
    ============================================================ */
 .buyer { min-height: 100vh; display: flex; flex-direction: column; background: var(--bg-alt); }
-.buyer-header { background: var(--white); border-bottom: 1px solid var(--border-soft); }
-.buyer-header-inner { max-width: var(--buyer-max); margin: 0 auto; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 64px; }
-.buyer-main { flex: 1; width: 100%; max-width: var(--buyer-max); margin: 0 auto; padding: 16px 16px 40px; }
-@media (min-width: 560px) { .buyer-main { padding: 28px 16px 56px; } }
+.buyer-header { background: var(--white); border-bottom: 1px solid var(--border-soft); position: sticky; top: 0; z-index: 50; }
+.buyer-header-inner { max-width: var(--buyer-max); margin: 0 auto; padding: 10px 24px; display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 68px; }
+.buyer-nav { display: flex; gap: 4px; }
+.buyer-nav a { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; min-height: var(--tap); border-radius: var(--r-md); color: var(--text-muted); font-weight: 600; text-decoration: none; }
+.buyer-nav a:hover { background: var(--gray-100); color: var(--navy-900); text-decoration: none; }
+.buyer-nav a.is-active { background: var(--navy-100); color: var(--navy-600); }
+@media (max-width: 559px) { .buyer-header-inner { padding: 8px 16px; } .buyer-nav a span { display: none; } .buyer-nav a { padding: 10px; } }
+.buyer-main { flex: 1; width: 100%; max-width: var(--buyer-max); margin: 0 auto; padding: 20px 16px 48px; }
+@media (min-width: 900px) { .buyer-main { padding: 36px 24px 72px; } }
+.buyer-main-narrow { max-width: 640px; }
+
+/* Bố cục 2 cột: aside (tóm tắt / giới thiệu) + cột chính */
+.buyer-split { display: grid; grid-template-columns: 1fr; gap: 20px; align-items: start; }
+.buyer-side-first > aside { order: -1; }
+@media (min-width: 900px) {
+  .buyer-split { grid-template-columns: 5fr 7fr; gap: 28px; }
+  .buyer-split-rev { grid-template-columns: 7fr 5fr; }
+  .buyer-split-rev > aside { order: 1; }
+  .buyer-side { position: sticky; top: 88px; }
+}
+
+/* Panel giới thiệu (A-04, A-05) */
+.intro-panel { background: linear-gradient(160deg, var(--navy-900), var(--navy-600)); color: var(--white); border-radius: var(--r-xl); padding: 28px; }
+.intro-panel h1 { color: var(--white); font-size: var(--fs-2xl); }
+.intro-panel p { color: var(--sky-200); margin-top: 8px; }
+.intro-steps { list-style: none; counter-reset: step; margin-top: 20px; display: grid; gap: 12px; }
+.intro-steps li { counter-increment: step; display: flex; gap: 12px; align-items: flex-start; font-size: var(--fs-sm); }
+.intro-steps li::before { content: counter(step); flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; background: var(--teal-500); color: var(--navy-900); font-weight: 700; display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-display); }
+@media (max-width: 899px) { .intro-panel { padding: 20px; } .intro-panel h1 { font-size: var(--fs-xl); } .intro-steps { display: none; } }
+
+/* Footer website */
+.site-footer { background: var(--white); border-top: 1px solid var(--border-soft); margin-top: auto; }
+.site-footer-inner { max-width: var(--buyer-max); margin: 0 auto; padding: 28px 24px; display: grid; grid-template-columns: 1fr; gap: 20px; font-size: var(--fs-sm); color: var(--text-muted); }
+@media (min-width: 720px) { .site-footer-inner { grid-template-columns: 2fr 1fr 1fr; gap: 32px; } }
+.site-footer .footer-title { font-family: var(--font-display); font-weight: 700; color: var(--navy-900); margin-bottom: 8px; }
+.site-footer a { display: block; color: var(--text-muted); padding: 4px 0; min-height: 32px; }
+.site-footer a:hover { color: var(--accent); }
 .buyer-footer { text-align: center; padding: 16px; font-size: var(--fs-xs); color: var(--text-caption); }
 .buyer-footer a { color: var(--text-muted); }
+
+/* Thẻ người giới thiệu (aside A-01) */
+.ref-card { display: flex; align-items: center; gap: 12px; }
+.ref-card .avatar { width: 44px; height: 44px; }
 
 /* Thông báo người giới thiệu */
 .ref-bar { background: var(--bg-tint); color: var(--navy-900); font-size: var(--fs-sm); padding: 8px 16px; text-align: center; }
