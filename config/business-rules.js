@@ -96,6 +96,36 @@ const CONFIG = {
   ],
   defaultPeriod: 'month',
 
+  /**
+   * Nội dung giới thiệu sản phẩm hiển thị ở cột phải A-01 (chuyển từ trang chủ A0 của prototype v1,
+   * đổi nhận diện GoCare → HOMI365). Nội dung tĩnh theo mã gói; D-04 quản lý giá/thời hạn/quyền lợi ngắn.
+   */
+  productContent: {
+    CN02: {
+      lead: 'Gói dịch vụ cao cấp bao gồm 01 đồng hồ thông minh HW01 theo dõi nhịp tim / SOS giao tận nơi và 01 năm phần mềm Bác sĩ 24/7 (mã kích hoạt gửi qua SMS).',
+      intro: 'Gói Bác sĩ 24/7 hỗ trợ, tư vấn sức khoẻ (ký hiệu CN02) cung cấp các tính năng nâng cao của nền tảng HOMI365. Ngoài việc tự theo dõi sức khoẻ cá nhân, người dùng được Trợ lý sức khoẻ theo dõi 24/7, được tư vấn trực tuyến từ đội ngũ bác sĩ, và khi có tình huống bất thường khẩn cấp hệ thống tự động gọi tới người thân kèm vị trí của người dùng để hỗ trợ kịp thời.',
+      storageYears: 10, storageSizeMB: 50,
+      gallery: [
+        { src: './public/product/nc-1.png', thumb: './public/product/thumbs/nc-1.png', title: 'Theo dõi, quản lý sức khoẻ cá nhân' },
+        { src: './public/product/nc-2.png', thumb: './public/product/thumbs/nc-2.png', title: 'Thu nhận dữ liệu vào ứng dụng' },
+        { src: './public/product/nc-3.png', thumb: './public/product/thumbs/nc-3.png', title: 'Lưu trữ dữ liệu sức khoẻ' },
+        { src: './public/product/nc-4.png', thumb: './public/product/thumbs/nc-4.png', title: 'Chia sẻ thông tin sức khoẻ online' },
+        { src: './public/product/nc-5.png', thumb: './public/product/thumbs/nc-5.png', title: 'Cảnh báo và hỗ trợ khẩn cấp (SOS)' },
+        { src: './public/product/nc-6.png', thumb: './public/product/thumbs/nc-6.png', title: 'Theo dõi và chăm sóc sức khoẻ từ xa' }
+      ],
+      features: [
+        { title: 'Theo dõi, quản lý sức khoẻ cá nhân', items: ['Sử dụng nền tảng HOMI365 để theo dõi, quản lý dữ liệu sức khoẻ cá nhân với các tính năng nâng cao.'] },
+        { title: 'Thu nhận dữ liệu vào ứng dụng', items: ['Thu nhận dữ liệu từ thiết bị đo kết nối đến ứng dụng', 'Nhập dữ liệu thông tin sức khoẻ thủ công', 'Tải hồ sơ sức khoẻ', 'Nhập hồ sơ sức khoẻ bằng chụp OCR'] },
+        { title: 'Lưu trữ dữ liệu sức khoẻ', items: ['Thời gian lưu trữ kéo dài 10 năm', 'Dung lượng lưu trữ tối đa 50MB'] },
+        { title: 'Chia sẻ thông tin sức khoẻ online', items: ['Chia sẻ dữ liệu sức khoẻ với Trung tâm theo dõi, chăm sóc sức khoẻ TT247', 'Thêm không giới hạn người thân theo dõi', 'Không cho phép thêm bác sĩ theo dõi'] },
+        { title: 'Cảnh báo và hỗ trợ khẩn cấp (SOS)', items: ['Tự động gửi cảnh báo khi có chỉ số sức khoẻ bất thường qua thông báo trên ứng dụng', 'Cuộc gọi tự động (Callbot) thông báo tình trạng bất thường nghiêm trọng đến người thân', 'Nút SOS trên ứng dụng để yêu cầu hỗ trợ từ TT247 và người thân'] },
+        { title: 'Theo dõi và chăm sóc sức khoẻ từ xa', items: ['Gọi lên TT247 để được Trợ lý sức khoẻ giải đáp về dịch vụ và tư vấn sức khoẻ trong phạm vi được hướng dẫn', 'TT247 chủ động theo dõi và hỗ trợ từ xa khi có bất thường nghiêm trọng hoặc khi nhấn nút SOS'] },
+        { title: 'Dịch vụ Bác sĩ 24/7', items: ['Bác sĩ 24/7 hỗ trợ khi người dùng gặp bất thường nghiêm trọng về sức khoẻ hoặc nhấn nút SOS trên ứng dụng'] },
+        { title: 'Tính năng nâng cao của nền tảng', items: ['Nhắc lịch uống thuốc', 'Người thân theo dõi lịch uống thuốc', 'Phân tích dữ liệu bằng AI theo tuần, tháng, năm để đưa ra xu hướng bệnh lý và nguy cơ tiềm ẩn, kèm tư vấn của bác sĩ'] }
+      ]
+    }
+  },
+
   banks: ['Vietcombank', 'BIDV', 'VietinBank', 'Agribank', 'Techcombank', 'MBBank', 'ACB', 'VPBank', 'Sacombank', 'TPBank'],
 
   demo: {

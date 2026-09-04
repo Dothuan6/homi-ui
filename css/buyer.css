@@ -86,3 +86,28 @@
 .actions { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
 @media (min-width: 480px) { .actions-row { flex-direction: row; } .actions-row .btn { flex: 1; } }
 .actions .btn-block { width: 100%; }
+
+/* Giới thiệu sản phẩm ở cột phải A-01 (từ A0 v1) */
+.buyer-side-static { position: static; }
+.product-card { overflow: hidden; }
+.gallery-main { position: relative; aspect-ratio: 16 / 9; background: var(--white); border-bottom: 1px solid var(--border-soft); outline-offset: -3px; touch-action: pan-y; }
+.gallery-main img { width: 100%; height: 100%; object-fit: contain; display: block; user-select: none; }
+.gallery-nav { position: absolute; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,.92); border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; color: var(--navy-900); box-shadow: var(--shadow-sm); }
+.gallery-nav:hover { background: var(--white); border-color: var(--navy-400); }
+.gallery-nav-prev { left: 8px; } .gallery-nav-next { right: 8px; }
+.gallery-caption { position: absolute; left: 0; right: 0; bottom: 0; background: rgba(18, 37, 68, .78); color: var(--white); font-size: var(--fs-xs); padding: 6px 12px; text-align: center; }
+.gallery-thumbs { display: flex; gap: 6px; padding: 8px; overflow-x: auto; background: var(--bg-alt); scrollbar-width: thin; }
+.gallery-thumb { flex: 0 0 76px; border: 2px solid transparent; border-radius: 6px; padding: 0; background: var(--white); cursor: pointer; overflow: hidden; min-height: 44px; }
+.gallery-thumb img { width: 100%; height: 44px; object-fit: cover; display: block; }
+.gallery-thumb:hover { border-color: var(--gray-300); }
+.gallery-thumb.is-active { border-color: var(--teal-500); }
+.feature { border-top: 1px solid var(--border-soft); }
+.feature summary { cursor: pointer; padding: 10px 0; font-weight: 600; color: var(--navy-900); list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 44px; font-size: var(--fs-sm); }
+.feature summary::-webkit-details-marker { display: none; }
+.feature summary::after { content: '+'; font-family: var(--font-mono); color: var(--accent); font-size: 20px; line-height: 1; flex-shrink: 0; }
+.feature[open] summary::after { content: '\2212'; }
+.feature ul { padding: 0 0 12px 18px; font-size: var(--fs-sm); display: grid; gap: 4px; }
+
+/* A-01: mobile hiện gói + giá → form → giới thiệu; desktop giữ 2 cột */
+.mobile-only { display: none; }
+@media (max-width: 899px) { .mobile-only { display: block; } .desktop-only { display: none; } .a01-split > aside { order: 1; } }

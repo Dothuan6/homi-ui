@@ -9,12 +9,65 @@ const Buyer = {
     return `<div class="intro-panel"><h1>${title}</h1><p>${desc}</p><ol class="intro-steps">${steps.map(t => `<li>${t}</li>`).join('')}</ol></div>`;
   },
 
-  pkgHeader: function(pkg) {
+  pkgHeader: function(pkg, opt) {
+    const tag = (opt && opt.tag) || 'h1';
     return `<div class="pkg">
       <div class="pkg-icon">${UI.icon('watch', 30)}</div>
-      <div class="grow"><h1 class="pkg-name">${UI.esc(pkg.name)}</h1><div class="pkg-meta">${UI.esc(pkg.id)} · License ${pkg.licenseMonths} tháng${pkg.hasShipping ? ' · kèm đồng hồ HW01' : ''}</div></div>
+      <div class="grow"><${tag} class="pkg-name">${UI.esc(pkg.name)}</${tag}><div class="pkg-meta">${UI.esc(pkg.id)} · License ${pkg.licenseMonths} tháng${pkg.hasShipping ? ' · kèm đồng hồ HW01' : ''}</div></div>
       <div class="pkg-price">${UI.money(pkg.price)}</div>
     </div>`;
+  },
+
+  // ---------------------------------------------------------------------
+  // Giới thiệu sản phẩm (chuyển từ trang chủ A0 bản v1): gallery + mô tả + chi tiết tính năng
+  // ---------------------------------------------------------------------
+  _gal: 0,
+  productIntro: function(pkg) {
+    const pc = CONFIG.productContent[pkg.id];
+    if (!pc) return `<div class="card"><div class="card-body"><p class="text-sm text-muted">${UI.esc(pkg.desc)}</p><ul class="pkg-benefits">${pkg.benefits.map(b => `<li>${UI.icon('check', 16)}<span>${UI.esc(b)}</span></li>`).join('')}</ul></div></div>`;
+    this._gal = 0;
+    App.after(() => this.bindGallery());
+    const g0 = pc.gallery[0];
+    return `
+        <div class="card product-card">
+          <div class="gallery">
+            <div class="gallery-main" id="gallery-main" tabindex="0" role="group" aria-roledescription="carousel" aria-label="Ảnh giới thiệu gói ${UI.esc(pkg.id)}">
+              <img id="gallery-img" src="${g0.src}" alt="${UI.esc(g0.title)}" width="1890" height="1063" decoding="async" draggable="false">
+              <button class="gallery-nav gallery-nav-prev" aria-label="Ảnh trước" onclick="Buyer.galleryStep(-1)">${UI.icon('arrow-left', 18)}</button>
+              <button class="gallery-nav gallery-nav-next" aria-label="Ảnh kế tiếp" onclick="Buyer.galleryStep(1)">${UI.icon('arrow-right', 18)}</button>
+              <span class="gallery-caption" id="gallery-caption" aria-live="polite">${UI.esc(g0.title)}</span>
+            </div>
+            <div class="gallery-thumbs" role="tablist" aria-label="Chọn ảnh">
+              ${pc.gallery.map((g, i) => `<button class="gallery-thumb ${i === 0 ? 'is-active' : ''}" role="tab" id="gthumb-${i}" aria-selected="${i === 0}" title="${UI.esc(g.title)}" onclick="Buyer.galleryTo(${i})"><img src="${g.thumb}" alt="" loading="lazy" decoding="async" draggable="false"><span class="sr-only">${UI.esc(g.title)}</span></button>`).join('')}
+            </div>
+          </div>
+          <div class="card-body">
+            <p>${UI.esc(pc.lead)}</p>
+            <ul class="pkg-benefits">${pkg.benefits.map(b => `<li>${UI.icon('check', 16)}<span>${UI.esc(b)}</span></li>`).join('')}</ul>
+          </div>
+        </div>
+        <div class="card"><div class="card-head"><h2 style="font-size:var(--fs-lg)">Chi tiết tính năng gói ${UI.esc(pkg.id)}</h2></div><div class="card-body">
+          <p class="text-sm text-muted">${UI.esc(pc.intro)}</p>
+          <div class="feature-list mt-3">${pc.features.map((f, i) => `<details class="feature" ${i === 0 ? 'open' : ''}><summary>${i + 1}. ${UI.esc(f.title)}</summary><ul>${f.items.map(t => `<li>${UI.esc(t)}</li>`).join('')}</ul></details>`).join('')}</div>
+        </div></div>`;
+  },
+  galleryTo: function(i) {
+    const pkg = Store.activePackage(); const pc = CONFIG.productContent[pkg.id]; if (!pc) return;
+    const n = pc.gallery.length; this._gal = ((i % n) + n) % n;
+    const g = pc.gallery[this._gal];
+    const img = document.getElementById('gallery-img'); if (img) { img.src = g.src; img.alt = g.title; }
+    const cap = document.getElementById('gallery-caption'); if (cap) cap.textContent = g.title;
+    document.querySelectorAll('.gallery-thumb').forEach((b, k) => { b.classList.toggle('is-active', k === this._gal); b.setAttribute('aria-selected', String(k === this._gal)); });
+    const t = document.getElementById('gthumb-' + this._gal); if (t && t.scrollIntoView) t.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  },
+  galleryStep: function(d) { this.galleryTo(this._gal + d); },
+  /** Vuốt ngang (pointer events) + phím mũi tên để đổi ảnh. */
+  bindGallery: function() {
+    const el = document.getElementById('gallery-main'); if (!el) return;
+    let x0 = null;
+    el.addEventListener('pointerdown', (e) => { x0 = e.clientX; });
+    el.addEventListener('pointerup', (e) => { if (x0 === null) return; const dx = e.clientX - x0; x0 = null; if (Math.abs(dx) > 40) this.galleryStep(dx < 0 ? 1 : -1); });
+    el.addEventListener('keydown', (e) => { if (e.key === 'ArrowLeft') this.galleryStep(-1); if (e.key === 'ArrowRight') this.galleryStep(1); });
   },
 
   // =====================================================================
@@ -63,16 +116,14 @@ const Buyer = {
     // (a) Form · (b) OTP inline · (c) lỗi field · (g) SMS lỗi
     const draft = Store.s().buyerDraft || {};
     const html = `
-      <div class="buyer-split buyer-split-rev">
-        <aside class="buyer-side stack">
-        ${this.pkgHeader(pkg)}
-        <div class="card"><div class="card-body">
-          <p class="text-sm text-muted">${UI.esc(pkg.desc)}</p>
-          <ul class="pkg-benefits">${pkg.benefits.map(b => `<li>${UI.icon('check', 16)}<span>${UI.esc(b)}</span></li>`).join('')}</ul>
-        </div></div>
+      <div class="buyer-split buyer-split-rev a01-split">
+        <aside class="buyer-side buyer-side-static stack">
+        <div class="desktop-only">${this.pkgHeader(pkg)}</div>
+        ${this.productIntro(pkg)}
         <div class="card card-tint"><div class="card-body ref-card"><span class="avatar" aria-hidden="true">${UI.esc(RULES.initials(seller.fullName))}</span><div><div class="text-sm text-muted">Người giới thiệu</div><div class="text-strong">${UI.esc(seller.fullName)}</div><div class="text-caption mono">Mã ${UI.esc(seller.refCode)}</div></div></div></div>
         </aside>
 
+        <div class="stack"><div class="mobile-only">${this.pkgHeader(pkg, { tag: 'div' })}</div>
         <div class="card" id="a01-card">
           <div class="card-head"><h2>Thông tin nhận hàng</h2><span class="text-sm text-muted">Bước 1/3</span></div>
           <div class="card-body" id="a01-body">
@@ -88,7 +139,7 @@ const Buyer = {
               <p class="text-caption text-center mt-3">Bằng việc tiếp tục, bạn đồng ý nhận SMS xác thực từ HOMI365.</p>
             </form>
           </div>
-        </div>
+        </div></div>
       </div>`;
     this._a01State = state;
     return App.buyerShell(html, { showRef: false });
