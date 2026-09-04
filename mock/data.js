@@ -487,8 +487,52 @@ const Store = {
     Object.assign(u, { type: 'seller', fullName: o.fullName, address: o.address, refCode: this.genRefCode(), referrerId: o.sellerId, activatedAt: this.nowIso() });
     this.d().clicks[u.id] = [];
     this.addLog(u.id, 'Tạo tài khoản seller từ đơn ' + o.id + ' (BR-10, không nhập lại)');
+    if (CONFIG.demo.seedNewSeller) this.seedDemoActivity(u);
     this.save();
     return u;
+  },
+
+  /**
+   * Chỉ dùng cho bản demo: seller vừa tạo được sinh sẵn 30 ngày lượt click,
+   * vài đơn qua link của họ (đã thanh toán / chờ đối soát) và hoa hồng tương ứng,
+   * để dashboard C-01/C-03 có dữ liệu xem ngay. Thực tế seller mới bắt đầu từ 0.
+   */
+  seedDemoActivity: function(u) {
+    const day = 86400000; const now = Date.now();
+    const pkg = this.activePackage(); const pol = this.currentPolicy();
+    const names = ['Nguyễn Thị Mai', 'Trần Văn Hùng', 'Lê Thị Thu', 'Phạm Văn Đức', 'Hoàng Thị Nga', 'Vũ Văn Tâm'];
+    const streets = ['Lê Văn Sỹ', 'Cách Mạng Tháng 8', 'Nguyễn Văn Cừ', 'Trần Hưng Đạo', 'Phạm Văn Đồng'];
+    const cities = ['TP. Hồ Chí Minh', 'Hà Nội', 'Đà Nẵng', 'Cần Thơ'];
+    // Lượt click 30 ngày (tăng dần về gần đây)
+    this.d().clicks[u.id] = Array.from({ length: 30 }, (_, i) => ({ date: new Date(now - (29 - i) * day).toISOString().slice(0, 10), clicks: Math.max(0, Math.round(2 + i * 0.3 + Math.random() * 4)) }));
+    // 5 đơn: 4 PAID (2 đã duyệt HH, 2 chờ duyệt) + 1 chờ đối soát
+    const specs = [[22, 'PAID', 'gateway', 'DELIVERED', true], [16, 'PAID', 'bank', 'DELIVERED', true], [8, 'PAID', 'gateway', 'SHIPPING', false], [3, 'PAID', 'gateway', 'PACKING', false], [0.2, 'AWAITING_RECONCILE', 'bank', 'NONE', false]];
+    specs.forEach((sp, i) => {
+      const [ago, status, method, shipping, approved] = sp;
+      const createdAt = new Date(now - ago * day).toISOString();
+      const key = createdAt.slice(2, 10).replace(/-/g, '');
+      const seq = this.orders().filter(x => x.id.startsWith(CONFIG.order.idPrefix + key)).length + 1;
+      const o = { id: CONFIG.order.idPrefix + key + String(seq).padStart(3, '0'), fullName: names[i], phone: '09' + String(Math.floor(10000000 + Math.random() * 89999999)),
+        address: `${10 + i * 7} ${streets[i % streets.length]}, ${cities[i % cities.length]}`, note: '', packageId: pkg.id, price: pkg.price, refCode: u.refCode, sellerId: u.id,
+        createdAt, expiresAt: RULES.orderExpiry(createdAt), method, status, shipping, licenseCode: null, refunded: false, flags: {} };
+      if (status === 'PAID') {
+        o.paidAt = new Date(new Date(createdAt).getTime() + 5 * 60000).toISOString();
+        if (method === 'bank') { o.reconciledAt = o.paidAt; o.reconciledBy = 'admin'; }
+        this.issueLicense(o);
+        const c = o.licenseCode ? this.codeInfo(o.licenseCode) : null;
+        if (c) { c.issuedAt = o.paidAt; if (ago > 5) { c.status = 'BOUND'; c.device = { name: ['Samsung Galaxy A54', 'iPhone 13', 'OPPO Reno8'][i % 3], deviceId: 'DEV-' + Math.random().toString(36).slice(2, 10).toUpperCase(), boundAt: new Date(new Date(o.paidAt).getTime() + day).toISOString() }; } }
+        o.policyVersion = pol.version;
+        this.uplineChain(u.id, pol.tiers.length).forEach((benef, idx) => {
+          const tier = pol.tiers[idx];
+          this.d().commissions.push({ id: 'CM' + String(++this.state.seq.cm).padStart(4, '0'), orderId: o.id, beneficiaryId: benef.id, tier: tier.tier, rate: tier.rate,
+            amount: RULES.commissionAmount(o.price, tier.rate), status: approved ? 'APPROVED' : 'PENDING', policyVersion: pol.version, createdAt: o.paidAt,
+            availableAt: RULES.availableAt(o.paidAt, pol), approvedAt: approved ? new Date(new Date(o.paidAt).getTime() + (pol.holdingDays + 1) * day).toISOString() : null, paidAt: null, batchId: null });
+        });
+      } else { o.transferClaimedAt = new Date(new Date(createdAt).getTime() + 4 * 60000).toISOString(); }
+      this.d().orders.unshift(o);
+    });
+    this.d().orders.sort((a, b) => a.createdAt < b.createdAt ? 1 : -1);
+    this.addLog(u.id, 'Dữ liệu mẫu demo: 30 ngày lượt click, 5 đơn qua link giới thiệu');
   },
   loginSeller: function(userId, remember, next) {
     this.s().seller = { userId, remember: !!remember, at: this.nowIso(), expiresAt: new Date(Date.now() + (remember ? CONFIG.session.rememberDays * 86400000 : CONFIG.session.sellerHours * 3600000)).toISOString() };

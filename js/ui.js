@@ -407,8 +407,9 @@ const UI = {
     const delay = CONFIG.demo.simulatedLatencyMs;
     if (!delay) { renderFn(); return; }
     region.innerHTML = skeletonHtml;
-    const token = (this._loadToken = (this._loadToken || 0) + 1);
-    setTimeout(() => { if (token !== this._loadToken || !document.getElementById(regionId)) return; renderFn(); }, delay);
+    this._loadTokens = this._loadTokens || {};
+    const token = (this._loadTokens[regionId] = (this._loadTokens[regionId] || 0) + 1);
+    setTimeout(() => { if (token !== this._loadTokens[regionId] || !document.getElementById(regionId)) return; renderFn(); }, delay);
   },
 
   // ---------------- Biểu đồ SVG ----------------
