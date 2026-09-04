@@ -8,7 +8,7 @@ const Buyer = {
   pkgHeader: function(pkg) {
     return `<div class="pkg">
       <div class="pkg-icon">${UI.icon('watch', 30)}</div>
-      <div class="grow"><div class="pkg-name">${UI.esc(pkg.name)}</div><div class="pkg-meta">${UI.esc(pkg.id)} · License ${pkg.licenseMonths} tháng${pkg.hasShipping ? ' · kèm đồng hồ HW01' : ''}</div></div>
+      <div class="grow"><h1 class="pkg-name">${UI.esc(pkg.name)}</h1><div class="pkg-meta">${UI.esc(pkg.id)} · License ${pkg.licenseMonths} tháng${pkg.hasShipping ? ' · kèm đồng hồ HW01' : ''}</div></div>
       <div class="pkg-price">${UI.money(pkg.price)}</div>
     </div>`;
   },
@@ -30,7 +30,7 @@ const Buyer = {
         <h1>${locked ? 'Link giới thiệu này đã ngừng hoạt động' : 'Link giới thiệu không hợp lệ'}</h1>
         <p class="text-muted">${locked ? 'Tài khoản người giới thiệu đang bị tạm khoá. Vui lòng liên hệ người đã gửi link cho bạn hoặc bộ phận hỗ trợ.' : 'Gói sản phẩm chỉ mua được qua link giới thiệu của seller HOMI365. Vui lòng mở lại đúng link bạn nhận được (dạng <span class="mono">' + UI.esc(CONFIG.brand.baseUrl) + '/r/…</span>).'}</p>
         <div class="alert alert-neutral" style="text-align:left">${UI.icon('phone', 20)}<div>Hỗ trợ: <strong>${UI.esc(CONFIG.brand.supportHotline)}</strong> (${UI.esc(CONFIG.brand.supportHours)})</div></div>
-        <div class="actions"><a class="btn btn-secondary btn-lg" href="#A-04">${UI.icon('search', 18)} Tra cứu đơn hàng đã mua</a></div>
+        <div class="actions actions-row"><a class="btn btn-secondary btn-lg" href="#A-04">${UI.icon('search', 18)} Tra cứu đơn hàng đã mua</a><a class="btn btn-primary btn-lg" href="#HOME">Về trang giới thiệu prototype</a></div>
       </div></div>`);
     }
 
@@ -108,7 +108,7 @@ const Buyer = {
     setTimeout(() => {
       UI.setLoading(btn, false);
       // (g) Dịch vụ SMS lỗi
-      if (this._a01State === 'sms-error') {
+      if (this._a01State === 'sms-error' || draft.phone === CONFIG.demo.smsErrorPhone) {
         alertBox.hidden = false;
         alertBox.innerHTML = `<div class="alert alert-error" role="alert">${UI.icon('warning', 22)}<div><span class="alert-title">Không gửi được mã OTP</span>Hệ thống SMS đang gián đoạn. Vui lòng thử lại sau ít phút. Sự cố đã được ghi nhận.</div></div>`;
         this._a01State = ''; // lần bấm sau sẽ thành công
@@ -193,6 +193,7 @@ const Buyer = {
       </div></div>
       ${order.status === 'FAILED' ? `<div class="alert alert-error" role="alert">${UI.icon('x-circle', 22)}<div><span class="alert-title">Thanh toán không thành công</span>${UI.esc(order.failReason || 'Giao dịch bị huỷ hoặc cổng trả lỗi.')} Bạn có thể chọn lại phương thức khi đơn còn thời hạn.</div></div>` : ''}
       ${body}
+      <div class="demo-hint">Mô phỏng: <button class="btn-link" onclick="Buyer.a02SimExpire('${order.id}')">hết thời gian giữ đơn</button> (thực tế đơn tự hết hạn sau ${CONFIG.order.holdSeconds / 60} phút)</div>
     </div>`;
     App.after(() => UI.countdown.mount('a02-countdown', order.expiresAt, { onExpire: () => { Store.expireOrder(order.id); App.reload(); } }));
     return App.buyerShell(html, { showRef: true });
@@ -217,6 +218,7 @@ const Buyer = {
     Store.setOrder(orderId, { method: m, status: 'PENDING_PAYMENT' });
     App.navigate('A-02?view=' + m);
   },
+  a02SimExpire: function(orderId) { Store.setOrder(orderId, { expiresAt: new Date(Date.now() - 1000).toISOString() }); Store.expireOrder(orderId); App.reload(); },
   a02Cancel: function(orderId) {
     UI.confirm({ title: 'Huỷ đơn hàng?', body: 'Đơn hàng sẽ hết hiệu lực. Bạn có thể đặt lại bất cứ lúc nào qua link giới thiệu.', confirmText: 'Huỷ đơn', tone: 'danger',
       onConfirm: () => { Store.expireOrder(orderId); App.navigate('A-01'); } });
@@ -510,7 +512,7 @@ const Buyer = {
     UI.setError('lg-phone', ''); alertBox.hidden = true;
     if (!phone) { UI.setError('lg-phone', raw ? 'Số điện thoại không đúng định dạng.' : 'Vui lòng nhập số điện thoại.'); UI.focusFirstError(); return; }
     // (f) BR-12: tài khoản admin không dùng A-05
-    if (phone === '0900000000') {
+    if (phone === CONFIG.demo.adminPhone) {
       alertBox.hidden = false;
       alertBox.innerHTML = `<div class="alert alert-error mt-4" role="alert">${UI.icon('shield', 22)}<div><span class="alert-title">Quản trị viên vui lòng đăng nhập tại trang quản trị</span>Số này thuộc tài khoản quản trị. Khu vực quản trị dùng tên đăng nhập và mật khẩu riêng. <a href="#D-00">Tới trang đăng nhập quản trị</a></div></div>`;
       return;

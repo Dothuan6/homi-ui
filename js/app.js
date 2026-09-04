@@ -29,6 +29,7 @@ const App = {
     'D-06': (q) => Admin.D06(q),
     'D-07': (q) => Admin.D07(q),
     'D-08': (q) => Admin.D08(q),
+    'HOME': () => App.pageHome(),
     '403': () => App.page403(),
     'STYLEGUIDE': () => { window.location.href = './styleguide.html'; }
   },
@@ -39,7 +40,7 @@ const App = {
       this.render(window.location.hash.replace('#', ''));
     });
     const hash = window.location.hash.replace('#', '');
-    this.render(hash || 'A-01');
+    this.render(hash || 'HOME');
     if (CONFIG.demo.navigator) this.mountDemoNav();
   },
 
@@ -72,7 +73,7 @@ const App = {
     const [base, qs] = target.split('?');
     const q = new URLSearchParams(qs || '');
     const route = this.routes[base];
-    if (!route) { this.navigate('A-01?state=invalid', { replace: true }); return; }
+    if (!route) { this.navigate('HOME', { replace: true }); return; }
 
     // Guard nhóm C: cần phiên seller (AC-12: hết phiên → A-05, sau đăng nhập quay lại)
     if (base.startsWith('C-')) {
@@ -113,7 +114,7 @@ const App = {
       </div></header>
       ${opt.showRef && seller ? `<div class="ref-bar">Người giới thiệu: <strong>${UI.esc(seller.fullName)}</strong> · mã <span class="mono">${UI.esc(seller.refCode)}</span></div>` : ''}
       <main class="buyer-main" id="buyer-main">${content}</main>
-      <footer class="buyer-footer">${UI.esc(CONFIG.brand.company)} · Hỗ trợ ${UI.esc(CONFIG.brand.supportHotline)} (${UI.esc(CONFIG.brand.supportHours)})<br><a href="#A-05">Đăng nhập seller</a> · <a href="#D-00">Quản trị</a></footer>
+      <footer class="buyer-footer">${UI.esc(CONFIG.brand.company)} · Hỗ trợ ${UI.esc(CONFIG.brand.supportHotline)} (${UI.esc(CONFIG.brand.supportHours)})<br><a href="#HOME">Trang giới thiệu prototype</a> · <a href="#A-05">Đăng nhập seller</a> · <a href="#D-00">Quản trị</a></footer>
     </div>`;
   },
 
@@ -182,6 +183,39 @@ const App = {
     </div>`;
   },
   logoutAdmin: function() { Store.logoutAdmin(); this.navigate('D-00'); },
+
+
+  // ---------------- Trang bìa prototype (không thuộc sản phẩm — chỉ để KH xem thử) ----------------
+  pageHome: function() {
+    const seller = Store.user('U001'); const buyer = Store.user('U101'); const paidOrder = Store.orders().find(o => o.status === 'PAID' && o.phone === buyer.phone) || Store.orders().find(o => o.status === 'PAID');
+    const card = (ico, title, desc, rows, actions) => `<div class="card"><div class="card-body">
+        <div class="row mb-2"><span class="result-icon is-info" style="width:44px;height:44px;margin:0">${UI.icon(ico, 22)}</span><h2 style="font-size:var(--fs-lg)">${title}</h2></div>
+        <p class="text-sm text-muted">${desc}</p>
+        <dl class="dl dl-stack mt-3">${rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>
+        <div class="actions">${actions}</div></div></div>`;
+    const content = `<div class="stack-lg">
+      <div class="text-center"><h1>Prototype giao diện HOMI365 · Medigo</h1><p class="text-muted mt-2">Bản mô phỏng luồng mua hàng, dashboard seller và quản trị. Dữ liệu là dữ liệu mẫu, lưu trên trình duyệt của bạn. Mã OTP dùng chung cho mọi bước: <strong class="mono">${CONFIG.otp.mockCode}</strong>.</p></div>
+      <div class="grid-2">
+        ${card('users', 'Người mua', 'Bắt đầu từ link giới thiệu của seller (điểm vào duy nhất). Hoàn tất OTP → chọn thanh toán → kết quả → tạo tài khoản seller.',
+          [['Link giới thiệu mẫu', `<span class="mono">${UI.esc(RULES.referralUrl(seller.refCode))}</span>`], ['SĐT đã mua gói (bị chặn 1 gói/SĐT)', `<span class="mono">${UI.esc(buyer.phone)}</span>`], ['SĐT gây lỗi gửi SMS', `<span class="mono">${UI.esc(CONFIG.demo.smsErrorPhone)}</span>`]],
+          `<a class="btn btn-primary btn-lg btn-block" href="${RULES.referralHash(seller.refCode)}">${UI.icon('external', 18)} Mở link giới thiệu mẫu</a><a class="btn btn-secondary btn-block" href="#A-01">Mở trực tiếp không có mã (BR-01)</a>`)}
+        ${card('search', 'Tra cứu đơn hàng', 'Không cần đăng nhập. Tra bằng SĐT + OTP (thấy mã kích hoạt) hoặc bằng mã đơn (chỉ thấy trạng thái).',
+          [['SĐT có đơn, chưa có tài khoản', `<span class="mono">${UI.esc(buyer.phone)}</span>`], ['Mã đơn mẫu', `<span class="mono">${UI.esc(paidOrder ? paidOrder.id : '')}</span>`]],
+          `<a class="btn btn-primary btn-lg btn-block" href="#A-04">${UI.icon('search', 18)} Tra cứu đơn hàng</a>`)}
+        ${card('key', 'Seller', 'Đăng nhập chỉ bằng SĐT + OTP. Dashboard: link & QR, thống kê, bảng kê hoa hồng, gói & mã kích hoạt, ví & rút tiền.',
+          [['Seller đang hoạt động', `<span class="mono">${UI.esc(seller.phone)}</span> · ${UI.esc(seller.fullName)}`], ['Có đơn, chưa kích hoạt tài khoản', `<span class="mono">${UI.esc(buyer.phone)}</span>`], ['Seller bị khoá · chưa đăng ký', `<span class="mono">0977000111</span> · <span class="mono">0999999999</span>`], ['SĐT của admin (bị từ chối)', `<span class="mono">${UI.esc(CONFIG.demo.adminPhone)}</span>`]],
+          `<a class="btn btn-primary btn-lg btn-block" href="#A-05">${UI.icon('key', 18)} Đăng nhập seller</a>`)}
+        ${card('shield', 'Quản trị', 'Tài khoản riêng, đăng nhập bằng tên đăng nhập + mật khẩu. 9 màn: tổng quan, người dùng, đơn & đối soát, gói, kho mã, chính sách hoa hồng, duyệt chi trả, ngoại lệ.',
+          [['Tài khoản', `<span class="mono">${UI.esc(CONFIG.admin.mockUser)}</span> / <span class="mono">${UI.esc(CONFIG.admin.mockPassword)}</span>`], ['Đơn chờ đối soát', `${Store.orders().filter(o => o.status === 'AWAITING_RECONCILE').length} đơn đang chờ tại D-03`]],
+          `<a class="btn btn-primary btn-lg btn-block" href="#D-00">${UI.icon('shield', 18)} Đăng nhập quản trị</a>`)}
+      </div>
+      <div class="alert alert-neutral">${UI.icon('info', 18)}<div class="text-sm">Muốn xem lại từ đầu với dữ liệu gốc: <button class="btn-link" onclick="if (confirm('Nạp lại toàn bộ dữ liệu mẫu? Mọi thao tác đã làm sẽ mất.')) Store.reset()">nạp lại dữ liệu mẫu</button>. Bộ thành phần giao diện: <a href="./styleguide.html">styleguide</a>.</div></div>
+    </div>`;
+    return `<div class="buyer" style="--buyer-max: 960px">
+      <header class="buyer-header"><div class="buyer-header-inner">${UI.logo({ size: 34 })}<span class="text-sm text-muted">Prototype v2 · 04/09/2026</span></div></header>
+      <main class="buyer-main">${content}</main>
+      <footer class="buyer-footer">${UI.esc(CONFIG.brand.company)}</footer></div>`;
+  },
 
   // ---------------- Trang lỗi ----------------
   page403: function() {

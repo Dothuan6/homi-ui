@@ -100,7 +100,9 @@ const CONFIG = {
 
   demo: {
     simulatedLatencyMs: 450,
-    navigator: true,           // nút "Demo" góc phải để nhảy tới mọi màn/trạng thái
+    navigator: false,          // nút "Demo" góc phải (chỉ bật khi review nội bộ) — bản gửi KH tắt
+    smsErrorPhone: '0911111111', // SĐT mẫu: gửi OTP luôn báo lỗi dịch vụ SMS (A-01 trạng thái g)
+    adminPhone: '0900000000',    // SĐT mẫu của tài khoản admin (A-05 từ chối theo BR-12)
     reconcileAutoSeconds: 0    // > 0: tự động đối soát sau N giây (0 = chờ admin ở D-03)
   }
 };

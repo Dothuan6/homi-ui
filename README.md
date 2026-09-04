@@ -24,7 +24,7 @@ Không cần build. Hash router, thuần HTML/CSS/JS, dữ liệu lưu `localSto
 | Seller bị khoá · chưa đăng ký · admin | `0977000111` · `0999999999` · `0900000000` |
 | Admin (D-00) | `admin` / `Homi@2026` |
 
-Nút **Demo** (góc phải dưới, phím F9) mở bảng nhảy tới mọi màn và trạng thái phụ (`?state=`), đăng nhập nhanh, giả lập hết phiên, gỡ khoá OTP, nạp lại dữ liệu mẫu.
+Mở `index.html` không có hash → **trang bìa prototype** (`#HOME`) liệt kê điểm vào và tài khoản mẫu cho khách. Nút **Demo** (bảng nhảy tới mọi màn/trạng thái, F9) mặc định **tắt** ở bản gửi khách; bật lại bằng `demo.navigator: true` trong `config/business-rules.js` khi review nội bộ. SĐT `0911111111` mô phỏng lỗi dịch vụ SMS.
 
 ## Cấu trúc
 
