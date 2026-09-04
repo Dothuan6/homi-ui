@@ -20,7 +20,7 @@ const CONFIG = {
     supportHotline: '1900 6868',
     supportHours: '08:00 – 20:00 hằng ngày',
     company: 'CÔNG TY TNHH GIẢI PHÁP CÔNG NGHỆ HUY GIÁP',
-    baseUrl: 'https://homi365.vn'        // dùng để dựng link giới thiệu /r/{mã}
+    baseUrl: 'https://homi-dev-ui.netlify.app'   // bản deploy demo; khi lên tên miền thật đổi thành https://homi365.vn và bỏ '#' trong referralUrl
   },
 
   /** Mốc "hôm nay" của bản demo — dữ liệu mẫu sinh quanh mốc này. */
@@ -226,7 +226,7 @@ const RULES = {
 
   /** Link giới thiệu /r/{mã} — tuyệt đối theo brand.baseUrl. */
   referralUrl: function(code) {
-    return `${CONFIG.brand.baseUrl}/r/${code}`;
+    return `${CONFIG.brand.baseUrl}/#r/${code}`; // prototype dùng hash router; bản thật là /r/{mã}
   },
   /** Link nội bộ của prototype mở được ngay (hash router). */
   referralHash: function(code) {
