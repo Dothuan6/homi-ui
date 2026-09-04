@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HOMI365 · Medigo prototype v2</title>
+  <meta name="description" content="Prototype v2 nền tảng phân phối gói sản phẩm qua kênh cộng tác viên — nhận diện HOMI365.">
+  <meta name="theme-color" content="#1E3A66">
+  <link rel="icon" href="./public/image/favicon.svg" type="image/svg+xml">
+
+  <!-- Design system -->
+  <link rel="stylesheet" href="./css/tokens.css">
+  <link rel="stylesheet" href="./css/base.css">
+  <link rel="stylesheet" href="./css/components.css">
+  <link rel="stylesheet" href="./css/buyer.css">
+  <link rel="stylesheet" href="./css/seller.css">
+  <link rel="stylesheet" href="./css/admin.css">
+</head>
+<body>
+  <div id="app-root">
+    <noscript>
+      <div style="max-width:480px;margin:40px auto;padding:20px;font-family:sans-serif">
+        <h1 style="font-size:20px;color:#122544">HOMI365 · Gói Bác sĩ 24/7 (CN02)</h1>
+        <p>Prototype cần bật JavaScript để chạy.</p>
+      </div>
+    </noscript>
+  </div>
+
+  <!-- Thư viện QR (tuỳ chọn — không tải được thì UI.qrSvg dùng hoạ tiết mô phỏng) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js" crossorigin="anonymous"></script>
+
+  <!-- Nghiệp vụ → dữ liệu → UI → views → router -->
+  <script src="./config/business-rules.js"></script>
+  <script src="./mock/data.js"></script>
+  <script src="./js/ui.js"></script>
+  <script src="./js/views-buyer.js"></script>
+  <script src="./js/views-seller.js"></script>
+  <script src="./js/views-admin.js"></script>
+  <script src="./js/app.js"></script>
+</body>
+</html>

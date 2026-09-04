@@ -1,0 +1,103 @@
+/* ============================================================
+   HOMI365 · Design tokens cho prototype v2
+   Nguồn màu: brandingGuideline/tokens.css (04/09/2026).
+   Phần "BỔ SUNG" là đề xuất của BA (kế hoạch redesign mục 4) —
+   brandingGuideline gốc chỉ có màu, chưa có tint/spacing/radius/shadow.
+   ============================================================ */
+:root {
+  /* --- Brand · Navy (chủ đạo) --- */
+  --navy-900: #122544;
+  --navy-700: #1B3358;
+  --navy-600: #1E3A66;   /* PRIMARY */
+  --navy-400: #4A6A9E;
+
+  /* --- Brand · Teal (điểm nhấn) --- */
+  --teal-700: #0F7F96;   /* chữ teal, link (AA trên trắng) */
+  --teal-500: #1BA3BE;   /* mảng, icon — KHÔNG dùng cho chữ trên nền trắng */
+  --teal-300: #4FB8CE;
+  --teal-100: #D6E6EF;
+
+  /* --- Neutral --- */
+  --white:    #FFFFFF;
+  --warm-50:  #FAF8F3;
+  --gray-100: #F2F4F3;
+  --gray-400: #8A93A3;   /* chỉ caption / placeholder / timestamp */
+  --gray-800: #2B303A;
+
+  /* --- Accent phụ (đồ hoạ, không dùng cho chữ) --- */
+  --wood-300: #D8B98F;
+  --sky-200:  #A8C4D8;
+
+  /* --- Functional (đạt AA trên trắng) --- */
+  --success: #2F7A48;
+  --warning: #965C0A;
+  --error:   #C0392B;
+  --info:    #0F7F96;
+
+  /* --- BỔ SUNG · tint nền cho badge / alert (đề xuất, chờ duyệt) --- */
+  --success-100: #E4F2E8;
+  --warning-100: #FBF0DC;
+  --error-100:   #F9E4E1;
+  --info-100:    #DCEFF3;
+  --neutral-100: #ECEFF1;
+  --navy-100:    #E4E9F2;
+
+  /* --- BỔ SUNG · neutral trung gian cho viền / chữ phụ đạt AA --- */
+  --gray-200: #E3E6E8;   /* viền input, divider đậm hơn gray-100 */
+  --gray-300: #C9CED4;   /* viền hover, disabled */
+  --gray-600: #5B6472;   /* chữ phụ đạt AA (7.0:1) — dùng thay gray-400 cho text thân */
+
+  /* --- Semantic --- */
+  --bg:           var(--white);
+  --bg-alt:       var(--warm-50);
+  --bg-tint:      var(--teal-100);
+  --bg-input:     var(--white);
+  --text:         var(--gray-800);
+  --text-muted:   var(--gray-600);
+  --text-caption: var(--gray-400);
+  --text-invert:  var(--white);
+  --primary:      var(--navy-600);
+  --primary-hover:var(--navy-700);
+  --on-primary:   var(--white);
+  --accent:       var(--teal-700);
+  --accent-hover: var(--teal-500);
+  --on-accent:    var(--white);
+  --border:       var(--gray-200);
+  --border-soft:  var(--gray-100);
+  --border-strong:var(--navy-400);
+  --focus-ring:   var(--teal-700);
+  --sidebar-bg:   var(--navy-900);
+  --sidebar-active: var(--teal-500);
+  --sidebar-active-text: var(--navy-900);
+
+  /* --- BỔ SUNG · typography --- */
+  --font-display: 'Archivo', 'Segoe UI', Arial, sans-serif;
+  --font-body:    'Source Sans 3', 'Segoe UI', Arial, sans-serif;
+  --font-mono:    'JetBrains Mono', Consolas, 'Courier New', monospace;
+  --fs-xs: 14px;  /* caption — mức nhỏ nhất cho phép */
+  --fs-sm: 15px;
+  --fs-md: 16px;  /* thân */
+  --fs-lg: 18px;
+  --fs-xl: 22px;
+  --fs-2xl: 26px;
+  --fs-3xl: 32px;
+
+  /* --- BỔ SUNG · spacing scale --- */
+  --sp-1: 4px;  --sp-2: 8px;  --sp-3: 12px; --sp-4: 16px;
+  --sp-5: 20px; --sp-6: 24px; --sp-7: 32px; --sp-8: 40px; --sp-9: 56px;
+
+  /* --- BỔ SUNG · radius --- */
+  --r-sm: 6px; --r-md: 10px; --r-lg: 14px; --r-xl: 20px; --r-full: 999px;
+
+  /* --- BỔ SUNG · shadow --- */
+  --shadow-sm: 0 1px 2px rgba(18, 37, 68, .06), 0 1px 6px rgba(18, 37, 68, .05);
+  --shadow-md: 0 4px 14px rgba(18, 37, 68, .10);
+  --shadow-lg: 0 12px 32px rgba(18, 37, 68, .16);
+
+  /* --- Layout --- */
+  --tap: 44px;             /* vùng bấm tối thiểu */
+  --buyer-max: 520px;      /* khung màn nhóm A */
+  --seller-max: 1040px;    /* khung nội dung nhóm C */
+  --sidebar-w: 220px;      /* sidebar admin */
+  --transition: .18s cubic-bezier(.4, 0, .2, 1);
+}

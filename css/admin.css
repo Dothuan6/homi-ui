@@ -1,0 +1,90 @@
+/* ============================================================
+   Nhóm D · Quản trị — desktop-first (1280 / 1920), sidebar 220px
+   Sidebar --navy-900, mục active --teal-500 chữ --navy-900
+   ============================================================ */
+.admin { min-height: 100vh; display: flex; background: var(--bg-alt); }
+
+.admin-sidebar { width: var(--sidebar-w); flex-shrink: 0; background: var(--sidebar-bg); color: var(--white); display: flex; flex-direction: column; position: sticky; top: 0; height: 100vh; }
+.admin-sidebar-brand { padding: 20px 18px 16px; border-bottom: 1px solid rgba(255,255,255,.1); }
+.admin-sidebar-brand .sub { display: block; font-size: var(--fs-xs); color: var(--sky-200); margin-top: 6px; letter-spacing: .08em; text-transform: uppercase; }
+.admin-nav { padding: 12px 10px; flex: 1; overflow-y: auto; }
+.admin-nav-group { font-size: 12px; text-transform: uppercase; letter-spacing: .1em; color: var(--sky-200); padding: 14px 10px 6px; opacity: .8; }
+.admin-nav a { display: flex; align-items: center; gap: 10px; padding: 10px 12px; min-height: var(--tap); border-radius: var(--r-md); color: rgba(255,255,255,.85); font-weight: 600; text-decoration: none; font-size: var(--fs-sm); }
+.admin-nav a:hover { background: rgba(255,255,255,.08); color: var(--white); text-decoration: none; }
+.admin-nav a.is-active { background: var(--sidebar-active); color: var(--sidebar-active-text); }
+.admin-nav a .nav-code { font-family: var(--font-mono); font-size: 11px; opacity: .7; margin-left: auto; }
+.admin-nav a .nav-badge { margin-left: auto; background: var(--error); color: var(--white); border-radius: var(--r-full); font-size: 11px; min-width: 20px; text-align: center; padding: 1px 6px; font-weight: 700; }
+.admin-nav a.is-active .nav-badge { background: var(--navy-900); color: var(--white); }
+.admin-sidebar-foot { padding: 14px 18px; border-top: 1px solid rgba(255,255,255,.1); font-size: var(--fs-sm); }
+.admin-sidebar-foot .who { font-weight: 700; }
+.admin-sidebar-foot .role { font-size: var(--fs-xs); color: var(--sky-200); }
+.admin-sidebar-foot button { margin-top: 8px; color: var(--white); border-color: rgba(255,255,255,.3); background: transparent; width: 100%; }
+.admin-sidebar-foot button:hover { background: rgba(255,255,255,.1); border-color: var(--white); }
+
+.admin-content { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.admin-topbar { background: var(--white); border-bottom: 1px solid var(--border-soft); padding: 14px 28px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; min-height: 64px; }
+.admin-topbar h1 { font-size: var(--fs-xl); }
+.admin-topbar .crumb { font-size: var(--fs-xs); color: var(--text-caption); font-family: var(--font-mono); letter-spacing: .06em; }
+.admin-main { padding: 24px 28px 48px; max-width: 1560px; width: 100%; }
+.admin-main .stack-lg > .card { margin-top: 0; }
+
+/* Mobile fallback (không phải mục tiêu chính, nhưng không được vỡ) */
+.admin-menu-btn { display: none; }
+@media (max-width: 899px) {
+  .admin { flex-direction: column; }
+  .admin-sidebar { position: fixed; left: 0; top: 0; bottom: 0; z-index: 800; transform: translateX(-100%); transition: transform var(--transition); }
+  .admin-sidebar.is-open { transform: none; }
+  .admin-menu-btn { display: inline-flex; }
+  .admin-topbar { padding: 10px 16px; }
+  .admin-main { padding: 16px; }
+}
+
+/* Lưới KPI + việc cần làm (D-01) */
+.todo-list { list-style: none; }
+.todo-list li { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border-soft); }
+.todo-list li:last-child { border-bottom: 0; }
+.todo-list .todo-count { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-xl); color: var(--navy-900); min-width: 44px; text-align: center; }
+.todo-list .todo-text { flex: 1; }
+.todo-list .todo-text small { display: block; color: var(--text-muted); }
+
+/* Admin login (D-00) */
+.admin-login { min-height: 100vh; display: grid; grid-template-columns: 1fr; background: var(--bg-alt); }
+@media (min-width: 900px) { .admin-login { grid-template-columns: 5fr 7fr; } }
+.admin-login-side { background: var(--navy-900); color: var(--white); padding: 40px; display: none; flex-direction: column; justify-content: space-between; }
+@media (min-width: 900px) { .admin-login-side { display: flex; } }
+.admin-login-side h2 { color: var(--white); font-size: var(--fs-3xl); max-width: 420px; margin-top: 40px; }
+.admin-login-side p { color: var(--sky-200); margin-top: 12px; max-width: 420px; }
+.admin-login-form { display: flex; align-items: center; justify-content: center; padding: 24px; }
+.admin-login-form .card { width: min(100%, 440px); }
+
+/* Chi tiết đơn / user trong drawer */
+.section-title { font-size: var(--fs-xs); text-transform: uppercase; letter-spacing: .08em; color: var(--text-caption); font-weight: 700; margin-bottom: 8px; }
+.section + .section { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-soft); }
+
+/* Policy tiers editor (D-06) */
+.tier-rows { display: grid; gap: 10px; }
+.tier-row { display: grid; grid-template-columns: 90px 1fr 44px; gap: 10px; align-items: center; }
+.tier-row .tier-name { font-family: var(--font-mono); font-weight: 600; color: var(--navy-900); }
+.policy-version { padding: 12px 14px; border: 1px solid var(--border-soft); border-radius: var(--r-md); background: var(--white); }
+.policy-version + .policy-version { margin-top: 8px; }
+.policy-version.is-current { border-color: var(--teal-500); background: var(--bg-tint); }
+.diff-add { color: var(--success); font-weight: 600; }
+.diff-del { color: var(--error); text-decoration: line-through; }
+
+/* Batch bar (D-07) */
+.batch-bar { position: sticky; bottom: 0; background: var(--navy-900); color: var(--white); border-radius: var(--r-lg); padding: 12px 16px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 12px; box-shadow: var(--shadow-lg); }
+.batch-bar .sum { font-family: var(--font-mono); font-weight: 600; }
+.batch-bar .btn-secondary { background: transparent; color: var(--white); border-color: rgba(255,255,255,.4); }
+.batch-bar .btn-secondary:hover { background: rgba(255,255,255,.1); }
+.batch-bar .spacer { flex: 1; }
+
+/* Stock progress (D-05) */
+.progress { height: 10px; background: var(--gray-100); border-radius: var(--r-full); overflow: hidden; }
+.progress > span { display: block; height: 100%; background: var(--teal-500); border-radius: var(--r-full); }
+.progress.is-low > span { background: var(--error); }
+.dropzone { border: 2px dashed var(--gray-300); border-radius: var(--r-lg); padding: 24px; text-align: center; color: var(--text-muted); background: var(--bg-alt); cursor: pointer; }
+.dropzone:hover { border-color: var(--navy-400); }
+
+/* Two-column detail layout */
+.split-2 { display: grid; gap: 20px; }
+@media (min-width: 1100px) { .split-2 { grid-template-columns: 2fr 1fr; align-items: start; } .split-2-eq { grid-template-columns: 1fr 1fr; } }

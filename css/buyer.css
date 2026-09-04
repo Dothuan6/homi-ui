@@ -1,0 +1,50 @@
+/* ============================================================
+   Nhóm A · Người mua — mobile-first (>= 360px), khung tối đa 520px
+   ============================================================ */
+.buyer { min-height: 100vh; display: flex; flex-direction: column; background: var(--bg-alt); }
+.buyer-header { background: var(--white); border-bottom: 1px solid var(--border-soft); }
+.buyer-header-inner { max-width: var(--buyer-max); margin: 0 auto; padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 64px; }
+.buyer-main { flex: 1; width: 100%; max-width: var(--buyer-max); margin: 0 auto; padding: 16px 16px 40px; }
+@media (min-width: 560px) { .buyer-main { padding: 28px 16px 56px; } }
+.buyer-footer { text-align: center; padding: 16px; font-size: var(--fs-xs); color: var(--text-caption); }
+.buyer-footer a { color: var(--text-muted); }
+
+/* Thông báo người giới thiệu */
+.ref-bar { background: var(--bg-tint); color: var(--navy-900); font-size: var(--fs-sm); padding: 8px 16px; text-align: center; }
+.ref-bar .mono { font-weight: 600; }
+
+/* Khối gói sản phẩm ở đầu A-01 */
+.pkg { display: flex; gap: 14px; align-items: center; padding: 16px; background: var(--navy-900); color: var(--white); border-radius: var(--r-lg); }
+.pkg-icon { width: 56px; height: 56px; border-radius: var(--r-md); background: rgba(255,255,255,.08); display: inline-flex; align-items: center; justify-content: center; color: var(--teal-300); flex-shrink: 0; }
+.pkg-name { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-lg); line-height: 1.25; }
+.pkg-meta { font-size: var(--fs-sm); color: var(--sky-200); margin-top: 2px; }
+.pkg-price { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-xl); color: var(--teal-300); white-space: nowrap; }
+@media (max-width: 419px) { .pkg { flex-wrap: wrap; } .pkg-price { width: 100%; padding-left: 70px; margin-top: -6px; } }
+.pkg-benefits { list-style: none; display: grid; gap: 8px; margin-top: 12px; }
+.pkg-benefits li { display: flex; gap: 8px; align-items: flex-start; font-size: var(--fs-sm); color: var(--text); }
+.pkg-benefits .ico { color: var(--success); flex-shrink: 0; margin-top: 3px; }
+.qty-fixed { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; background: var(--bg-alt); border-radius: var(--r-md); font-size: var(--fs-sm); color: var(--text-muted); }
+.qty-fixed strong { color: var(--navy-900); }
+
+/* Tóm tắt đơn (A-02) */
+.order-summary { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.order-summary .order-id { font-family: var(--font-mono); color: var(--navy-900); font-weight: 600; }
+.total-row { display: flex; justify-content: space-between; align-items: baseline; padding-top: 12px; margin-top: 12px; border-top: 1px dashed var(--border); }
+.total-row .total-amt { font-family: var(--font-display); font-weight: 700; font-size: var(--fs-xl); color: var(--navy-900); }
+
+/* Gateway redirect giả lập */
+.gateway-sim { text-align: center; padding: 24px 12px; }
+.gateway-logo { display: inline-flex; align-items: center; gap: 10px; padding: 10px 18px; border: 1.5px solid var(--border); border-radius: var(--r-full); font-family: var(--font-display); font-weight: 700; color: var(--navy-900); margin-bottom: 16px; }
+.gateway-sim .btn + .btn { margin-top: 10px; }
+
+/* Danh sách đơn (A-04) */
+.order-card { border: 1px solid var(--border-soft); border-radius: var(--r-lg); background: var(--white); padding: 16px; box-shadow: var(--shadow-sm); }
+.order-card + .order-card { margin-top: 12px; }
+.order-card-head { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; flex-wrap: wrap; }
+.order-card .dl { margin-top: 12px; }
+.status-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+
+/* Nút hành động dưới cùng */
+.actions { display: flex; flex-direction: column; gap: 10px; margin-top: 20px; }
+@media (min-width: 480px) { .actions-row { flex-direction: row; } .actions-row .btn { flex: 1; } }
+.actions .btn-block { width: 100%; }

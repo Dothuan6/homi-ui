@@ -1,0 +1,66 @@
+/* ============================================================
+   HOMI365 — design tokens
+   Nguồn: trích từ ảnh quầy lễ tân HOMI365 · 04.09.2026
+   Tham chiếu trực quan: homi365-palette.html
+   Lưu ý: mã màu là ước lượng thị giác (±5%). Xác nhận lại bằng
+   eyedropper trên file logo gốc trước khi khoá bộ nhận diện.
+   ============================================================ */
+
+:root{
+  /* --- Brand · Navy (chủ đạo) --- */
+  --navy-900:#122544;  /* footer, heading lớn */
+  --navy-700:#1B3358;  /* hover nút chính */
+  --navy-600:#1E3A66;  /* PRIMARY — logo, nav, nút chính */
+  --navy-400:#4A6A9E;  /* viền active, icon phụ */
+
+  /* --- Brand · Teal (điểm nhấn) --- */
+  --teal-700:#0F7F96;  /* chữ teal, link, nút teal (AA trên trắng) */
+  --teal-500:#1BA3BE;  /* ACCENT — số "365", mảng lớn, icon */
+  --teal-300:#4FB8CE;  /* hover, highlight */
+  --teal-100:#D6E6EF;  /* nền section, card sức khoẻ */
+
+  /* --- Neutral --- */
+  --white:#FFFFFF;
+  --warm-50:#FAF8F3;   /* nền section xen kẽ */
+  --gray-100:#F2F4F3;  /* divider, nền input */
+  --gray-400:#8A93A3;  /* chữ phụ, placeholder — chỉ đạt ngưỡng chữ lớn */
+  --gray-800:#2B303A;  /* chữ nội dung */
+
+  /* --- Accent phụ · chỉ dùng cho đồ hoạ, KHÔNG dùng cho chữ --- */
+  --wood-300:#D8B98F;
+  --sky-200:#A8C4D8;
+
+  /* --- Functional · đã hiệu chỉnh đạt AA trên nền trắng --- */
+  --success:#2F7A48;   /* 5.21:1 */
+  --warning:#965C0A;   /* 5.58:1 */
+  --error:#C0392B;     /* 5.44:1 */
+  --info:#0F7F96;      /* 4.61:1 */
+
+  /* --- Semantic · đổi giao diện bằng cách trỏ lại token --- */
+  --bg:var(--white);
+  --bg-alt:var(--warm-50);
+  --bg-tint:var(--teal-100);
+  --text:var(--gray-800);
+  --text-muted:var(--gray-400);
+  --text-invert:var(--white);
+  --primary:var(--navy-600);
+  --primary-hover:var(--navy-700);
+  --on-primary:var(--white);
+  --accent:var(--teal-700);
+  --accent-hover:var(--teal-500);
+  --on-accent:var(--white);
+  --border:var(--gray-100);
+  --border-strong:var(--navy-400);
+  --focus-ring:var(--teal-700);
+}
+
+/* ------------------------------------------------------------
+   QUY TẮC BẮT BUỘC (WCAG 2.1 AA)
+   1. Không đặt chữ --teal-500 (2.99:1) hay --teal-300 (2.31:1)
+      trên nền trắng. Chữ teal phải dùng --teal-700.
+   2. Nút nền --teal-500 phải dùng chữ --navy-900 (5.13:1),
+      không dùng chữ trắng. Muốn chữ trắng thì nền --teal-700.
+   3. --gray-400 (3.12:1) chỉ dùng cho caption/placeholder/timestamp.
+   4. Không truyền tải trạng thái chỉ bằng màu — luôn kèm chữ hoặc icon.
+   5. Tỷ lệ dùng màu 60/30/10: neutral / navy / teal.
+   ------------------------------------------------------------ */

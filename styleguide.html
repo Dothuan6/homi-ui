@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Styleguide · HOMI365 prototype v2</title>
+  <meta name="theme-color" content="#1E3A66">
+  <link rel="icon" href="./public/image/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./css/tokens.css">
+  <link rel="stylesheet" href="./css/base.css">
+  <link rel="stylesheet" href="./css/components.css">
+  <link rel="stylesheet" href="./css/buyer.css">
+  <link rel="stylesheet" href="./css/seller.css">
+  <link rel="stylesheet" href="./css/admin.css">
+  <style>
+    .sg { max-width: 1100px; margin: 0 auto; padding: 32px 20px 80px; }
+    .sg-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 32px; }
+    .sg h2 { margin: 40px 0 14px; padding-bottom: 8px; border-bottom: 2px solid var(--border-soft); }
+    .sg h3 { margin: 22px 0 10px; }
+    .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+    .swatch { border-radius: var(--r-md); overflow: hidden; border: 1px solid var(--border-soft); background: var(--white); }
+    .swatch-color { height: 64px; }
+    .swatch-meta { padding: 8px 10px; font-size: var(--fs-xs); }
+    .swatch-meta code { font-family: var(--font-mono); display: block; color: var(--text-muted); }
+    .demo-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .demo-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .spec { font-size: var(--fs-xs); color: var(--text-caption); font-family: var(--font-mono); margin-top: 6px; }
+    .type-sample { display: grid; grid-template-columns: 160px 1fr; gap: 8px 16px; align-items: baseline; }
+    .type-sample code { font-family: var(--font-mono); font-size: 12px; color: var(--text-muted); }
+    .rule { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1px dashed var(--border-soft); font-size: var(--fs-sm); }
+    .rule .ico { flex-shrink: 0; color: var(--success); margin-top: 2px; }
+    .dark { background: var(--navy-900); padding: 16px; border-radius: var(--r-md); }
+  </style>
+</head>
+<body>
+<div class="sg">
+  <div class="sg-head">
+    <div><div id="logo"></div><p class="text-muted mt-2">Design system prototype v2 · nhận diện HOMI365 · bước 1 kế hoạch redesign (MS 2.1)</p></div>
+    <div class="row"><a class="btn btn-secondary" href="./index.html#A-01">Về prototype</a><a class="btn btn-ghost" href="./brandingGuideline/homi365-palette.html">Palette gốc</a></div>
+  </div>
+
+  <div class="alert alert-info"><div><span class="alert-title">Ràng buộc kế thừa</span>Người dùng trung niên/cao tuổi: chữ thân ≥16px, vùng bấm ≥44px, không emoji, không truyền trạng thái chỉ bằng màu, tiếng Việt lịch sự. Các token đánh dấu <em>bổ sung</em> là đề xuất của BA chờ duyệt (tint, spacing, radius, shadow, font Source Sans 3).</div></div>
+
+  <h2>1. Màu sắc</h2>
+  <h3>Brand</h3>
+  <div class="swatches" id="sw-brand"></div>
+  <h3>Neutral</h3>
+  <div class="swatches" id="sw-neutral"></div>
+  <h3>Functional (đạt AA trên trắng) + tint nền <em>(bổ sung)</em></h3>
+  <div class="swatches" id="sw-func"></div>
+
+  <h2>2. Chữ</h2>
+  <div class="type-sample">
+    <code>Archivo 700 · 32px</code><div class="display" style="font-size:32px;color:var(--navy-900)">Tiêu đề trang (h1 desktop)</div>
+    <code>Archivo 700 · 26px</code><h1>Tiêu đề h1 · Thanh toán thành công</h1>
+    <code>Archivo 700 · 22px</code><h2 style="margin:0;border:0;padding:0">Tiêu đề h2 · Link giới thiệu của bạn</h2>
+    <code>Archivo 700 · 18px</code><h3 style="margin:0">Tiêu đề h3 · Thiết bị đã kích hoạt</h3>
+    <code>Source Sans 3 · 16px</code><p>Thân bài. Gói sản phẩm chỉ mua được qua link giới thiệu của seller HOMI365. Mỗi số điện thoại chỉ được sở hữu 1 gói.</p>
+    <code>Source Sans 3 · 15px</code><p class="text-sm text-muted">Chữ phụ đạt AA (--gray-600): Hoa hồng khả dụng sau 7 ngày kể từ khi đơn thanh toán.</p>
+    <code>Source Sans 3 · 14px</code><p class="text-caption">Caption (--gray-400, chỉ timestamp/placeholder): 09:30 04/09/2026</p>
+    <code>JetBrains Mono · 18px</code><span class="mono" style="font-size:18px">HM260904001 · HOMI-ARRB-THD3-J5DS · 0108294845</span>
+  </div>
+
+  <h2>3. Nút · 6 trạng thái</h2>
+  <div class="demo-row">
+    <button class="btn btn-primary">Primary</button><button class="btn btn-accent">Accent (teal-500 + chữ navy)</button><button class="btn btn-secondary">Secondary</button><button class="btn btn-outline">Outline</button><button class="btn btn-ghost">Ghost</button><button class="btn btn-danger">Danger</button><button class="btn btn-danger-outline">Danger outline</button><button class="btn btn-success">Success</button>
+  </div>
+  <div class="demo-row mt-3">
+    <button class="btn btn-primary btn-lg">Lớn 52px</button><button class="btn btn-primary">Mặc định 44px</button><button class="btn btn-primary btn-sm">Nhỏ 36px (chỉ trong bảng)</button><button class="btn btn-primary" disabled>Disabled</button><button class="btn btn-primary is-loading">Loading</button><button class="btn btn-secondary is-loading">Loading</button><button class="btn btn-secondary btn-icon" aria-label="Sao chép" id="ico-btn"></button><button class="btn-link">Nút link</button>
+  </div>
+  <p class="spec">hover: navy-700 · focus-visible: ring 3px teal-700 · active: translateY(1px) · disabled: opacity .55 · loading: spinner, chặn click</p>
+
+  <h2>4. Form field</h2>
+  <div class="demo-grid">
+    <div id="f1"></div><div id="f2"></div><div id="f3"></div><div id="f4"></div>
+  </div>
+  <div class="demo-grid mt-4">
+    <label class="radio-card is-selected"><input type="radio" checked><div><div class="radio-card-title">Radio card đã chọn</div><div class="radio-card-desc">Mô tả ngắn phương thức thanh toán</div></div></label>
+    <label class="radio-card"><input type="radio"><div><div class="radio-card-title">Radio card</div><div class="radio-card-desc">Mô tả ngắn</div></div></label>
+    <label class="check"><input type="checkbox" checked> Ghi nhớ đăng nhập (30 ngày)</label>
+  </div>
+
+  <h2>5. Badge trạng thái (luôn kèm chữ)</h2>
+  <h3>Đơn hàng (BR-11)</h3><div class="demo-row" id="b-order"></div>
+  <h3>Giao hàng</h3><div class="demo-row" id="b-ship"></div>
+  <h3>Mã kích hoạt</h3><div class="demo-row" id="b-lic"></div>
+  <h3>Hoa hồng · Rút tiền · Người dùng</h3><div class="demo-row" id="b-misc"></div>
+
+  <h2>6. Alert · Toast · Empty · Skeleton</h2>
+  <div class="stack" id="alerts"></div>
+  <div class="demo-row mt-4"><button class="btn btn-secondary" onclick="UI.toast('Đã sao chép link giới thiệu.')">Toast success</button><button class="btn btn-secondary" onclick="UI.toast('Không gửi được OTP.', 'error')">Toast error</button><button class="btn btn-secondary" onclick="UI.toast('Đã gửi lại mã (lần 2/5).', 'info')">Toast info</button><button class="btn btn-secondary" onclick="UI.toast('Kho mã sắp cạn.', 'warning')">Toast warning</button></div>
+  <div class="demo-grid mt-4"><div class="card"><div class="card-body" id="empty"></div></div><div class="card"><div class="card-body" id="skel"></div></div></div>
+
+  <h2>7. OTP 6 ô · Đếm ngược · Mã · VietQR</h2>
+  <div class="demo-grid">
+    <div class="card"><div class="card-body"><div class="otp"><input class="otp-box" value="1" aria-label="1"><input class="otp-box" value="2" aria-label="2"><input class="otp-box" value="3" aria-label="3"><input class="otp-box" aria-label="4"><input class="otp-box" aria-label="5"><input class="otp-box" aria-label="6"></div><div class="otp-meta"><span>Không nhận được mã? <button class="btn-link" disabled>Gửi lại (42s)</button></span><span class="otp-attempts">Còn 4/5 lần nhập</span></div>
+      <div class="otp is-error mt-4"><input class="otp-box" aria-label="1"><input class="otp-box" aria-label="2"><input class="otp-box" aria-label="3"><input class="otp-box" aria-label="4"><input class="otp-box" aria-label="5"><input class="otp-box" aria-label="6"></div><div class="field-error mt-2" style="justify-content:center">Mã không đúng. Bạn còn 3 lần thử.</div></div></div>
+    <div class="card"><div class="card-body stack">
+      <div class="demo-row"><span class="countdown"><span>Giữ đơn</span><span class="countdown-time">14:59</span></span><span class="countdown is-warning"><span>Giữ đơn</span><span class="countdown-time">00:42</span></span><span class="countdown is-expired"><span>Giữ đơn</span><span class="countdown-time">00:00</span></span></div>
+      <div class="code-box"><div class="grow"><span class="code-label">Mã đơn hàng</span><span class="code-value">HM260904001</span></div><button class="btn btn-secondary btn-icon" aria-label="Sao chép" id="ico-btn2"></button></div>
+      <div class="code-box code-box-lg code-box-navy"><div class="grow"><span class="code-label">Mã kích hoạt của bạn</span><span class="code-value">HOMI-ARRB-THD3-J5DS</span></div><button class="btn btn-icon btn-secondary" aria-label="Sao chép" id="ico-btn3"></button></div>
+    </div></div>
+  </div>
+  <div class="card mt-4"><div class="card-head"><h3 style="margin:0">Khối VietQR</h3></div><div class="card-body" id="vietqr"></div></div>
+
+  <h2>8. Stat / KPI · Tabs · Steps · Biểu đồ</h2>
+  <div class="stat-grid stat-grid-4">
+    <div class="stat"><div class="stat-label">Lượt click</div><div class="stat-value">1.284</div><div class="stat-sub">30 ngày</div></div>
+    <div class="stat stat-accent"><div class="stat-label">Hoa hồng chờ duyệt</div><div class="stat-value text-warning">3.600.000đ</div></div>
+    <div class="stat stat-navy"><div class="stat-label">Khả dụng</div><div class="stat-value">4.850.000đ</div><div class="stat-sub">Xem ví</div></div>
+    <div class="stat"><div class="stat-label">Chuyển đổi</div><div class="stat-value">6,2%</div></div>
+  </div>
+  <div class="tabs mt-4"><button class="tab is-active">Hoa hồng <span class="count">20</span></button><button class="tab">Rút tiền <span class="count">2</span></button></div>
+  <div class="demo-row mt-4"><div class="seg"><button class="is-active">7 ngày</button><button>30 ngày</button><button>90 ngày</button></div>
+    <div class="steps"><div class="step is-done"><span class="step-dot">✓</span><span>Thông tin</span></div><span class="step-line"></span><div class="step is-active"><span class="step-dot">2</span><span>OTP</span></div><span class="step-line"></span><div class="step"><span class="step-dot">3</span><span>Xong</span></div></div></div>
+  <div class="card mt-4"><div class="card-body" id="chart"></div></div>
+
+  <h2>9. Bảng dữ liệu · Phân trang · Modal · Drawer</h2>
+  <div class="table-wrap"><table class="table"><thead><tr><th>Mã đơn</th><th>Người mua</th><th class="num">Số tiền</th><th>Thanh toán</th><th>Giao hàng</th><th></th></tr></thead>
+    <tbody><tr><td><span class="cell-main mono">HM260904001</span><span class="cell-sub">09:30 04/09/2026</span></td><td><span class="cell-main">Nguyễn Văn An</span><span class="cell-sub mono">0908•••456</span></td><td class="num mono">10.000.000đ</td><td><span class="badge badge-success">Đã thanh toán</span></td><td><span class="badge badge-info">Đang giao</span></td><td><div class="row-actions"><button class="btn btn-secondary btn-sm">Chi tiết</button></div></td></tr>
+    <tr class="is-selected"><td><span class="cell-main mono">HM260904002</span><span class="cell-sub">10:12 04/09/2026</span></td><td><span class="cell-main">Trần Thị Bình</span><span class="cell-sub mono">0912•••678</span></td><td class="num mono">10.000.000đ</td><td><span class="badge badge-info">Chờ đối soát</span></td><td>—</td><td><div class="row-actions"><button class="btn btn-success btn-sm">Xác nhận</button><button class="btn btn-danger-outline btn-sm">Từ chối</button></div></td></tr></tbody></table></div>
+  <div id="pagination"></div>
+  <div class="demo-row mt-4"><button class="btn btn-primary" onclick="demoConfirm()">Modal xác nhận (nêu rõ số tiền/người)</button><button class="btn btn-danger" onclick="demoReason()">Modal có lý do bắt buộc</button><button class="btn btn-secondary" onclick="demoDrawer()">Panel trượt</button></div>
+
+  <h2>10. Logo · nền tối</h2>
+  <div class="demo-row" id="logos"></div>
+  <div class="dark mt-3" id="logos-dark"></div>
+  <p class="spec">Wordmark dựng bằng Archivo (font trang) nên hiển thị đồng nhất khi nhúng inline; file SVG ngang vẫn cần outline chữ trước khi dùng ngoài web.</p>
+
+  <h2>11. Quy tắc</h2>
+  <div id="rules"></div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js" crossorigin="anonymous"></script>
+<script src="./config/business-rules.js"></script>
+<script src="./mock/data.js"></script>
+<script src="./js/ui.js"></script>
+<script>
+  const App = { timers: {}, clearTimer(n) { if (this.timers[n]) { clearInterval(this.timers[n]); this.timers[n] = null; } }, reload() {} };
+  document.getElementById('logo').innerHTML = UI.logo({ size: 40 });
+  const sw = (id, list) => document.getElementById(id).innerHTML = list.map(([n, v, note]) => `<div class="swatch"><div class="swatch-color" style="background:${v}"></div><div class="swatch-meta"><strong>${n}</strong><code>${v}</code>${note ? '<span class="text-muted">' + note + '</span>' : ''}</div></div>`).join('');
+  sw('sw-brand', [['--navy-900', '#122544', 'sidebar, heading lớn'], ['--navy-700', '#1B3358', 'hover nút chính'], ['--navy-600', '#1E3A66', 'PRIMARY'], ['--navy-400', '#4A6A9E', 'viền active, icon'], ['--teal-700', '#0F7F96', 'chữ teal, link (AA)'], ['--teal-500', '#1BA3BE', 'mảng, icon, nút accent'], ['--teal-300', '#4FB8CE', 'hover, highlight'], ['--teal-100', '#D6E6EF', 'nền card tint']]);
+  sw('sw-neutral', [['--white', '#FFFFFF'], ['--warm-50', '#FAF8F3', 'nền trang'], ['--gray-100', '#F2F4F3', 'divider'], ['--gray-200 (bổ sung)', '#E3E6E8', 'viền input'], ['--gray-400', '#8A93A3', 'caption'], ['--gray-600 (bổ sung)', '#5B6472', 'chữ phụ AA'], ['--gray-800', '#2B303A', 'chữ thân']]);
+  sw('sw-func', [['--success', '#2F7A48', '5.21:1'], ['--warning', '#965C0A', '5.58:1'], ['--error', '#C0392B', '5.44:1'], ['--info', '#0F7F96', '4.61:1'], ['--success-100', '#E4F2E8', 'tint'], ['--warning-100', '#FBF0DC', 'tint'], ['--error-100', '#F9E4E1', 'tint'], ['--info-100', '#DCEFF3', 'tint'], ['--navy-100', '#E4E9F2', 'tint navy']]);
+  ['ico-btn', 'ico-btn2', 'ico-btn3'].forEach(id => document.getElementById(id).innerHTML = UI.icon('copy', 18));
+  document.getElementById('f1').innerHTML = UI.field({ id: 'x1', label: 'Họ và tên', required: true, placeholder: 'Nguyễn Văn A', hint: 'Mặc định' });
+  document.getElementById('f2').innerHTML = UI.field({ id: 'x2', label: 'Số điện thoại', required: true, mono: true, value: '0912 34', error: 'Số điện thoại không đúng định dạng (di động Việt Nam 10 số).' });
+  document.getElementById('f3').innerHTML = UI.field({ id: 'x3', label: 'Ngân hàng', type: 'select', value: 'Vietcombank', options: CONFIG.banks.map(b => ({ value: b, label: b })) });
+  document.getElementById('f4').innerHTML = UI.field({ id: 'x4', label: 'Ghi chú', type: 'textarea', rows: 2, placeholder: 'Giao giờ hành chính…' });
+  const badges = (id, kind) => document.getElementById(id).insertAdjacentHTML('beforeend', Object.keys(LABELS[kind]).map(k => UI.badge(kind, k)).join(''));
+  badges('b-order', 'orderStatus'); badges('b-ship', 'shipping'); badges('b-lic', 'license'); badges('b-misc', 'commission'); badges('b-misc', 'withdrawal'); badges('b-misc', 'user'); badges('b-misc', 'userType');
+  document.getElementById('alerts').innerHTML = [['info', 'info', 'Thông tin', 'Nội dung chuyển khoản phải ghi đúng mã đơn để đối soát.'], ['success', 'check-circle', 'Thành công', 'Đã gửi mã kích hoạt qua SMS.'], ['warning', 'warning', 'Cảnh báo', 'Kho mã còn 12 — dưới ngưỡng 20.'], ['error', 'x-circle', 'Lỗi', 'Không gửi được OTP. Hệ thống SMS gián đoạn.']].map(([t, i, h, b]) => `<div class="alert alert-${t}">${UI.icon(i, 22)}<div><span class="alert-title">${h}</span>${b}</div></div>`).join('');
+  document.getElementById('empty').innerHTML = UI.empty('cash', 'Chưa có khoản hoa hồng nào', 'Chia sẻ link giới thiệu để bắt đầu nhận hoa hồng.', '<button class="btn btn-primary">Sao chép link</button>');
+  document.getElementById('skel').innerHTML = UI.skeletonTable(4, 4);
+  document.getElementById('vietqr').innerHTML = UI.vietqr({ id: 'HM260904001', price: 10000000 });
+  document.getElementById('chart').innerHTML = UI.chart.combo(Array.from({ length: 14 }, (_, i) => ({ label: String(i + 1).padStart(2, '0') + '/09', bar: (i * 7) % 5, line: 8 + (i * 13) % 20 })), { height: 200, legend: [{ text: 'Đơn thanh toán (cột)' }, { text: 'Lượt click (đường)', cls: 'legend-line' }] });
+  document.getElementById('pagination').innerHTML = UI.pagination({ total: 42, page: 2, totalPages: 5, from: 11, to: 20 }, 'void');
+  document.getElementById('logos').innerHTML = UI.logo({ size: 48 }) + UI.logo({ size: 32 }) + UI.logo({ size: 48, markOnly: true }) + '<img src="./public/image/favicon.svg" width="40" height="40" alt="favicon">';
+  document.getElementById('logos-dark').innerHTML = UI.logo({ size: 40, invert: true });
+  document.getElementById('rules').innerHTML = ['Chữ --teal-500 / --teal-300 không đặt trên nền trắng; chữ teal dùng --teal-700.', 'Nút nền --teal-500 dùng chữ --navy-900 (5.13:1); muốn chữ trắng thì nền --teal-700.', '--gray-400 chỉ cho caption/placeholder/timestamp; chữ phụ trong thân dùng --gray-600.', 'Trạng thái luôn kèm chữ (badge có text) — không chỉ màu.', 'Tỷ lệ 60/30/10: neutral / navy / teal.', 'Mã đơn, mã kích hoạt, STK, SĐT dùng JetBrains Mono để đọc số dễ hơn.', 'Vùng bấm ≥44px; nút trong bảng 36px là ngoại lệ có chủ đích (desktop admin).'].map(r => `<div class="rule">${UI.icon('check', 16)}<span>${r}</span></div>`).join('');
+  document.querySelector('.alert.alert-info').insertAdjacentHTML('afterbegin', UI.icon('info', 22));
+  function demoConfirm() { UI.confirm({ title: 'Duyệt yêu cầu rút tiền', body: 'Sau khi duyệt, xuất file ngân hàng và bấm "Đã chi" khi chuyển khoản xong.', summary: [['Seller', 'Nguyễn Văn An'], ['Số tiền', '<strong>1.200.000đ</strong>'], ['Nhận về', 'Vietcombank · <span class="mono">0123456789</span>']], confirmText: 'Duyệt', onConfirm: () => UI.toast('Đã duyệt (demo).') }); }
+  function demoReason() { UI.confirm({ title: 'Khoá tài khoản?', body: 'Seller <strong>Hoàng Văn Em</strong> sẽ không đăng nhập được.', reason: 'Lý do khoá', confirmText: 'Khoá tài khoản', tone: 'danger', onConfirm: (r) => UI.toast('Đã khoá: ' + r, 'warning') }); }
+  function demoDrawer() { UI.drawer({ title: '<h2 class="mono">HM260904001</h2><div class="mt-1"><span class="badge badge-success">Đã thanh toán</span></div>', body: '<div class="section"><div class="section-title">Đơn hàng</div><dl class="dl"><dt>Gói</dt><dd>CN02 · Gói Bác sĩ 24/7</dd><dt>Số tiền</dt><dd>10.000.000đ</dd></dl></div><div class="section"><div class="section-title">Dòng thời gian</div><ul class="timeline"><li><span class="timeline-time">09:30 04/09/2026</span><span class="timeline-text">Tạo đơn</span></li><li><span class="timeline-time">09:35 04/09/2026</span><span class="timeline-text">Callback cổng → PAID</span></li></ul></div>', foot: '<button class="btn btn-secondary" onclick="UI.closeDrawer()">Đóng</button><button class="btn btn-primary">Cập nhật giao hàng</button>' }); }
+</script>
+</body>
+</html>

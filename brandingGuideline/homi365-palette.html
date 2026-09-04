@@ -1,0 +1,571 @@
+<title>Bảng màu HOMI365</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap">
+
+<style>
+:root{
+  /* --- surfaces & type (page chrome) --- */
+  --ground:#FFFFFF;
+  --ground-alt:#F4F6F8;
+  --ground-sunk:#E9EEF3;
+  --ink:#1B2430;
+  --ink-soft:#5A6674;
+  --ink-faint:#8A96A4;
+  --rule:#D9E1E9;
+  --rule-strong:#B9C6D3;
+  --mark:#1E3A66;
+  --mark-alt:#0F7F96;
+  --shadow:0 1px 0 rgba(27,36,48,.06);
+
+  --font-display:"Archivo","Helvetica Neue",Arial,sans-serif;
+  --font-body:"Source Sans 3","Segoe UI",system-ui,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Consolas,monospace;
+
+  --wrap:1120px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --ground:#101720;
+    --ground-alt:#161F2A;
+    --ground-sunk:#1D2833;
+    --ink:#E6ECF2;
+    --ink-soft:#A3B0BE;
+    --ink-faint:#77848F;
+    --rule:#293544;
+    --rule-strong:#3B4A5C;
+    --mark:#7FA6DE;
+    --mark-alt:#4FB8CE;
+    --shadow:0 1px 0 rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#101720;
+  --ground-alt:#161F2A;
+  --ground-sunk:#1D2833;
+  --ink:#E6ECF2;
+  --ink-soft:#A3B0BE;
+  --ink-faint:#77848F;
+  --rule:#293544;
+  --rule-strong:#3B4A5C;
+  --mark:#7FA6DE;
+  --mark-alt:#4FB8CE;
+  --shadow:0 1px 0 rgba(0,0,0,.4);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0;
+  background:var(--ground);
+  color:var(--ink);
+  font-family:var(--font-body);
+  font-size:16px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:var(--wrap);margin:0 auto;padding:0 28px}
+
+/* ---------- masthead ---------- */
+.masthead{
+  border-bottom:1px solid var(--rule);
+  background:var(--ground-alt);
+  padding:52px 0 40px;
+}
+.mast-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,320px);gap:48px;align-items:end}
+@media (max-width:820px){.mast-grid{grid-template-columns:1fr;gap:28px;align-items:start}}
+
+.eyebrow{
+  font-family:var(--font-mono);
+  font-size:11px;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--ink-faint);margin:0 0 14px;
+}
+h1{
+  font-family:var(--font-display);
+  font-weight:700;font-size:clamp(34px,5.2vw,54px);
+  line-height:1.02;letter-spacing:-.025em;margin:0;
+  text-wrap:balance;
+}
+h1 em{font-style:normal;color:var(--mark-alt)}
+.lede{margin:18px 0 0;max-width:56ch;color:var(--ink-soft);font-size:17px}
+
+.factsheet{border-top:2px solid var(--rule-strong);padding-top:14px}
+.factsheet dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:6px 18px;font-size:13.5px}
+.factsheet dt{color:var(--ink-faint);font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;align-self:center}
+.factsheet dd{margin:0;font-variant-numeric:tabular-nums}
+
+.caveat{
+  margin-top:26px;padding:14px 16px;
+  border-left:3px solid #965C0A;
+  background:var(--ground-sunk);
+  font-size:14px;color:var(--ink-soft);max-width:72ch;
+}
+.caveat b{color:var(--ink)}
+
+/* ---------- sections ---------- */
+section{padding:56px 0;border-bottom:1px solid var(--rule)}
+section:last-of-type{border-bottom:0}
+.sec-head{display:flex;align-items:baseline;gap:16px;margin-bottom:8px;flex-wrap:wrap}
+.sec-num{
+  font-family:var(--font-mono);font-size:12px;color:var(--mark-alt);
+  letter-spacing:.1em;padding-top:4px;
+}
+h2{
+  font-family:var(--font-display);font-weight:600;
+  font-size:clamp(22px,3vw,29px);letter-spacing:-.02em;margin:0;line-height:1.15;
+}
+.sec-note{margin:0 0 30px;color:var(--ink-soft);max-width:66ch;font-size:15.5px}
+
+/* ---------- extracted swatch grid ---------- */
+.extract{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(158px,1fr));
+  gap:2px;
+  border:1px solid var(--rule);
+}
+.ex{
+  background:var(--ground-alt);
+  display:flex;flex-direction:column;
+}
+.ex .chip{height:76px;display:flex;align-items:flex-end;padding:8px 10px}
+.ex .idx{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;
+  opacity:.75;
+}
+.ex .meta{padding:9px 10px 11px;display:flex;flex-direction:column;gap:2px;flex:1}
+.ex .where{font-size:12.5px;line-height:1.35;color:var(--ink)}
+.ex .hex{font-family:var(--font-mono);font-size:11.5px;color:var(--ink-faint);font-variant-numeric:tabular-nums}
+
+/* ---------- ramps ---------- */
+.ramp-block{margin-bottom:34px}
+.ramp-label{
+  display:flex;align-items:baseline;gap:12px;margin-bottom:9px;
+  border-bottom:1px solid var(--rule);padding-bottom:7px;
+}
+.ramp-label h3{
+  font-family:var(--font-display);font-weight:600;font-size:15px;
+  letter-spacing:.01em;margin:0;
+}
+.ramp-label span{font-size:13px;color:var(--ink-faint)}
+.ramp{display:flex;flex-wrap:wrap}
+.step{
+  flex:1 1 168px;min-width:150px;
+  padding:16px 14px 15px;
+  display:flex;flex-direction:column;gap:3px;min-height:118px;
+}
+.step .tok{font-family:var(--font-mono);font-size:11.5px;letter-spacing:.02em;opacity:.9}
+.step .hx{font-family:var(--font-mono);font-size:16px;font-weight:500;letter-spacing:.01em;margin-top:auto}
+.step .use{font-size:12.5px;line-height:1.35;opacity:.88}
+.step .rgb{font-family:var(--font-mono);font-size:10.5px;opacity:.7;font-variant-numeric:tabular-nums}
+
+/* ---------- contrast table ---------- */
+.tablewrap{overflow-x:auto;border:1px solid var(--rule)}
+table{border-collapse:collapse;width:100%;min-width:600px;font-size:14.5px}
+thead th{
+  text-align:left;font-family:var(--font-mono);font-size:10.5px;
+  letter-spacing:.12em;text-transform:uppercase;color:var(--ink-faint);
+  font-weight:400;padding:11px 14px;border-bottom:1px solid var(--rule-strong);
+  background:var(--ground-alt);
+}
+tbody td{padding:11px 14px;border-bottom:1px solid var(--rule);vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}
+td.ratio{font-family:var(--font-mono);font-variant-numeric:tabular-nums;font-weight:500}
+.pair{display:flex;align-items:center;gap:9px}
+.dot{width:19px;height:19px;border:1px solid rgba(128,140,155,.45);flex:none}
+.verdict{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.06em;
+  padding:3px 8px;white-space:nowrap;
+}
+.v-pass{background:rgba(47,122,72,.14);color:#2F7A48}
+.v-large{background:rgba(150,92,10,.16);color:#965C0A}
+.v-fail{background:rgba(192,57,43,.14);color:#C0392B}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .v-pass{color:#7ED39B}
+  :root:not([data-theme="light"]) .v-large{color:#E0B15F}
+  :root:not([data-theme="light"]) .v-fail{color:#F09A8F}
+}
+:root[data-theme="dark"] .v-pass{color:#7ED39B}
+:root[data-theme="dark"] .v-large{color:#E0B15F}
+:root[data-theme="dark"] .v-fail{color:#F09A8F}
+
+.rules{margin:26px 0 0;padding:0;list-style:none;display:grid;gap:12px;max-width:74ch}
+.rules li{padding-left:18px;position:relative;font-size:14.5px;color:var(--ink-soft)}
+.rules li::before{content:"";position:absolute;left:0;top:.62em;width:8px;height:2px;background:var(--mark-alt)}
+.rules b{color:var(--ink)}
+code{font-family:var(--font-mono);font-size:.9em;background:var(--ground-sunk);padding:1px 5px}
+
+/* ---------- specimens ---------- */
+.spec-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(272px,1fr));gap:26px}
+.spec{border:1px solid var(--rule);background:var(--ground-alt)}
+.spec h4{
+  margin:0;padding:10px 16px;border-bottom:1px solid var(--rule);
+  font-family:var(--font-mono);font-size:10.5px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--ink-faint);font-weight:400;
+}
+.spec .body{padding:22px 16px}
+
+.btn{
+  display:inline-block;border:0;cursor:pointer;
+  font-family:var(--font-body);font-size:15px;font-weight:600;
+  padding:11px 22px;letter-spacing:.005em;
+}
+.btn-primary{background:#1E3A66;color:#fff}
+.btn-primary:hover{background:#1B3358}
+.btn-accent{background:#0F7F96;color:#fff}
+.btn-accent:hover{background:#1BA3BE;color:#122544}
+.btn-ghost{background:transparent;color:#0F7F96;box-shadow:inset 0 0 0 1.5px #0F7F96}
+.btn-ghost:hover{background:#D6E6EF;color:#0F7F96}
+.btnrow{display:flex;gap:11px;flex-wrap:wrap}
+
+.card-demo{background:#FFFFFF;border-top:3px solid #1BA3BE;padding:18px 18px 20px;color:#2B303A;box-shadow:0 1px 3px rgba(30,58,102,.13)}
+.card-demo .k{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;color:#8A93A3}
+.card-demo .n{font-family:var(--font-display);font-weight:700;font-size:31px;color:#1E3A66;line-height:1.1;margin:5px 0 3px;font-variant-numeric:tabular-nums}
+.card-demo .d{font-size:13.5px;color:#5A6674;margin:0}
+
+.pills{display:flex;gap:9px;flex-wrap:wrap}
+.pill{font-size:12.5px;font-weight:600;padding:4px 11px;letter-spacing:.01em}
+.p-ok{background:rgba(47,122,72,.13);color:#2F7A48}
+.p-warn{background:rgba(150,92,10,.14);color:#965C0A}
+.p-err{background:rgba(192,57,43,.12);color:#C0392B}
+.p-info{background:#D6E6EF;color:#0F7F96}
+
+.typescale{display:grid;gap:11px}
+.typescale div{color:#2B303A}
+.ts-bg{background:#FAF8F3;padding:20px 18px}
+.ts1{font-family:var(--font-display);font-weight:700;font-size:30px;letter-spacing:-.02em;line-height:1.1;color:#1E3A66}
+.ts2{font-family:var(--font-display);font-weight:600;font-size:19px;color:#1B3358}
+.ts3{font-size:14.5px;color:#2B303A;line-height:1.55}
+.ts4{font-size:12.5px;color:#8A93A3}
+
+/* ---------- code ---------- */
+.codehead{display:flex;justify-content:space-between;align-items:center;gap:14px;
+  border:1px solid var(--rule);border-bottom:0;padding:9px 14px;background:var(--ground-alt)}
+.codehead span{font-family:var(--font-mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-faint)}
+#copy{
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;
+  background:transparent;border:1px solid var(--rule-strong);color:var(--ink-soft);
+  padding:5px 11px;cursor:pointer;
+}
+#copy:hover{border-color:var(--mark-alt);color:var(--mark-alt)}
+pre{
+  margin:0;border:1px solid var(--rule);background:var(--ground-sunk);
+  padding:18px 16px;overflow-x:auto;
+  font-family:var(--font-mono);font-size:12.5px;line-height:1.65;color:var(--ink);
+}
+pre .c{color:var(--ink-faint)}
+
+footer{padding:34px 0 56px;color:var(--ink-faint);font-size:13.5px}
+
+:focus-visible{outline:2px solid var(--mark-alt);outline-offset:2px}
+@media (prefers-reduced-motion:no-preference){
+  .btn,#copy{transition:background .14s ease,color .14s ease,border-color .14s ease}
+}
+</style>
+
+<header class="masthead">
+  <div class="wrap mast-grid">
+    <div>
+      <p class="eyebrow">Brand Guideline · Bảng màu</p>
+      <h1>HOMI<em>365</em><br>hệ màu nhận diện</h1>
+      <p class="lede">Trích từ ảnh dựng phòng khám — chuẩn hoá thành 19 token sẵn dùng cho web, in ấn và đồng phục. Hệ hai màu: navy dẫn dắt, teal làm điểm nhấn.</p>
+    </div>
+    <div class="factsheet">
+      <dl>
+        <dt>Nguồn</dt><dd>Ảnh quầy lễ tân HOMI365</dd>
+        <dt>Màu trích</dt><dd>16 vùng</dd>
+        <dt>Token</dt><dd>19 (8 brand · 5 neutral · 2 accent · 4 functional)</dd>
+        <dt>Chuẩn</dt><dd>WCAG 2.1 AA</dd>
+        <dt>Cập nhật</dt><dd>04.09.2026</dd>
+      </dl>
+    </div>
+  </div>
+  <div class="wrap">
+    <p class="caveat"><b>Về độ chính xác:</b> các mã dưới đây được đọc bằng mắt từ ảnh render, sai số ước tính ±5%. Trước khi khoá bộ nhận diện, hãy pick lại bằng công cụ eyedropper trên file gốc độ phân giải cao — đặc biệt với 8 màu brand core.</p>
+  </div>
+</header>
+
+<main>
+
+<section class="wrap">
+  <div class="sec-head"><span class="sec-num">01</span><h2>Màu trích từ ảnh</h2></div>
+  <p class="sec-note">Toàn bộ 16 vùng màu phân biệt được trong ảnh, kể cả vật liệu nền. Đây là dữ liệu thô — chưa phải bảng màu thương hiệu.</p>
+  <div class="extract">
+    <div class="ex"><div class="chip" style="background:#1E3A66;color:#fff"><span class="idx">01</span></div><div class="meta"><span class="where">Chữ "HOMI", viền nhà, tagline</span><span class="hex">#1E3A66 · 30,58,102</span></div></div>
+    <div class="ex"><div class="chip" style="background:#1BA3BE;color:#122544"><span class="idx">02</span></div><div class="meta"><span class="where">Chữ "365", trái tim</span><span class="hex">#1BA3BE · 27,163,190</span></div></div>
+    <div class="ex"><div class="chip" style="background:#1B3358;color:#fff"><span class="idx">03</span></div><div class="meta"><span class="where">Chân quầy lễ tân</span><span class="hex">#1B3358 · 27,51,88</span></div></div>
+    <div class="ex"><div class="chip" style="background:#1F2E4D;color:#fff"><span class="idx">04</span></div><div class="meta"><span class="where">Đồng phục điều dưỡng</span><span class="hex">#1F2E4D · 31,46,77</span></div></div>
+    <div class="ex"><div class="chip" style="background:#2E6FB7;color:#fff"><span class="idx">05</span></div><div class="meta"><span class="where">Dây đeo thẻ nhân viên</span><span class="hex">#2E6FB7 · 46,111,183</span></div></div>
+    <div class="ex"><div class="chip" style="background:#D6E6EF;color:#1B3358"><span class="idx">06</span></div><div class="meta"><span class="where">Panel tường xanh nhạt</span><span class="hex">#D6E6EF · 214,230,239</span></div></div>
+    <div class="ex"><div class="chip" style="background:#C3DCE8;color:#1B3358"><span class="idx">07</span></div><div class="meta"><span class="where">Hoạ tiết vòng tròn trên tường</span><span class="hex">#C3DCE8 · 195,220,232</span></div></div>
+    <div class="ex"><div class="chip" style="background:#F2F4F3;color:#2B303A"><span class="idx">08</span></div><div class="meta"><span class="where">Tường chính (off-white)</span><span class="hex">#F2F4F3 · 242,244,243</span></div></div>
+    <div class="ex"><div class="chip" style="background:#FAF8F3;color:#2B303A"><span class="idx">09</span></div><div class="meta"><span class="where">Mặt trước quầy</span><span class="hex">#FAF8F3 · 250,248,243</span></div></div>
+    <div class="ex"><div class="chip" style="background:#C9A57A;color:#2B303A"><span class="idx">10</span></div><div class="meta"><span class="where">Mặt bàn, khung gỗ ghế</span><span class="hex">#C9A57A · 201,165,122</span></div></div>
+    <div class="ex"><div class="chip" style="background:#D8B98F;color:#2B303A"><span class="idx">11</span></div><div class="meta"><span class="where">Ốp gỗ tường bên trái</span><span class="hex">#D8B98F · 216,185,143</span></div></div>
+    <div class="ex"><div class="chip" style="background:#E0CDB4;color:#2B303A"><span class="idx">12</span></div><div class="meta"><span class="where">Sàn gỗ</span><span class="hex">#E0CDB4 · 224,205,180</span></div></div>
+    <div class="ex"><div class="chip" style="background:#A8C4D8;color:#1B3358"><span class="idx">13</span></div><div class="meta"><span class="where">Nệm ghế chờ</span><span class="hex">#A8C4D8 · 168,196,216</span></div></div>
+    <div class="ex"><div class="chip" style="background:#B9CFE0;color:#1B3358"><span class="idx">14</span></div><div class="meta"><span class="where">Áo khách hàng</span><span class="hex">#B9CFE0 · 185,207,224</span></div></div>
+    <div class="ex"><div class="chip" style="background:#4A7C59;color:#fff"><span class="idx">15</span></div><div class="meta"><span class="where">Cây xanh trang trí</span><span class="hex">#4A7C59 · 74,124,89</span></div></div>
+    <div class="ex"><div class="chip" style="background:#4FB8CE;color:#122544"><span class="idx">16</span></div><div class="meta"><span class="where">Màn hình check-in</span><span class="hex">#4FB8CE · 79,184,206</span></div></div>
+  </div>
+</section>
+
+<section class="wrap">
+  <div class="sec-head"><span class="sec-num">02</span><h2>Bảng màu thương hiệu</h2></div>
+  <p class="sec-note">16 màu thô rút gọn còn 19 token có vai trò rõ ràng. Bốn màu functional đã được làm tối so với bản đọc trực tiếp từ ảnh để đạt tỷ lệ tương phản 4.5:1 trên nền trắng.</p>
+
+  <div class="ramp-block">
+    <div class="ramp-label"><h3>Navy — màu chủ đạo</h3><span>Logo, điều hướng, nút chính, tiêu đề</span></div>
+    <div class="ramp">
+      <div class="step" style="background:#122544;color:#E6ECF2"><span class="tok">--navy-900</span><span class="use">Footer, heading lớn</span><span class="hx">#122544</span><span class="rgb">18, 37, 68</span></div>
+      <div class="step" style="background:#1B3358;color:#fff"><span class="tok">--navy-700</span><span class="use">Trạng thái hover của nút chính</span><span class="hx">#1B3358</span><span class="rgb">27, 51, 88</span></div>
+      <div class="step" style="background:#1E3A66;color:#fff"><span class="tok">--navy-600 · PRIMARY</span><span class="use">Logo, nav, nút chính</span><span class="hx">#1E3A66</span><span class="rgb">30, 58, 102</span></div>
+      <div class="step" style="background:#4A6A9E;color:#fff"><span class="tok">--navy-400</span><span class="use">Viền active, icon phụ</span><span class="hx">#4A6A9E</span><span class="rgb">74, 106, 158</span></div>
+    </div>
+  </div>
+
+  <div class="ramp-block">
+    <div class="ramp-label"><h3>Teal — màu điểm nhấn</h3><span>Liên kết, badge, mảng nền y tế</span></div>
+    <div class="ramp">
+      <div class="step" style="background:#0F7F96;color:#fff"><span class="tok">--teal-700</span><span class="use">Chữ teal trên nền sáng · nút teal</span><span class="hx">#0F7F96</span><span class="rgb">15, 127, 150</span></div>
+      <div class="step" style="background:#1BA3BE;color:#122544"><span class="tok">--teal-500 · ACCENT</span><span class="use">Số "365", mảng lớn, icon</span><span class="hx">#1BA3BE</span><span class="rgb">27, 163, 190</span></div>
+      <div class="step" style="background:#4FB8CE;color:#122544"><span class="tok">--teal-300</span><span class="use">Hover, highlight</span><span class="hx">#4FB8CE</span><span class="rgb">79, 184, 206</span></div>
+      <div class="step" style="background:#D6E6EF;color:#1B3358"><span class="tok">--teal-100</span><span class="use">Nền section, card sức khoẻ</span><span class="hx">#D6E6EF</span><span class="rgb">214, 230, 239</span></div>
+    </div>
+  </div>
+
+  <div class="ramp-block">
+    <div class="ramp-label"><h3>Neutral</h3><span>Nền, đường kẻ, chữ</span></div>
+    <div class="ramp">
+      <div class="step" style="background:#FFFFFF;color:#2B303A;box-shadow:inset 0 0 0 1px rgba(140,150,165,.35)"><span class="tok">--white</span><span class="use">Nền chính, nền card</span><span class="hx">#FFFFFF</span><span class="rgb">255, 255, 255</span></div>
+      <div class="step" style="background:#FAF8F3;color:#2B303A"><span class="tok">--warm-50</span><span class="use">Nền section xen kẽ</span><span class="hx">#FAF8F3</span><span class="rgb">250, 248, 243</span></div>
+      <div class="step" style="background:#F2F4F3;color:#2B303A"><span class="tok">--gray-100</span><span class="use">Divider, nền input</span><span class="hx">#F2F4F3</span><span class="rgb">242, 244, 243</span></div>
+      <div class="step" style="background:#8A93A3;color:#fff"><span class="tok">--gray-400</span><span class="use">Chữ phụ, placeholder</span><span class="hx">#8A93A3</span><span class="rgb">138, 147, 163</span></div>
+      <div class="step" style="background:#2B303A;color:#fff"><span class="tok">--gray-800</span><span class="use">Chữ nội dung</span><span class="hx">#2B303A</span><span class="rgb">43, 48, 58</span></div>
+    </div>
+  </div>
+
+  <div class="ramp-block">
+    <div class="ramp-label"><h3>Accent phụ</h3><span>Chỉ dùng cho ảnh, minh hoạ, empty state — không dùng cho chữ</span></div>
+    <div class="ramp">
+      <div class="step" style="background:#D8B98F;color:#2B303A"><span class="tok">--wood-300</span><span class="use">Nội thất trong illustration</span><span class="hx">#D8B98F</span><span class="rgb">216, 185, 143</span></div>
+      <div class="step" style="background:#A8C4D8;color:#1B3358"><span class="tok">--sky-200</span><span class="use">Nền ảnh, trạng thái rỗng</span><span class="hx">#A8C4D8</span><span class="rgb">168, 196, 216</span></div>
+    </div>
+  </div>
+
+  <div class="ramp-block">
+    <div class="ramp-label"><h3>Functional</h3><span>Đã hiệu chỉnh đạt AA trên nền trắng</span></div>
+    <div class="ramp">
+      <div class="step" style="background:#2F7A48;color:#fff"><span class="tok">--success</span><span class="use">Đặt lịch thành công, đã thanh toán</span><span class="hx">#2F7A48</span><span class="rgb">47, 122, 72</span></div>
+      <div class="step" style="background:#965C0A;color:#fff"><span class="tok">--warning</span><span class="use">Sắp đến hạn tái khám</span><span class="hx">#965C0A</span><span class="rgb">150, 92, 10</span></div>
+      <div class="step" style="background:#C0392B;color:#fff"><span class="tok">--error</span><span class="use">Chỉ số bất thường, lỗi form</span><span class="hx">#C0392B</span><span class="rgb">192, 57, 43</span></div>
+      <div class="step" style="background:#0F7F96;color:#fff"><span class="tok">--info</span><span class="use">Ghi chú, hướng dẫn</span><span class="hx">#0F7F96</span><span class="rgb">15, 127, 150</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap">
+  <div class="sec-head"><span class="sec-num">03</span><h2>Kiểm tra tương phản</h2></div>
+  <p class="sec-note">Ngưỡng WCAG 2.1 AA: chữ thường ≥ 4.5:1, chữ lớn (≥ 18.5px đậm hoặc 24px thường) ≥ 3:1.</p>
+  <div class="tablewrap">
+    <table>
+      <thead><tr><th>Cặp màu</th><th>Vai trò</th><th>Tỷ lệ</th><th>Kết luận</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><div class="pair"><span class="dot" style="background:#1E3A66"></span><span class="dot" style="background:#FFFFFF"></span> navy-600 / trắng</div></td>
+          <td>Chữ chính, nút primary</td><td class="ratio">10.87</td>
+          <td><span class="verdict v-pass">AA · AAA</span></td>
+        </tr>
+        <tr>
+          <td><div class="pair"><span class="dot" style="background:#1B3358"></span><span class="dot" style="background:#FFFFFF"></span> navy-700 / trắng</div></td>
+          <td>Hover nút primary</td><td class="ratio">12.66</td>
+          <td><span class="verdict v-pass">AA · AAA</span></td>
+        </tr>
+        <tr>
+          <td><div class="pair"><span class="dot" style="background:#4A6A9E"></span><span class="dot" style="background:#FFFFFF"></span> navy-400 / trắng</div></td>
+          <td>Icon phụ, chữ phụ</td><td class="ratio">5.46</td>
+          <td><span class="verdict v-pass">AA</span></td>
+        </tr>
+        <tr>
+          <td><div class="pair"><span class="dot" style="background:#0F7F96"></span><span class="dot" style="background:#FFFFFF"></span> teal-700 / trắng</div></td>
+          <td>Chữ teal, link</td><td class="ratio">4.61</td>
+          <td><span class="verdict v-pass">AA</span></td>
+        </tr>
+        <tr>
+          <td><div class="pair"><span class="dot" style="background:#1BA3BE"></span><span class="dot" style="background:#FFFFFF"></span> teal-500 / trắng</div></td>
+          <td>Không dùng cho chữ</td><td class="ratio">2.99</td>
+          <td><span class="verdict v-fail">Trượt</span></td>
+        </tr>
+        <tr>
+          <td><div class="pair"><span class="dot" style="background:#122544"></span><span class="dot" style="background:#1BA3BE"></span> navy-900 / teal-500</div></td>
+          <td>Chữ trên nút teal sáng</td><td class="ratio">5.13</td>
+          <td><span class="verdict v-pass">AA</span></td>
+        </tr>
+        <tr>
+          <td><div class="pair"><span class="dot" style="background:#4FB8CE"></span><span class="dot" style="background:#FFFFFF"></span> teal-300 / trắng</div></td>
+          <td>Chỉ dùng làm mảng nền</td><td class="ratio">2.31</td>
+          <td><span class="verdict v-fail">Trượt</span></td>
+        </tr>
+        <tr>
+          <td><div class="pair"><span class="dot" style="background:#2B303A"></span><span class="dot" style="background:#D6E6EF"></span> gray-800 / teal-100</div></td>
+          <td>Chữ trên nền section xanh</td><td class="ratio">10.36</td>
+          <td><span class="verdict v-pass">AA · AAA</span></td>
+        </tr>
+        <tr>
+          <td><div class="pair"><span class="dot" style="background:#2B303A"></span><span class="dot" style="background:#FAF8F3"></span> gray-800 / warm-50</div></td>
+          <td>Chữ trên nền ngà</td><td class="ratio">12.47</td>
+          <td><span class="verdict v-pass">AA · AAA</span></td>
+        </tr>
+        <tr>
+          <td><div class="pair"><span class="dot" style="background:#8A93A3"></span><span class="dot" style="background:#FFFFFF"></span> gray-400 / trắng</div></td>
+          <td>Placeholder, caption</td><td class="ratio">3.12</td>
+          <td><span class="verdict v-large">Chỉ chữ lớn</span></td>
+        </tr>
+        <tr>
+          <td><div class="pair"><span class="dot" style="background:#2F7A48"></span><span class="dot" style="background:#FFFFFF"></span> success / trắng</div></td>
+          <td>Nhãn thành công</td><td class="ratio">5.21</td>
+          <td><span class="verdict v-pass">AA</span></td>
+        </tr>
+        <tr>
+          <td><div class="pair"><span class="dot" style="background:#965C0A"></span><span class="dot" style="background:#FFFFFF"></span> warning / trắng</div></td>
+          <td>Nhãn cảnh báo</td><td class="ratio">5.58</td>
+          <td><span class="verdict v-pass">AA</span></td>
+        </tr>
+        <tr>
+          <td><div class="pair"><span class="dot" style="background:#C0392B"></span><span class="dot" style="background:#FFFFFF"></span> error / trắng</div></td>
+          <td>Thông báo lỗi</td><td class="ratio">5.44</td>
+          <td><span class="verdict v-pass">AA</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <ul class="rules">
+    <li><b>Không đặt chữ màu <code>--teal-500</code> hay <code>--teal-300</code> trên nền trắng.</b> Chữ teal phải dùng <code>--teal-700</code>. Hai bậc sáng chỉ dành cho mảng nền, icon lớn và đồ hoạ.</li>
+    <li><b>Nút nền teal-500 phải dùng chữ <code>--navy-900</code>, không dùng chữ trắng</b> (chữ trắng chỉ đạt 2.99:1). Nếu bắt buộc chữ trắng, đổi nền sang <code>--teal-700</code>.</li>
+    <li><b><code>--gray-400</code> không dùng cho nội dung quan trọng.</b> Chỉ đạt ngưỡng chữ lớn — dành cho caption, placeholder, timestamp.</li>
+    <li><b>Không dùng màu đơn thuần để truyền tải trạng thái.</b> Nhãn "Bất thường" cần cả màu đỏ lẫn chữ hoặc icon — quan trọng với nhóm người dùng cao tuổi và người rối loạn sắc giác.</li>
+    <li><b>Tỷ lệ dùng màu 60/30/10:</b> 60% neutral (trắng, warm-50), 30% navy, 10% teal. Teal mất tác dụng điểm nhấn nếu phủ quá rộng.</li>
+  </ul>
+</section>
+
+<section class="wrap">
+  <div class="sec-head"><span class="sec-num">04</span><h2>Ứng dụng mẫu</h2></div>
+  <p class="sec-note">Các thành phần dưới đây dựng bằng đúng token đã khai báo, hiển thị ở chế độ sáng để đối chiếu khi triển khai.</p>
+  <div class="spec-grid">
+    <div class="spec">
+      <h4>Nút bấm</h4>
+      <div class="body" style="background:#FFFFFF">
+        <div class="btnrow">
+          <button class="btn btn-primary" type="button">Đặt lịch khám</button>
+          <button class="btn btn-accent" type="button">Gọi bác sĩ</button>
+          <button class="btn btn-ghost" type="button">Xem hồ sơ</button>
+        </div>
+      </div>
+    </div>
+    <div class="spec">
+      <h4>Thẻ chỉ số</h4>
+      <div class="body" style="background:#F2F4F3">
+        <div class="card-demo">
+          <span class="k">Huyết áp trung bình · 7 ngày</span>
+          <div class="n">128/82</div>
+          <p class="d">mmHg — cao hơn tuần trước 4 điểm</p>
+        </div>
+      </div>
+    </div>
+    <div class="spec">
+      <h4>Nhãn trạng thái</h4>
+      <div class="body" style="background:#FFFFFF">
+        <div class="pills">
+          <span class="pill p-ok">✓ Đã thanh toán</span>
+          <span class="pill p-warn">! Sắp tái khám</span>
+          <span class="pill p-err">✕ Chỉ số bất thường</span>
+          <span class="pill p-info">i Cần nhịn ăn</span>
+        </div>
+      </div>
+    </div>
+    <div class="spec">
+      <h4>Thang chữ trên nền warm-50</h4>
+      <div class="body ts-bg">
+        <div class="typescale">
+          <div class="ts1">Chăm sóc sức khoẻ gia đình</div>
+          <div class="ts2">Gói khám định kỳ 12 tháng</div>
+          <div class="ts3">Điều dưỡng đến tận nhà lấy mẫu, kết quả trả về ứng dụng trong 24 giờ.</div>
+          <div class="ts4">Cập nhật 04.09.2026 · HOMI365</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="wrap">
+  <div class="sec-head"><span class="sec-num">05</span><h2>CSS variables</h2></div>
+  <p class="sec-note">Dán vào file token gốc. Nhóm semantic ở cuối cho phép đổi toàn bộ giao diện chỉ bằng cách trỏ lại token.</p>
+  <div class="codehead"><span>tokens.css</span><button id="copy" type="button">Sao chép</button></div>
+  <pre id="code"><span class="c">/* HOMI365 — design tokens */</span>
+:root{
+  <span class="c">/* Brand — navy */</span>
+  --navy-900:#122544;
+  --navy-700:#1B3358;
+  --navy-600:#1E3A66;
+  --navy-400:#4A6A9E;
+
+  <span class="c">/* Brand — teal */</span>
+  --teal-700:#0F7F96;
+  --teal-500:#1BA3BE;
+  --teal-300:#4FB8CE;
+  --teal-100:#D6E6EF;
+
+  <span class="c">/* Neutral */</span>
+  --white:#FFFFFF;
+  --warm-50:#FAF8F3;
+  --gray-100:#F2F4F3;
+  --gray-400:#8A93A3;
+  --gray-800:#2B303A;
+
+  <span class="c">/* Accent — chỉ dùng cho đồ hoạ */</span>
+  --wood-300:#D8B98F;
+  --sky-200:#A8C4D8;
+
+  <span class="c">/* Functional — đã hiệu chỉnh đạt AA */</span>
+  --success:#2F7A48;
+  --warning:#965C0A;
+  --error:#C0392B;
+  --info:#0F7F96;
+
+  <span class="c">/* Semantic */</span>
+  --bg:var(--white);
+  --bg-alt:var(--warm-50);
+  --bg-tint:var(--teal-100);
+  --text:var(--gray-800);
+  --text-muted:var(--gray-400);
+  --text-invert:var(--white);
+  --primary:var(--navy-600);
+  --primary-hover:var(--navy-700);
+  --on-primary:var(--white);
+  --accent:var(--teal-700);
+  --accent-hover:var(--teal-500);
+  --on-accent:var(--white);
+  --border:var(--gray-100);
+  --border-strong:var(--navy-400);
+  --focus-ring:var(--teal-700);
+}</pre>
+</section>
+
+</main>
+
+<footer class="wrap">
+  Bảng màu HOMI365 · dựng từ ảnh quầy lễ tân, 04.09.2026. Mã màu là ước lượng thị giác — xác nhận lại bằng eyedropper trước khi khoá bộ nhận diện.
+</footer>
+
+<script>
+document.getElementById('copy').addEventListener('click', function(){
+  var txt = document.getElementById('code').innerText;
+  var btn = this;
+  navigator.clipboard.writeText(txt).then(function(){
+    btn.textContent = 'Đã chép';
+    setTimeout(function(){ btn.textContent = 'Sao chép'; }, 1800);
+  }).catch(function(){
+    btn.textContent = 'Chọn thủ công';
+    setTimeout(function(){ btn.textContent = 'Sao chép'; }, 1800);
+  });
+});
+</script>
