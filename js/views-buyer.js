@@ -384,8 +384,21 @@ const Buyer = {
     if (el.reason === 'pending') return `${head('clock', 'Hồ sơ thành viên đang chờ duyệt', 'Trạng thái: ' + UI.label('approval', el.registration.status) + '. Chúng tôi sẽ gửi email khi hồ sơ được duyệt.')}<div class="actions"><a class="btn btn-secondary btn-lg btn-block" href="#A-06?state=pending&phone=${UI.esc(order.phone)}">Xem trạng thái hồ sơ</a></div>`;
     return `${head('check-circle', 'Đơn hàng thành công', 'Mã kích hoạt và hướng dẫn đã được gửi qua SMS/email. Bạn có thể đăng ký thành viên sau tại mục Đăng nhập thành viên khi đủ điều kiện.')}<div class="actions"><button class="btn btn-secondary btn-lg btn-block" onclick="Buyer.a03Later('${order.id}', true)">Thoát ra</button></div>`;
   },
+  /** Popup mời đăng ký thành viên — hiện 1 lần/đơn ngay khi vào A-03 PAID (LP-6). */
+  regPrompt: function(order) {
+    const el = Store.registrationEligibility(order.phone); if (!el.ok) return;
+    const shown = Store.s().regPromptShown || []; if (shown.includes(order.id)) return;
+    shown.push(order.id); Store.s().regPromptShown = shown; Store.save();
+    const ref = el.referrer;
+    UI.modal({ title: 'Trở thành thành viên HOMI365?', sticky: true,
+      body: `<div class="text-center mb-3"><span class="result-icon is-info" style="margin:0 auto">${UI.icon('gift', 32)}</span></div>
+        <p>Bạn được <strong>${UI.esc(ref.fullName)}</strong> (hạng ${RULES.rank(ref.rank).label}) mời tham gia chương trình thành viên. Đăng ký hồ sơ để nhận <strong>link bán hàng cá nhân</strong> và <strong>hoa hồng theo hạng</strong> cho mỗi gói bán được.</p>
+        <ul class="pkg-benefits mt-3"><li>${UI.icon('check', 16)}<span>Thông tin điền sẵn từ đơn hàng, chỉ cần thêm tài khoản ngân hàng và mật khẩu.</span></li><li>${UI.icon('check', 16)}<span>Hồ sơ được duyệt trong 1–2 ngày làm việc, nhận email kích hoạt.</span></li><li>${UI.icon('check', 16)}<span>Không đăng ký vẫn giữ nguyên đơn hàng và mã kích hoạt.</span></li></ul>`,
+      foot: `<button class="btn btn-secondary btn-lg" onclick="UI.closeModal()">Thoát ra, để sau</button><a class="btn btn-primary btn-lg" href="#A-06?order=${UI.esc(order.id)}" onclick="UI.closeModal()">${UI.icon('user', 18)} Đăng ký thành viên</a>` });
+  },
   /** (a) PAID — mã đơn + mã kích hoạt + mời đăng ký thành viên */
   a03Paid: function(order, pkg) {
+    App.after(() => setTimeout(() => this.regPrompt(order), 400));
     return `<div class="buyer-split buyer-split-rev">
       <div class="card"><div class="card-body">
         <div class="result-hero"><div class="result-icon is-success">${UI.icon('check-circle', 40)}</div><h1>Thanh toán thành công</h1><p>Cảm ơn bạn đã mua ${UI.esc(pkg.name)}. Đồng hồ HW01 sẽ được giao tới địa chỉ đã đăng ký.</p></div>
