@@ -108,9 +108,16 @@
 .feature[open] summary::after { content: '\2212'; }
 .feature ul { padding: 0 0 12px 18px; font-size: var(--fs-sm); display: grid; gap: 4px; }
 
-/* A-01: mobile hiện gói + giá → form → giới thiệu; desktop giữ 2 cột */
-.mobile-only { display: none; }
-@media (max-width: 899px) { .mobile-only { display: block; } .desktop-only { display: none; } .a01-split > aside { order: 1; } }
-
+/* A-01: lưới 2 hàng × 2 cột — hàng 1 (người giới thiệu | gói + giá) cao bằng nhau,
+   hàng 2 (form | giới thiệu sản phẩm). Mobile: gói → người giới thiệu → form → giới thiệu */
+.a01-grid { display: grid; grid-template-columns: 1fr; gap: 20px; }
+.a01-grid .pkg { height: 100%; }
+.a01-ref .card { height: 100%; display: flex; align-items: center; }
+.a01-ref .card-body { width: 100%; }
+@media (max-width: 899px) { .a01-pkg { order: 0; } .a01-ref { order: 1; } .a01-form { order: 2; } .a01-intro { order: 3; } }
+@media (min-width: 900px) {
+  .a01-grid { grid-template-columns: 7fr 5fr; gap: 24px 28px; grid-template-areas: "ref pkg" "form intro"; align-items: stretch; }
+  .a01-ref { grid-area: ref; } .a01-pkg { grid-area: pkg; } .a01-form { grid-area: form; } .a01-intro { grid-area: intro; }
+}
 #feat-toggle .ico { transition: transform var(--transition); }
 #feat-toggle.is-open .ico { transform: rotate(180deg); }

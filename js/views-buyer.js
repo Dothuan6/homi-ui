@@ -124,15 +124,10 @@ const Buyer = {
     // (a) Form · (b) OTP inline · (c) lỗi field · (g) SMS lỗi
     const draft = Store.s().buyerDraft || {};
     const html = `
-      <div class="buyer-split buyer-split-rev a01-split">
-        <aside class="buyer-side buyer-side-static stack">
-        <div class="desktop-only">${this.pkgHeader(pkg)}</div>
-        ${this.productIntro(pkg)}
-        </aside>
-
-        <div class="stack"><div class="mobile-only">${this.pkgHeader(pkg, { tag: 'div' })}</div>
-        <div class="card card-tint"><div class="card-body ref-card"><span class="avatar" aria-hidden="true">${UI.esc(RULES.initials(seller.fullName))}</span><div><div class="text-sm text-muted">Người giới thiệu</div><div class="text-strong">${UI.esc(seller.fullName)}</div><div class="text-caption mono">Mã ${UI.esc(seller.refCode)}</div></div></div></div>
-        <div class="card" id="a01-card">
+      <div class="a01-grid">
+        <div class="a01-pkg">${this.pkgHeader(pkg)}</div>
+        <div class="a01-ref"><div class="card card-tint"><div class="card-body ref-card"><span class="avatar" aria-hidden="true">${UI.esc(RULES.initials(seller.fullName))}</span><div><div class="text-sm text-muted">Người giới thiệu</div><div class="text-strong">${UI.esc(seller.fullName)}</div><div class="text-caption mono">Mã ${UI.esc(seller.refCode)}</div></div></div></div></div>
+        <div class="card a01-form" id="a01-card">
           <div class="card-head"><h2>Thông tin nhận hàng</h2><span class="text-sm text-muted">Bước 1/3</span></div>
           <div class="card-body" id="a01-body">
             <form id="a01-form" novalidate onsubmit="Buyer.a01Submit(event)">
@@ -147,7 +142,8 @@ const Buyer = {
               <p class="text-caption text-center mt-3">Bằng việc tiếp tục, bạn đồng ý nhận SMS xác thực từ HOMI365.</p>
             </form>
           </div>
-        </div></div>
+        </div>
+        <div class="a01-intro stack">${this.productIntro(pkg)}</div>
       </div>`;
     this._a01State = state;
     return App.buyerShell(html, { showRef: false });
