@@ -111,3 +111,6 @@
 /* A-01: mobile hiện gói + giá → form → giới thiệu; desktop giữ 2 cột */
 .mobile-only { display: none; }
 @media (max-width: 899px) { .mobile-only { display: block; } .desktop-only { display: none; } .a01-split > aside { order: 1; } }
+
+#feat-toggle .ico { transition: transform var(--transition); }
+#feat-toggle.is-open .ico { transform: rotate(180deg); }

@@ -46,10 +46,18 @@ const Buyer = {
             <ul class="pkg-benefits">${pkg.benefits.map(b => `<li>${UI.icon('check', 16)}<span>${UI.esc(b)}</span></li>`).join('')}</ul>
           </div>
         </div>
-        <div class="card"><div class="card-head"><h2 style="font-size:var(--fs-lg)">Chi tiết tính năng gói ${UI.esc(pkg.id)}</h2></div><div class="card-body">
+        <div class="card"><div class="card-head"><h2 style="font-size:var(--fs-lg)">Chi tiết tính năng gói ${UI.esc(pkg.id)}</h2>
+          <button class="btn btn-ghost btn-sm" id="feat-toggle" aria-expanded="false" aria-controls="feat-body" onclick="Buyer.toggleFeatures()">Xem chi tiết ${UI.icon('chevron-down', 18)}</button></div>
+          <div class="card-body" id="feat-body" hidden>
           <p class="text-sm text-muted">${UI.esc(pc.intro)}</p>
           <div class="feature-list mt-3">${pc.features.map((f, i) => `<details class="feature" ${i === 0 ? 'open' : ''}><summary>${i + 1}. ${UI.esc(f.title)}</summary><ul>${f.items.map(t => `<li>${UI.esc(t)}</li>`).join('')}</ul></details>`).join('')}</div>
         </div></div>`;
+  },
+  toggleFeatures: function() {
+    const body = document.getElementById('feat-body'); const btn = document.getElementById('feat-toggle'); if (!body || !btn) return;
+    const open = body.hidden; body.hidden = !open; btn.setAttribute('aria-expanded', String(open));
+    btn.innerHTML = (open ? 'Thu gọn ' : 'Xem chi tiết ') + UI.icon(open ? 'chevron-down' : 'chevron-down', 18);
+    btn.classList.toggle('is-open', open);
   },
   galleryTo: function(i) {
     const pkg = Store.activePackage(); const pc = CONFIG.productContent[pkg.id]; if (!pc) return;
@@ -119,8 +127,8 @@ const Buyer = {
       <div class="buyer-split buyer-split-rev a01-split">
         <aside class="buyer-side buyer-side-static stack">
         <div class="desktop-only">${this.pkgHeader(pkg)}</div>
-        ${this.productIntro(pkg)}
         <div class="card card-tint"><div class="card-body ref-card"><span class="avatar" aria-hidden="true">${UI.esc(RULES.initials(seller.fullName))}</span><div><div class="text-sm text-muted">Người giới thiệu</div><div class="text-strong">${UI.esc(seller.fullName)}</div><div class="text-caption mono">Mã ${UI.esc(seller.refCode)}</div></div></div></div>
+        ${this.productIntro(pkg)}
         </aside>
 
         <div class="stack"><div class="mobile-only">${this.pkgHeader(pkg, { tag: 'div' })}</div>
