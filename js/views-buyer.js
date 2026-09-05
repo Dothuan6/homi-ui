@@ -127,11 +127,11 @@ const Buyer = {
       <div class="buyer-split buyer-split-rev a01-split">
         <aside class="buyer-side buyer-side-static stack">
         <div class="desktop-only">${this.pkgHeader(pkg)}</div>
-        <div class="card card-tint"><div class="card-body ref-card"><span class="avatar" aria-hidden="true">${UI.esc(RULES.initials(seller.fullName))}</span><div><div class="text-sm text-muted">Người giới thiệu</div><div class="text-strong">${UI.esc(seller.fullName)}</div><div class="text-caption mono">Mã ${UI.esc(seller.refCode)}</div></div></div></div>
         ${this.productIntro(pkg)}
         </aside>
 
         <div class="stack"><div class="mobile-only">${this.pkgHeader(pkg, { tag: 'div' })}</div>
+        <div class="card card-tint"><div class="card-body ref-card"><span class="avatar" aria-hidden="true">${UI.esc(RULES.initials(seller.fullName))}</span><div><div class="text-sm text-muted">Người giới thiệu</div><div class="text-strong">${UI.esc(seller.fullName)}</div><div class="text-caption mono">Mã ${UI.esc(seller.refCode)}</div></div></div></div>
         <div class="card" id="a01-card">
           <div class="card-head"><h2>Thông tin nhận hàng</h2><span class="text-sm text-muted">Bước 1/3</span></div>
           <div class="card-body" id="a01-body">
