@@ -1,5 +1,5 @@
 /**
- * Nhóm A · Người mua — A-01 → A-05 (US-01 → US-10, US-24)
+ * Nhóm A · Người mua — A-01 → A-06 (spec v3: LP-1…6, 7.1, 7.2)
  * Mỗi màn có đủ trạng thái phụ theo kế hoạch redesign mục 3.
  * Trạng thái mock bằng query ?state= (xem Demo navigator).
  */
@@ -93,7 +93,7 @@ const Buyer = {
         <div class="result-icon is-error" style="margin:0 auto">${UI.icon('external', 34)}</div>
         <div class="error-code">${locked ? 'LINK KHÔNG CÒN HIỆU LỰC' : 'LINK KHÔNG HỢP LỆ'}</div>
         <h1>${locked ? 'Link giới thiệu này đã ngừng hoạt động' : 'Link giới thiệu không hợp lệ'}</h1>
-        <p class="text-muted">${locked ? 'Tài khoản người giới thiệu đang bị tạm khoá. Vui lòng liên hệ người đã gửi link cho bạn hoặc bộ phận hỗ trợ.' : 'Gói sản phẩm chỉ mua được qua link giới thiệu của seller HOMI365. Vui lòng mở lại đúng link bạn nhận được (dạng <span class="mono">' + UI.esc(CONFIG.brand.baseUrl) + '/r/…</span>).'}</p>
+        <p class="text-muted">${locked ? 'Tài khoản người giới thiệu đang bị tạm khoá. Vui lòng liên hệ người đã gửi link cho bạn hoặc bộ phận hỗ trợ.' : 'Gói sản phẩm chỉ mua được qua link giới thiệu của thành viên HOMI365. Vui lòng mở lại đúng link bạn nhận được (dạng <span class="mono">' + UI.esc(CONFIG.brand.baseUrl) + '/r/…</span>).'}</p>
         <div class="alert alert-neutral" style="text-align:left">${UI.icon('phone', 20)}<div>Hỗ trợ: <strong>${UI.esc(CONFIG.brand.supportHotline)}</strong> (${UI.esc(CONFIG.brand.supportHours)})</div></div>
         <div class="actions actions-row"><a class="btn btn-secondary btn-lg" href="#A-04">${UI.icon('search', 18)} Tra cứu đơn hàng đã mua</a><a class="btn btn-primary btn-lg" href="#HOME">Về trang giới thiệu prototype</a></div>
       </div></div>`, { narrow: true });
@@ -133,6 +133,7 @@ const Buyer = {
             <form id="a01-form" novalidate onsubmit="Buyer.a01Submit(event)">
               ${UI.field({ id: 'fullName', label: 'Họ và tên', required: true, placeholder: 'Nguyễn Văn A', value: draft.fullName, attrs: 'autocomplete="name"' })}
               ${UI.field({ id: 'phone', label: 'Số điện thoại', required: true, type: 'tel', placeholder: '0912 345 678', value: draft.phone, mono: true, hint: 'Dùng để nhận mã OTP, mã kích hoạt và đăng nhập sau này.', attrs: 'autocomplete="tel" inputmode="numeric"' })}
+              ${UI.field({ id: 'email', label: 'Email', required: true, type: 'email', placeholder: 'ban@email.com', value: draft.email, hint: 'Nhận xác nhận đơn hàng và thông tin thành viên.', attrs: 'autocomplete="email"' })}
               ${UI.field({ id: 'address', label: 'Địa chỉ nhận hàng', required: true, type: 'textarea', rows: 2, placeholder: 'Số nhà, đường, phường/xã, tỉnh/thành phố', value: draft.address, attrs: 'autocomplete="street-address"' })}
               ${UI.field({ id: 'note', label: 'Ghi chú', type: 'textarea', rows: 2, placeholder: 'Ví dụ: giao giờ hành chính, gọi trước khi giao…', value: draft.note })}
               <div class="qty-fixed mt-4"><span>Số lượng</span><strong>1 gói (cố định)</strong></div>
@@ -151,15 +152,16 @@ const Buyer = {
 
   a01Validate: function() {
     let ok = true;
-    const fullName = UI.val('fullName'); const phoneRaw = UI.val('phone'); const address = UI.val('address');
-    UI.setError('fullName', ''); UI.setError('phone', ''); UI.setError('address', '');
+    const fullName = UI.val('fullName'); const phoneRaw = UI.val('phone'); const address = UI.val('address'); const email = UI.val('email');
+    UI.setError('fullName', ''); UI.setError('phone', ''); UI.setError('address', ''); UI.setError('email', '');
+    if (!RULES.isEmail(email)) { UI.setError('email', email ? 'Email không đúng định dạng.' : 'Vui lòng nhập email.'); ok = false; }
     if (fullName.length < 2) { UI.setError('fullName', 'Vui lòng nhập họ và tên.'); ok = false; }
     const phone = RULES.normalizePhone(phoneRaw);
     if (!phoneRaw) { UI.setError('phone', 'Vui lòng nhập số điện thoại.'); ok = false; }
     else if (!phone) { UI.setError('phone', 'Số điện thoại không đúng định dạng (di động Việt Nam 10 số).'); ok = false; }
     if (address.length < 8) { UI.setError('address', 'Vui lòng nhập địa chỉ nhận hàng đầy đủ.'); ok = false; }
     if (!ok) UI.focusFirstError();
-    return ok ? { fullName, phone, address, note: UI.val('note') } : null;
+    return ok ? { fullName, phone, email, address, note: UI.val('note') } : null;
   },
 
   a01Submit: function(e) {
@@ -198,7 +200,7 @@ const Buyer = {
       onVerified: () => {
         Store.s().verifiedPhone = draft.phone; Store.save();
         // BR-03: kiểm tra 1 gói / SĐT SAU OTP, TRƯỚC khi tạo đơn
-        if (RULES.ownsPackage(Store.orders(), draft.phone)) { App.navigate('A-01?state=duplicate'); return; }
+        if (CONFIG.rules.onePackagePerPhone && RULES.ownsPackage(Store.orders(), draft.phone)) { App.navigate('A-01?state=duplicate'); return; }
         Store.createOrder(draft);
         UI.toast('Xác thực thành công. Đã tạo đơn hàng.');
         App.navigate('A-02');
@@ -371,10 +373,19 @@ const Buyer = {
     </dl>`;
   },
 
-  /** (a) PAID — mã đơn + mã kích hoạt (BR-08: người mua đã OTP) + 2 nút */
+  /** Khối mời đăng ký thành viên sau khi PAID (LP-6, 7.2.1): chỉ khi người giới thiệu ≥ Silver. */
+  regCta: function(order) {
+    const el = Store.registrationEligibility(order.phone);
+    const ref = order.sellerId ? Store.user(order.sellerId) : null;
+    const head = (ico, title, desc) => `<div class="row"><span class="result-icon is-info" style="width:44px;height:44px;margin:0">${UI.icon(ico, 22)}</span><div class="grow"><h2 style="font-size:var(--fs-lg)">${title}</h2><p class="text-sm text-muted">${desc}</p></div></div>`;
+    if (el.ok) return `${head('gift', 'Trở thành thành viên HOMI365', `Được ${UI.esc(ref ? ref.fullName : 'người giới thiệu')} (hạng ${RULES.rank(ref.rank).label}) mời tham gia. Đăng ký hồ sơ để nhận link bán hàng cá nhân và hoa hồng theo hạng; hồ sơ được duyệt trong 1–2 ngày làm việc.`)}
+      <div class="actions actions-row"><button class="btn btn-secondary btn-lg" onclick="Buyer.a03Later('${order.id}', true)">Thoát ra</button><a class="btn btn-primary btn-lg" href="#A-06?order=${UI.esc(order.id)}">${UI.icon('user', 18)} Đăng ký thành viên</a></div>`;
+    if (el.reason === 'agent') return `${head('user', 'Bạn đã là thành viên HOMI365', 'Đăng nhập để xem gói, mã kích hoạt và hoa hồng.')}<div class="actions"><a class="btn btn-primary btn-lg btn-block" href="#A-05">Đăng nhập thành viên</a></div>`;
+    if (el.reason === 'pending') return `${head('clock', 'Hồ sơ thành viên đang chờ duyệt', 'Trạng thái: ' + UI.label('approval', el.registration.status) + '. Chúng tôi sẽ gửi email khi hồ sơ được duyệt.')}<div class="actions"><a class="btn btn-secondary btn-lg btn-block" href="#A-06?state=pending&phone=${UI.esc(order.phone)}">Xem trạng thái hồ sơ</a></div>`;
+    return `${head('check-circle', 'Đơn hàng thành công', 'Mã kích hoạt và hướng dẫn đã được gửi qua SMS/email. Bạn có thể đăng ký thành viên sau tại mục Đăng nhập thành viên khi đủ điều kiện.')}<div class="actions"><button class="btn btn-secondary btn-lg btn-block" onclick="Buyer.a03Later('${order.id}', true)">Thoát ra</button></div>`;
+  },
+  /** (a) PAID — mã đơn + mã kích hoạt + mời đăng ký thành viên */
   a03Paid: function(order, pkg) {
-    const existing = Store.userByPhone(order.phone);
-    const isSeller = existing && existing.type === 'seller';
     return `<div class="buyer-split buyer-split-rev">
       <div class="card"><div class="card-body">
         <div class="result-hero"><div class="result-icon is-success">${UI.icon('check-circle', 40)}</div><h1>Thanh toán thành công</h1><p>Cảm ơn bạn đã mua ${UI.esc(pkg.name)}. Đồng hồ HW01 sẽ được giao tới địa chỉ đã đăng ký.</p></div>
@@ -383,24 +394,8 @@ const Buyer = {
         <p class="text-sm text-muted mt-2">Nhập mã này trong ứng dụng HOMI365 trên điện thoại để kích hoạt gói. Mã chỉ dùng được trên 1 thiết bị.</p>
         <div class="mt-4">${this.orderInfoBlock(order)}</div>
       </div></div>
-
-      <aside class="buyer-side"><div class="card card-tint"><div class="card-body">
-        <div class="row"><span class="result-icon is-info" style="width:44px;height:44px;margin:0">${UI.icon('gift', 22)}</span>
-          <div class="grow"><h2 style="font-size:var(--fs-lg)">${isSeller ? 'Bạn đã có tài khoản seller' : 'Tạo tài khoản seller — nhận hoa hồng khi giới thiệu'}</h2>
-          <p class="text-sm text-muted">${isSeller ? 'Đăng nhập để xem gói và mã kích hoạt trong mục Gói của tôi.' : 'Không cần nhập lại thông tin. Bạn sẽ có link giới thiệu riêng và nhận hoa hồng ' + RULES.formatPercent(Store.currentPolicy().tiers[0].rate) + ' cho mỗi đơn F1.'}</p></div></div>
-        <div class="actions actions-row">
-          ${isSeller ? `<a class="btn btn-primary btn-lg" href="#A-05">Đăng nhập seller</a>` : `
-          <button class="btn btn-secondary btn-lg" onclick="Buyer.a03Later('${order.id}', true)">Để sau</button>
-          <button class="btn btn-primary btn-lg" onclick="Buyer.a03CreateSeller('${order.id}')">${UI.icon('user', 18)} Tạo tài khoản</button>`}
-        </div>
-      </div></div></aside>
+      <aside class="buyer-side"><div class="card card-tint"><div class="card-body">${this.regCta(order)}</div></div></aside>
     </div>`;
-  },
-  a03CreateSeller: function(orderId) {
-    const u = Store.createSellerFromOrder(orderId);
-    Store.loginSeller(u.id, false);
-    UI.toast('Đã tạo tài khoản seller. Chào mừng ' + u.fullName + '!');
-    App.navigate('C-01');
   },
   /** (b) Để sau → xác nhận đã gửi SMS */
   a03Later: function(orderOrId, go) {
@@ -410,8 +405,8 @@ const Buyer = {
       <div class="result-icon is-success" style="margin:0 auto">${UI.icon('sms', 34)}</div>
       <h1>Đã gửi mã kích hoạt qua SMS</h1>
       <p class="text-muted">Tin nhắn chứa mã kích hoạt và hướng dẫn sử dụng đã gửi tới <strong class="mono">${UI.esc(RULES.maskPhone(order.phone))}</strong> (trong vòng 1 phút).</p>
-      <div class="alert alert-info" style="text-align:left">${UI.icon('info', 20)}<div>Bạn có thể tạo tài khoản seller bất cứ lúc nào bằng chính số điện thoại này tại mục <strong>Đăng nhập seller</strong>, hoặc tra cứu đơn hàng để xem lại mã.</div></div>
-      <div class="actions actions-row"><a class="btn btn-secondary btn-lg" href="#A-05">Đăng nhập seller</a><a class="btn btn-primary btn-lg" href="#A-04">Tra cứu đơn hàng</a></div>
+      <div class="alert alert-info" style="text-align:left">${UI.icon('info', 20)}<div>Bạn có thể đăng ký thành viên sau bằng chính số điện thoại này tại mục <strong>Đăng nhập thành viên</strong> (nếu người giới thiệu đủ điều kiện), hoặc tra cứu đơn hàng để xem lại mã.</div></div>
+      <div class="actions actions-row"><a class="btn btn-secondary btn-lg" href="#A-05">Đăng nhập thành viên</a><a class="btn btn-primary btn-lg" href="#A-04">Tra cứu đơn hàng</a></div>
     </div></div>`;
   },
   /** (c) FAILED + Thử lại (nếu còn hạn) */
@@ -467,7 +462,7 @@ const Buyer = {
       <div class="result-hero"><div class="result-icon is-success">${UI.icon('check-circle', 40)}</div><h1>Thanh toán thành công</h1><p>Đơn hàng đã được ghi nhận.</p></div>
       <div class="alert alert-warning">${UI.icon('clock', 22)}<div><span class="alert-title">Mã kích hoạt đang chờ cấp</span>Mã kích hoạt sẽ được gửi qua SMS tới <strong class="mono">${UI.esc(RULES.maskPhone(order.phone))}</strong> trong thời gian sớm nhất. Bạn cũng có thể xem mã tại mục tra cứu đơn hàng.</div></div>
       ${this.orderInfoBlock(order)}
-      <div class="actions actions-row"><button class="btn btn-secondary btn-lg" onclick="Buyer.a03Later('${order.id}', true)">Để sau</button><button class="btn btn-primary btn-lg" onclick="Buyer.a03CreateSeller('${order.id}')">Tạo tài khoản seller</button></div>
+      <div class="card card-tint"><div class="card-body">${this.regCta(order)}</div></div>
     </div></div>`;
   },
 
@@ -524,96 +519,163 @@ const Buyer = {
       return;
     }
     const u = ctx.verified ? Store.userByPhone(ctx.phone) : null;
-    const canActivate = ctx.verified && (!u || u.type !== 'seller') && orders.some(o => o.status === 'PAID');
-    const isSeller = u && u.type === 'seller';
+    const el = ctx.verified ? Store.registrationEligibility(ctx.phone) : { ok: false };
+    const isSeller = u && u.type === 'agent';
     body.innerHTML = `
       <div class="row-between mb-3"><h2>${orders.length} đơn hàng</h2><button class="btn btn-ghost btn-sm" onclick="App.reload()">${UI.icon('arrow-left', 16)} Tra cứu khác</button></div>
       ${!ctx.verified ? `<div class="alert alert-neutral mb-3">${UI.icon('lock', 18)}<div class="text-sm">Mã kích hoạt được ẩn. Tra cứu bằng SĐT + OTP để xem.</div></div>` : ''}
       ${orders.sort((a, b) => a.createdAt < b.createdAt ? 1 : -1).map(o => this.a04Card(o, ctx.verified)).join('')}
-      ${canActivate ? `<div class="card card-tint mt-4"><div class="card-body"><h3>Kích hoạt tài khoản seller</h3><p class="text-sm text-muted mt-1">Số điện thoại này đã mua gói nhưng chưa có tài khoản. Kích hoạt để nhận link giới thiệu và hoa hồng — không cần nhập lại thông tin.</p>
-        <div class="actions"><button class="btn btn-primary btn-lg btn-block" onclick="Buyer.a04Activate('${UI.esc(ctx.phone)}')">${UI.icon('user', 18)} Kích hoạt tài khoản seller</button></div></div></div>` : ''}
-      ${isSeller ? `<div class="actions"><a class="btn btn-outline btn-lg btn-block" href="#A-05">Đăng nhập Dashboard Seller</a></div>` : ''}`;
+      ${el.ok ? `<div class="card card-tint mt-4"><div class="card-body"><h3>Đăng ký thành viên HOMI365</h3><p class="text-sm text-muted mt-1">Số điện thoại này đã mua gói qua ${UI.esc(el.referrer.fullName)} (hạng ${RULES.rank(el.referrer.rank).label}). Đăng ký hồ sơ để nhận link bán hàng và hoa hồng theo hạng.</p>
+        <div class="actions"><a class="btn btn-primary btn-lg btn-block" href="#A-06?phone=${UI.esc(ctx.phone)}">${UI.icon('user', 18)} Đăng ký thành viên</a></div></div></div>` : ''}
+      ${el.reason === 'pending' ? `<div class="alert alert-info mt-4">${UI.icon('clock', 18)}<div class="text-sm">Hồ sơ thành viên của bạn đang ${UI.label('approval', el.registration.status).toLowerCase()}. <a href="#A-06?state=pending&phone=${UI.esc(ctx.phone)}">Xem trạng thái</a></div></div>` : ''}
+      ${isSeller ? `<div class="actions"><a class="btn btn-outline btn-lg btn-block" href="#A-05">Đăng nhập Dashboard thành viên</a></div>` : ''}`;
   },
   a04Card: function(o, verified) {
     return `<div class="order-card">
       <div class="order-card-head"><div><div class="text-sm text-muted">Mã đơn</div><div class="mono text-strong">${UI.esc(o.id)}</div></div><div class="text-right"><div class="text-sm text-muted">${UI.date(o.createdAt)}</div><div class="text-strong">${UI.money(o.price)}</div></div></div>
       <div class="status-row"><span class="text-sm text-muted">Thanh toán:</span>${UI.badge('orderStatus', o.status)}<span class="text-sm text-muted">Giao hàng:</span>${UI.badge('shipping', o.shipping)}</div>
-      ${o.status === 'PAID' ? (verified ? (o.licenseCode ? `<div class="code-box mt-3"><div class="grow"><span class="code-label">Mã kích hoạt ${o.licenseCode && Store.codeInfo(o.licenseCode) && Store.codeInfo(o.licenseCode).status === 'BOUND' ? '· đã kích hoạt' : '· chưa dùng'}</span><span class="code-value">${UI.esc(o.licenseCode)}</span></div><button class="btn btn-secondary btn-icon" aria-label="Sao chép mã" onclick="UI.copy('${UI.esc(o.licenseCode)}', 'Đã sao chép mã kích hoạt.')">${UI.icon('copy', 18)}</button></div>` : `<div class="alert alert-warning mt-3">${UI.icon('clock', 18)}<div class="text-sm">Mã kích hoạt đang chờ cấp, sẽ gửi qua SMS.</div></div>`) : `<div class="code-box mt-3"><div class="grow"><span class="code-label">Mã kích hoạt</span><span class="code-value">••••-••••-••••</span></div>${UI.icon('lock', 18, 'text-muted')}</div>`) : ''}
+      ${o.status === 'PAID' ? (verified ? (o.licenseCode ? `<div class="code-box mt-3"><div class="grow"><span class="code-label">Mã kích hoạt ${o.licenseCode && Store.codeInfo(o.licenseCode) && Store.codeInfo(o.licenseCode).status === 'ACTIVATED' ? '· đã kích hoạt' : '· chưa dùng'}</span><span class="code-value">${UI.esc(o.licenseCode)}</span></div><button class="btn btn-secondary btn-icon" aria-label="Sao chép mã" onclick="UI.copy('${UI.esc(o.licenseCode)}', 'Đã sao chép mã kích hoạt.')">${UI.icon('copy', 18)}</button></div>` : `<div class="alert alert-warning mt-3">${UI.icon('clock', 18)}<div class="text-sm">Mã kích hoạt đang chờ cấp, sẽ gửi qua SMS.</div></div>`) : `<div class="code-box mt-3"><div class="grow"><span class="code-label">Mã kích hoạt</span><span class="code-value">••••-••••-••••</span></div>${UI.icon('lock', 18, 'text-muted')}</div>`) : ''}
       ${o.status === 'AWAITING_RECONCILE' ? `<p class="text-sm text-muted mt-3">Đang chờ đối soát chuyển khoản. Mã kích hoạt được cấp sau khi xác nhận.</p>` : ''}
       ${o.status === 'REJECTED' ? `<p class="text-sm text-error mt-3">Từ chối đối soát: ${UI.esc(o.rejectReason || '')}</p>` : ''}
     </div>`;
   },
-  a04Activate: function(phone) {
-    const o = Store.ordersByPhone(phone).find(x => x.status === 'PAID');
-    UI.confirm({ title: 'Kích hoạt tài khoản seller', body: 'Tài khoản seller sẽ được tạo từ thông tin đơn hàng của bạn (BR-10). Người giới thiệu là seller của link bạn đã mua.',
-      summary: [['Họ tên', UI.esc(o.fullName)], ['Số điện thoại', '<span class="mono">' + UI.esc(RULES.maskPhone(phone)) + '</span>'], ['Người giới thiệu', UI.esc(o.sellerId ? Store.user(o.sellerId).fullName : '—')]],
-      confirmText: 'Kích hoạt', onConfirm: () => { const u = Store.createSellerFromOrder(o.id); Store.loginSeller(u.id, false); UI.toast('Đã kích hoạt tài khoản seller.'); App.navigate('C-01'); } });
-  },
-
   // =====================================================================
-  // A-05 · Đăng nhập seller (SĐT + OTP, không mật khẩu)
+  // A-05 · Đăng nhập thành viên (SĐT + mật khẩu) · Quên mật khẩu (OTP)
   // =====================================================================
   A05: function(q) {
-    const reason = q.get('reason'); const next = q.get('next') || 'C-01';
-    this._a05Next = next;
+    const reason = q.get('reason'); const next = q.get('next') || 'C-01'; this._a05Next = next;
+    const forgot = q.get('view') === 'forgot';
     const html = `<div class="buyer-split">
-      <aside class="buyer-side">${this.introPanel('Đăng nhập seller', 'Chỉ cần số điện thoại đã mua gói. Không dùng mật khẩu.', ['Nhập số điện thoại và nhận mã OTP qua SMS.', 'Vào Dashboard: link giới thiệu, thống kê, bảng kê hoa hồng, ví & rút tiền.', 'Đã mua gói nhưng chưa có tài khoản? Dùng chính số đó để kích hoạt.'])}</aside>
+      <aside class="buyer-side">${this.introPanel(forgot ? 'Quên mật khẩu' : 'Đăng nhập thành viên', forgot ? 'Đặt lại mật khẩu bằng mã OTP gửi tới số điện thoại đã đăng ký.' : 'Dùng số điện thoại và mật khẩu đã đặt khi đăng ký thành viên.', forgot ? ['Nhập số điện thoại thành viên.', 'Nhập mã OTP nhận qua SMS.', 'Đặt mật khẩu mới và đăng nhập.'] : ['Nhập số điện thoại + mật khẩu.', 'Vào Dashboard: hạng & điểm, link bán hàng, hoa hồng, ví & rút tiền.', 'Đã mua gói nhưng chưa có tài khoản? Đăng ký thành viên tại đây.'])}</aside>
       <div class="stack">
       ${reason === 'expired' ? `<div class="alert alert-warning" role="alert">${UI.icon('clock', 20)}<div><span class="alert-title">Phiên đăng nhập đã hết hạn</span>Vui lòng đăng nhập lại. Sau khi đăng nhập bạn sẽ quay về trang đang xem.</div></div>` : ''}
       <div class="card"><div class="card-body" id="a05-body">
-        <form novalidate onsubmit="Buyer.a05Submit(event)">
-          ${UI.field({ id: 'lg-phone', label: 'Số điện thoại', required: true, type: 'tel', mono: true, placeholder: '0912 345 678', attrs: 'inputmode="numeric" autocomplete="tel"' })}
-          <label class="check mt-3"><input type="checkbox" id="lg-remember"> Ghi nhớ đăng nhập (${CONFIG.session.rememberDays} ngày)</label>
-          <div id="a05-alert" hidden></div>
-          <div class="actions"><button class="btn btn-primary btn-lg btn-block" id="lg-submit">${UI.icon('sms', 18)} Gửi OTP</button></div>
-        </form>
+        ${forgot ? `<form novalidate onsubmit="Buyer.a05Forgot(event)">${UI.field({ id: 'fg-phone', label: 'Số điện thoại thành viên', required: true, type: 'tel', mono: true, placeholder: '0912 345 678', attrs: 'inputmode="numeric" autocomplete="tel"' })}<div id="a05-alert" hidden></div><div class="actions"><button class="btn btn-primary btn-lg btn-block">${UI.icon('sms', 18)} Gửi OTP</button><a class="btn btn-ghost" href="#A-05">Quay lại đăng nhập</a></div></form>` :
+        `<form novalidate onsubmit="Buyer.a05Submit(event)">${UI.field({ id: 'lg-phone', label: 'Số điện thoại', required: true, type: 'tel', mono: true, placeholder: '0912 345 678', attrs: 'inputmode="numeric" autocomplete="tel"' })}
+          <div class="field mt-4" id="lg-pass-field"><label class="field-label" for="lg-pass">Mật khẩu<span class="req">*</span></label><div class="input-affix"><input class="input" type="password" id="lg-pass" autocomplete="current-password"><button type="button" class="btn btn-ghost affix-btn" aria-label="Hiện mật khẩu" onclick="UI.togglePassword('lg-pass', this)">${UI.icon('eye', 20)}</button></div><div class="field-error" id="lg-pass-err"></div></div>
+          <div class="row-between mt-3"><label class="check"><input type="checkbox" id="lg-remember"> Ghi nhớ đăng nhập (${CONFIG.session.rememberDays} ngày)</label><a href="#A-05?view=forgot" class="btn-link">Quên mật khẩu?</a></div>
+          <div id="a05-alert" hidden></div><div class="actions"><button class="btn btn-primary btn-lg btn-block" id="lg-submit">${UI.icon('key', 18)} Đăng nhập</button></div></form>
+        <p class="text-center text-sm text-muted mt-4">Đã mua gói nhưng chưa có tài khoản? <a href="#A-06">Đăng ký thành viên</a><br><a href="#D-00">Quản trị viên đăng nhập tại đây</a></p>`}
       </div></div>
-      <p class="text-center text-sm text-muted">Chưa có tài khoản? Mua gói qua link giới thiệu, sau đó dùng chính số điện thoại đó để đăng nhập.<br><a href="#D-00">Quản trị viên đăng nhập tại đây</a></p>
-      <div class="demo-hint">SĐT mẫu: <strong>0908123456</strong> seller · <strong>${Store.user('U101').phone}</strong> có đơn chưa TK · <strong>0977000111</strong> bị khoá · <strong>0999999999</strong> chưa đăng ký · <strong>0900000000</strong> admin</div>
+      <div class="demo-hint">Thành viên mẫu: <strong>0908123456</strong> / <strong>${CONFIG.demo.agentPassword}</strong> (Lithium) · <strong>0912345678</strong> Gold · <strong>0987654321</strong> Copper · <strong>0977000111</strong> bị khoá · <strong>${Store.user('U101').phone}</strong> đã mua chưa đăng ký · <strong>0913000888</strong> hồ sơ chờ duyệt · <strong>0914000999</strong> bị từ chối</div>
     </div></div>`;
     return App.buyerShell(html);
   },
   a05Submit: function(e) {
-    e.preventDefault();
-    const raw = UI.val('lg-phone'); const phone = RULES.normalizePhone(raw); const remember = document.getElementById('lg-remember').checked;
-    const alertBox = document.getElementById('a05-alert');
-    UI.setError('lg-phone', ''); alertBox.hidden = true;
-    if (!phone) { UI.setError('lg-phone', raw ? 'Số điện thoại không đúng định dạng.' : 'Vui lòng nhập số điện thoại.'); UI.focusFirstError(); return; }
-    // (f) BR-12: tài khoản admin không dùng A-05
-    if (phone === CONFIG.demo.adminPhone) {
-      alertBox.hidden = false;
-      alertBox.innerHTML = `<div class="alert alert-error mt-4" role="alert">${UI.icon('shield', 22)}<div><span class="alert-title">Quản trị viên vui lòng đăng nhập tại trang quản trị</span>Số này thuộc tài khoản quản trị. Khu vực quản trị dùng tên đăng nhập và mật khẩu riêng. <a href="#D-00">Tới trang đăng nhập quản trị</a></div></div>`;
-      return;
-    }
-    const body = document.getElementById('a05-body');
-    body.innerHTML = '<h2 class="text-center mb-4">Nhập mã OTP</h2><div id="a05-otp"></div>';
-    UI.otp.mount('a05-otp', { phone, verifyText: 'Đăng nhập', onBack: () => App.reload(), onVerified: () => this.a05After(phone, remember) });
+    e.preventDefault(); const raw = UI.val('lg-phone'); const phone = RULES.normalizePhone(raw); const pw = UI.val('lg-pass'); const remember = document.getElementById('lg-remember').checked; const box = document.getElementById('a05-alert');
+    UI.setError('lg-phone', ''); UI.setError('lg-pass', ''); box.hidden = true; let ok = true;
+    if (!phone) { UI.setError('lg-phone', raw ? 'Số điện thoại không đúng định dạng.' : 'Vui lòng nhập số điện thoại.'); ok = false; } if (!pw) { UI.setError('lg-pass', 'Vui lòng nhập mật khẩu.'); ok = false; } if (!ok) { UI.focusFirstError(); return; }
+    if (phone === CONFIG.demo.adminPhone) { box.hidden = false; box.innerHTML = `<div class="alert alert-error mt-4" role="alert">${UI.icon('shield', 22)}<div><span class="alert-title">Quản trị viên vui lòng đăng nhập tại trang quản trị</span><a href="#D-00">Tới trang đăng nhập quản trị</a></div></div>`; return; }
+    const btn = document.getElementById('lg-submit'); UI.setLoading(btn, true);
+    setTimeout(() => {
+      UI.setLoading(btn, false); const r = Store.loginAgent(phone, pw, remember);
+      if (r.ok) { UI.toast('Đăng nhập thành công.'); App.navigate(this._a05Next || 'C-01'); return; }
+      const show = (html) => { box.hidden = false; box.innerHTML = html; };
+      if (r.reason === 'locked') { show(`<div class="alert alert-error mt-4" role="alert">${UI.icon('lock', 22)}<div><span class="alert-title">Tài khoản đã bị khoá</span>Vui lòng liên hệ hỗ trợ <strong>${UI.esc(CONFIG.brand.supportHotline)}</strong>.</div></div>`); return; }
+      if (r.reason === 'wrong') { show(`<div class="alert alert-error mt-4" role="alert">${UI.icon('x-circle', 22)}<div>Số điện thoại hoặc mật khẩu không đúng. <a href="#A-05?view=forgot">Quên mật khẩu?</a></div></div>`); return; }
+      // Chưa là thành viên: kiểm tra đơn / hồ sơ đăng ký
+      const el = Store.registrationEligibility(phone);
+      if (el.reason === 'pending') { show(`<div class="alert alert-info mt-4">${UI.icon('clock', 22)}<div><span class="alert-title">Hồ sơ thành viên đang ${UI.label('approval', el.registration.status).toLowerCase()}</span>Bạn sẽ nhận email khi hồ sơ được duyệt. <a href="#A-06?state=pending&phone=${UI.esc(phone)}">Xem trạng thái</a></div></div>`); return; }
+      if (el.ok && el.rejected) { show(`<div class="alert alert-warning mt-4">${UI.icon('warning', 22)}<div><span class="alert-title">Hồ sơ trước đã bị từ chối</span>${UI.esc((el.rejected.approvals.find(a => a.action === 'REJECT') || {}).reason || '')}. <a href="#A-06?phone=${UI.esc(phone)}">Nộp lại hồ sơ</a></div></div>`); return; }
+      if (el.ok) { show(`<div class="alert alert-info mt-4">${UI.icon('user', 22)}<div><span class="alert-title">Số này đã mua gói nhưng chưa đăng ký thành viên</span><a href="#A-06?phone=${UI.esc(phone)}">Đăng ký thành viên ngay</a> — thông tin được điền sẵn từ đơn hàng.</div></div>`); return; }
+      if (el.reason === 'referrer_copper') { show(`<div class="alert alert-warning mt-4">${UI.icon('warning', 22)}<div><span class="alert-title">Chưa đủ điều kiện đăng ký thành viên</span>Người giới thiệu của bạn (hạng Copper) chưa được quyền tuyển thành viên. Vui lòng liên hệ người giới thiệu hoặc hỗ trợ.</div></div>`); return; }
+      show(`<div class="alert alert-error mt-4">${UI.icon('alert-octagon', 22)}<div><span class="alert-title">Số điện thoại chưa đăng ký</span>Chưa có tài khoản thành viên và chưa có đơn hàng thanh toán thành công. Vui lòng mua gói qua link giới thiệu.</div></div>`);
+    }, 400);
   },
-  a05After: function(phone, remember) {
-    const u = Store.userByPhone(phone);
-    const body = document.getElementById('a05-body');
-    if (u && u.type === 'seller') {
-      if (u.status === 'locked') { // (d)
-        body.innerHTML = `<div class="stack text-center"><div class="result-icon is-error" style="margin:0 auto">${UI.icon('lock', 34)}</div><h2>Tài khoản đã bị khoá</h2><p class="text-muted">Tài khoản seller của số <span class="mono">${UI.esc(RULES.maskPhone(phone))}</span> đang bị tạm khoá. Vui lòng liên hệ hỗ trợ <strong>${UI.esc(CONFIG.brand.supportHotline)}</strong> để được giải quyết.</p><div class="actions"><button class="btn btn-secondary btn-lg" onclick="App.reload()">Dùng số khác</button></div></div>`;
-        return;
-      }
-      Store.loginSeller(u.id, remember);
-      UI.toast('Đăng nhập thành công.');
-      App.navigate(this._a05Next || 'C-01');
-      return;
-    }
-    const paid = Store.ordersByPhone(phone).find(o => o.status === 'PAID');
-    if (paid) { // (c) US-24
-      body.innerHTML = `<div class="stack"><div class="text-center"><div class="result-icon is-info" style="margin:0 auto">${UI.icon('user', 34)}</div><h2>Kích hoạt tài khoản seller</h2><p class="text-muted">Số điện thoại này đã mua gói nhưng chưa có tài khoản. Kích hoạt ngay để nhận link giới thiệu và hoa hồng — thông tin lấy từ đơn hàng, không cần nhập lại.</p></div>
-        <dl class="dl"><dt>Họ tên</dt><dd>${UI.esc(paid.fullName)}</dd><dt>Đơn hàng</dt><dd class="mono">${UI.esc(paid.id)}</dd><dt>Người giới thiệu</dt><dd>${UI.esc(paid.sellerId ? Store.user(paid.sellerId).fullName : '—')}</dd></dl>
-        <div class="actions actions-row"><button class="btn btn-secondary btn-lg" onclick="App.reload()">Để sau</button><button class="btn btn-primary btn-lg" onclick="Buyer.a05Activate('${paid.id}', ${remember})">Kích hoạt &amp; vào Dashboard</button></div></div>`;
-      return;
-    }
-    // (e) chưa đăng ký
-    body.innerHTML = `<div class="stack text-center"><div class="result-icon is-pending" style="margin:0 auto">${UI.icon('alert-octagon', 34)}</div><h2>Số điện thoại chưa đăng ký</h2><p class="text-muted">Số <span class="mono">${UI.esc(RULES.maskPhone(phone))}</span> chưa có tài khoản seller và chưa có đơn hàng thanh toán thành công. Vui lòng mua gói qua link giới thiệu của seller HOMI365.</p><div class="actions actions-row"><button class="btn btn-secondary btn-lg" onclick="App.reload()">Dùng số khác</button><a class="btn btn-primary btn-lg" href="#A-04">Tra cứu đơn hàng</a></div></div>`;
+  a05Forgot: function(e) {
+    e.preventDefault(); const raw = UI.val('fg-phone'); const phone = RULES.normalizePhone(raw); UI.setError('fg-phone', '');
+    if (!phone) { UI.setError('fg-phone', raw ? 'Số điện thoại không đúng định dạng.' : 'Vui lòng nhập số điện thoại.'); return; }
+    const u = Store.userByPhone(phone); if (!u || u.type !== 'agent') { UI.setError('fg-phone', 'Số điện thoại chưa có tài khoản thành viên.'); return; }
+    const body = document.getElementById('a05-body'); body.innerHTML = '<h2 class="text-center mb-4">Nhập mã OTP</h2><div id="fg-otp"></div>';
+    UI.otp.mount('fg-otp', { phone, onBack: () => App.reload(), onVerified: () => {
+      body.innerHTML = `<h2 class="mb-4">Đặt mật khẩu mới</h2><form novalidate onsubmit="Buyer.a05Reset(event, '${phone}')">${UI.field({ id: 'rs-pw', label: 'Mật khẩu mới', type: 'password', required: true, hint: 'Tối thiểu 8 ký tự, có chữ và số' })}${UI.field({ id: 'rs-pw2', label: 'Nhập lại mật khẩu mới', type: 'password', required: true })}<div class="actions"><button class="btn btn-primary btn-lg btn-block">Đặt lại mật khẩu</button></div></form>`;
+    } });
   },
-  a05Activate: function(orderId, remember) {
-    const u = Store.createSellerFromOrder(orderId); Store.loginSeller(u.id, remember);
-    UI.toast('Đã kích hoạt tài khoản seller.'); App.navigate(this._a05Next || 'C-01');
+  a05Reset: function(e, phone) { e.preventDefault(); const a = UI.val('rs-pw'), b = UI.val('rs-pw2'); UI.setError('rs-pw', ''); UI.setError('rs-pw2', ''); const err = RULES.validatePassword(a); if (err) { UI.setError('rs-pw', err); return; } if (a !== b) { UI.setError('rs-pw2', 'Mật khẩu nhập lại không khớp.'); return; } Store.resetPassword(phone, a); UI.toast('Đã đặt lại mật khẩu. Vui lòng đăng nhập.'); App.navigate('A-05'); },
+
+  // =====================================================================
+  // A-06 · Đăng ký thành viên (7.2): kiểm tra điều kiện → hồ sơ + T&C → OTP → chờ duyệt (0/2)
+  // =====================================================================
+  A06: function(q) {
+    const state = q.get('state') || ''; const orderId = q.get('order'); const qp = q.get('phone');
+    let phone = qp ? RULES.normalizePhone(qp) : (orderId && Store.order(orderId) ? Store.order(orderId).phone : (Store.s().verifiedPhone || ''));
+    if (state === 'pending' && !phone) phone = '0913000888'; if (state === 'rejected' && !phone) phone = '0914000999';
+    const intro = this.introPanel('Đăng ký thành viên', 'Hồ sơ gồm thông tin cá nhân, tài khoản nhận hoa hồng, mật khẩu và chấp nhận điều khoản. Sau khi duyệt 2 lớp, bạn nhận email kích hoạt kèm link bán hàng cá nhân.', ['Kiểm tra điều kiện: đã mua gói, người giới thiệu từ hạng Silver.', 'Điền hồ sơ, chấp nhận T&C, xác thực OTP.', 'Chờ admin duyệt (0/2 → 1/2 → Đã duyệt) và nhận email.']);
+    let body;
+    if (!phone) body = this.a06Check();
+    else {
+      const el = Store.registrationEligibility(phone);
+      if (el.reason === 'pending' || state === 'pending') body = this.a06Status(el.registration || Store.registrationByPhone(phone), phone);
+      else if (el.reason === 'agent') body = `<div class="card"><div class="card-body stack text-center"><div class="result-icon is-info" style="margin:0 auto">${UI.icon('user', 34)}</div><h2>Bạn đã là thành viên</h2><p class="text-muted">Số <span class="mono">${UI.esc(RULES.maskPhone(phone))}</span> đã có tài khoản thành viên.</p><div class="actions"><a class="btn btn-primary btn-lg" href="#A-05">Đăng nhập</a></div></div></div>`;
+      else if (el.reason === 'no_order') body = this.a06Blocked('alert-octagon', 'Chưa có đơn hàng thanh toán thành công', `Số <span class="mono">${UI.esc(RULES.maskPhone(phone))}</span> chưa mua gói. Thành viên phải là khách hàng đã mua gói qua link giới thiệu.`, phone);
+      else if (el.reason === 'referrer_copper') body = this.a06Blocked('warning', 'Người giới thiệu chưa đủ điều kiện tuyển', `Người giới thiệu của bạn (<strong>${UI.esc(el.referrer ? el.referrer.fullName : '')}</strong>, hạng ${el.referrer ? RULES.rank(el.referrer.rank).label : 'Copper'}) chưa được quyền tuyển thành viên (từ hạng Silver). Bạn có thể đăng ký sau khi người giới thiệu lên hạng, hoặc liên hệ hỗ trợ ${UI.esc(CONFIG.brand.supportHotline)}.`, phone);
+      else if (el.reason === 'rejected_final') body = this.a06Blocked('x-circle', 'Hồ sơ đã bị từ chối', 'Hồ sơ trước đó bị từ chối và không thể nộp lại. Liên hệ hỗ trợ.', phone);
+      else body = this.a06Form(el, phone, state);
+    }
+    return App.buyerShell(`<div class="buyer-split"><aside class="buyer-side">${intro}</aside><div class="stack" id="a06-col">${body}</div></div>`);
+  },
+  a06Check: function() { return `<div class="card"><div class="card-body"><h2 class="mb-3">Kiểm tra điều kiện đăng ký</h2><form novalidate onsubmit="Buyer.a06Lookup(event)">${UI.field({ id: 'rg-phone', label: 'Số điện thoại đã mua gói', required: true, type: 'tel', mono: true, placeholder: '0912 345 678', attrs: 'inputmode="numeric"' })}<div class="actions"><button class="btn btn-primary btn-lg btn-block">${UI.icon('search', 18)} Kiểm tra</button></div></form></div></div><div class="demo-hint">SĐT mẫu: <strong>${Store.user('U101').phone}</strong> đủ điều kiện · <strong>${Store.user('U102').phone}</strong> người giới thiệu Copper · <strong>0999999999</strong> chưa mua · <strong>0913000888</strong> đang chờ duyệt · <strong>0914000999</strong> bị từ chối</div>`; },
+  a06Lookup: function(e) { e.preventDefault(); const raw = UI.val('rg-phone'); const phone = RULES.normalizePhone(raw); UI.setError('rg-phone', ''); if (!phone) { UI.setError('rg-phone', raw ? 'Số điện thoại không đúng định dạng.' : 'Vui lòng nhập số điện thoại.'); return; } App.navigate('A-06?phone=' + phone); },
+  a06Blocked: function(ico, title, desc, phone) { return `<div class="card"><div class="card-body stack text-center"><div class="result-icon is-pending" style="margin:0 auto">${UI.icon(ico, 34)}</div><h2>${title}</h2><p class="text-muted">${desc}</p><div class="actions actions-row"><a class="btn btn-secondary btn-lg" href="#A-06">Dùng số khác</a><a class="btn btn-primary btn-lg" href="#A-04?phone=${UI.esc(phone)}">Tra cứu đơn hàng</a></div></div></div>`; },
+  a06Status: function(reg, phone) {
+    if (!reg) return this.a06Blocked('search', 'Không tìm thấy hồ sơ', 'Số này chưa nộp hồ sơ đăng ký.', phone);
+    const ap = (reg.approvals || []).filter(a => a.action === 'APPROVE').length; const rej = (reg.approvals || []).find(a => a.action === 'REJECT');
+    const steps = [['Đã nộp hồ sơ', true], ['Duyệt lớp 1', ap >= 1 || reg.status === 'APPROVED'], ['Duyệt lớp 2', reg.status === 'APPROVED'], ['Kích hoạt & email', reg.status === 'APPROVED']];
+    return `<div class="card"><div class="card-body stack">
+      <div class="text-center"><div class="result-icon ${reg.status === 'APPROVED' ? 'is-success' : reg.status === 'REJECTED' ? 'is-error' : 'is-pending'}" style="margin:0 auto">${UI.icon(reg.status === 'APPROVED' ? 'check-circle' : reg.status === 'REJECTED' ? 'x-circle' : 'clock', 34)}</div><h2 class="mt-3">${reg.status === 'APPROVED' ? 'Hồ sơ đã được duyệt' : reg.status === 'REJECTED' ? 'Hồ sơ bị từ chối' : 'Hồ sơ đang chờ duyệt'}</h2><div class="mt-2">${UI.badge('approval', reg.status, true)}</div></div>
+      <div class="steps" style="justify-content:center">${steps.map(([l, done], i) => `<div class="step ${done ? 'is-done' : ''}"><span class="step-dot">${done ? UI.icon('check', 14) : i + 1}</span><span>${l}</span></div>${i < 3 ? '<span class="step-line"></span>' : ''}`).join('')}</div>
+      <dl class="dl"><dt>Mã hồ sơ</dt><dd class="mono">${UI.esc(reg.id)}</dd><dt>Nộp lúc</dt><dd>${UI.dt(reg.createdAt)}</dd><dt>Người giới thiệu</dt><dd>${reg.referrerId ? UI.esc(Store.user(reg.referrerId).fullName) : '—'}</dd></dl>
+      ${rej ? `<div class="alert alert-error">${UI.icon('x-circle', 18)}<div><span class="alert-title">Lý do từ chối</span>${UI.esc(rej.reason || '')}</div></div>` : `<div class="alert alert-info">${UI.icon('sms', 18)}<div class="text-sm">Khi được duyệt, bạn nhận email từ <strong>${UI.esc(CONFIG.email.from)}</strong> gồm link giới thiệu, link mua hàng cá nhân và cổng thành viên.</div></div>`}
+      <div class="actions actions-row">${reg.status === 'REJECTED' && CONFIG.rules.rejectedCanResubmit ? `<a class="btn btn-primary btn-lg" href="#A-06?phone=${UI.esc(phone)}&resubmit=1">Nộp lại hồ sơ</a>` : ''}${reg.status === 'APPROVED' ? `<a class="btn btn-primary btn-lg" href="#A-05">Đăng nhập thành viên</a>` : `<a class="btn btn-secondary btn-lg" href="#A-05">Về đăng nhập</a>`}</div>
+    </div></div>`;
+  },
+  a06Form: function(el, phone, state) {
+    const o = el.order; const ref = el.referrer; const d = Store.s().regDraft && Store.s().regDraft.phone === phone ? Store.s().regDraft : { fullName: o.fullName, email: o.email || '', bankName: CONFIG.banks[0], accountNo: '', owner: '' };
+    const tc = Store.rules().tc; const rej = el.rejected;
+    return `<div class="card"><div class="card-head"><h2>Hồ sơ thành viên</h2><span class="text-sm text-muted">Bước 1/3</span></div><div class="card-body" id="a06-body">
+      ${rej ? `<div class="alert alert-warning mb-4">${UI.icon('warning', 18)}<div class="text-sm"><span class="alert-title">Hồ sơ trước bị từ chối</span>${UI.esc((rej.approvals.find(a => a.action === 'REJECT') || {}).reason || '')}. Vui lòng kiểm tra và nộp lại.</div></div>` : ''}
+      <div class="alert alert-info mb-4">${UI.icon('users', 18)}<div class="text-sm">Người giới thiệu: <strong>${UI.esc(ref.fullName)}</strong> · ${RULES.rank(ref.rank).label} · đơn <span class="mono">${UI.esc(o.id)}</span>. Bạn sẽ thuộc tuyến của người này (khoá tại thời điểm mua).</div></div>
+      <form novalidate onsubmit="Buyer.a06Submit(event, '${phone}')">
+        ${UI.field({ id: 'rg-name', label: 'Họ và tên', required: true, value: d.fullName, hint: 'Dùng để tạo link mua hàng cá nhân', attrs: 'oninput="Buyer.a06Alias(\'' + phone + '\')"' })}
+        <div class="text-sm text-muted mt-1">Link cá nhân dự kiến: <span class="mono text-strong" id="rg-alias">${UI.esc(RULES.publicPurchaseUrl(Store.genPurchaseAlias(d.fullName, phone)))}</span></div>
+        <div class="form-grid form-grid-2 mt-4">${UI.field({ id: 'rg-email', label: 'Email', required: true, type: 'email', value: d.email })}${UI.field({ id: 'rg-phone2', label: 'Số điện thoại', value: phone, mono: true, attrs: 'readonly' })}</div>
+        <h3 class="mt-6 mb-2">Tài khoản nhận hoa hồng</h3>
+        <div class="form-grid form-grid-2">${UI.field({ id: 'rg-bank', label: 'Ngân hàng', required: true, type: 'select', value: d.bankName, options: CONFIG.banks.map(b => ({ value: b, label: b })) })}${UI.field({ id: 'rg-acc', label: 'Số tài khoản', required: true, mono: true, value: d.accountNo, attrs: 'inputmode="numeric"' })}</div>
+        <div class="mt-4">${UI.field({ id: 'rg-owner', label: 'Chủ tài khoản', required: true, value: d.owner, placeholder: 'NGUYEN VAN A', hint: 'Viết in hoa không dấu, trùng họ tên' })}</div>
+        <h3 class="mt-6 mb-2">Mật khẩu đăng nhập</h3>
+        <div class="form-grid form-grid-2">${UI.field({ id: 'rg-pw', label: 'Mật khẩu', required: true, type: 'password', hint: 'Tối thiểu 8 ký tự, có chữ và số' })}${UI.field({ id: 'rg-pw2', label: 'Nhập lại mật khẩu', required: true, type: 'password' })}</div>
+        <h3 class="mt-6 mb-2">Điều khoản & điều kiện <span class="badge badge-navy badge-plain">v${UI.esc(tc.version)}</span></h3>
+        <div class="tc-box" tabindex="0">${UI.esc(tc.text)}</div>
+        <label class="check mt-3"><input type="checkbox" id="rg-tc"> Tôi đã đọc và đồng ý với Điều khoản & điều kiện phiên bản ${UI.esc(tc.version)}</label><div class="field-error" id="rg-tc-err"></div>
+        <div id="a06-alert" hidden></div>
+        <div class="actions"><button class="btn btn-primary btn-lg btn-block">${UI.icon('sms', 18)} Gửi OTP &amp; nộp hồ sơ</button></div>
+      </form></div></div>`;
+  },
+  a06Alias: function(phone) { const el = document.getElementById('rg-alias'); if (el) el.textContent = RULES.publicPurchaseUrl(Store.genPurchaseAlias(UI.val('rg-name'), phone)); },
+  a06Submit: function(e, phone) {
+    e.preventDefault(); const f = { fullName: UI.val('rg-name'), email: UI.val('rg-email'), bankName: UI.val('rg-bank'), accountNo: UI.val('rg-acc'), owner: UI.val('rg-owner').toUpperCase(), pw: UI.val('rg-pw'), pw2: UI.val('rg-pw2'), tc: document.getElementById('rg-tc').checked };
+    ['rg-name', 'rg-email', 'rg-acc', 'rg-owner', 'rg-pw', 'rg-pw2'].forEach(x => UI.setError(x, '')); document.getElementById('rg-tc-err').textContent = ''; let ok = true;
+    if (f.fullName.length < 2) { UI.setError('rg-name', 'Vui lòng nhập họ tên.'); ok = false; } if (!RULES.isEmail(f.email)) { UI.setError('rg-email', 'Email không hợp lệ.'); ok = false; }
+    const ex = Store.userByEmail(f.email); if (ex && ex.type === 'agent' && ex.phone !== phone) { UI.setError('rg-email', 'Email đã được dùng cho thành viên khác.'); ok = false; }
+    if (!/^\d{6,16}$/.test(f.accountNo)) { UI.setError('rg-acc', 'Số tài khoản gồm 6–16 chữ số.'); ok = false; } if (f.owner.length < 4) { UI.setError('rg-owner', 'Nhập tên chủ tài khoản.'); ok = false; }
+    const pe = RULES.validatePassword(f.pw); if (pe) { UI.setError('rg-pw', pe); ok = false; } if (f.pw !== f.pw2) { UI.setError('rg-pw2', 'Mật khẩu nhập lại không khớp.'); ok = false; }
+    if (!f.tc) { document.getElementById('rg-tc-err').innerHTML = UI.icon('warning', 16) + '<span>Bạn cần đồng ý điều khoản để tiếp tục.</span>'; ok = false; }
+    if (!ok) { UI.focusFirstError(); return; }
+    Store.s().regDraft = { phone, fullName: f.fullName, email: f.email, bankName: f.bankName, accountNo: f.accountNo, owner: f.owner }; Store.save();
+    const can = Store.otpCanSend(phone); const box = document.getElementById('a06-alert');
+    if (!can.ok) { box.hidden = false; box.innerHTML = `<div class="alert alert-error mt-4">${UI.icon('lock', 20)}<div>Tạm khoá gửi OTP. Thử lại sau ${can.minutes} phút.</div></div>`; return; }
+    this._regPending = { phone, fullName: f.fullName, email: f.email, bank: { bankName: f.bankName, accountNo: f.accountNo, owner: f.owner }, password: f.pw };
+    const body = document.getElementById('a06-body'); document.querySelector('#a06-col .card-head').innerHTML = '<h2>Xác thực số điện thoại</h2><span class="text-sm text-muted">Bước 2/3</span>';
+    body.innerHTML = '<div id="a06-otp"></div>';
+    UI.otp.mount('a06-otp', { phone, backText: 'Sửa hồ sơ', onBack: () => App.reload(), verifyText: 'Nộp hồ sơ', onVerified: () => this.a06Done(phone) });
+  },
+  a06Done: function(phone) {
+    const p = this._regPending; const el = Store.registrationEligibility(phone); if (!p || !el.ok) { App.reload(); return; }
+    const r = Store.submitRegistration({ phone, fullName: p.fullName, email: p.email, bank: p.bank, password: p.password, orderId: el.order.id });
+    if (!r.ok) { UI.toast(r.message, 'error'); App.reload(); return; } this._regPending = null;
+    document.querySelector('#a06-col .card-head').innerHTML = '<h2>Đăng ký đã gửi</h2><span class="text-sm text-muted">Bước 3/3</span>';
+    document.getElementById('a06-body').innerHTML = `<div class="stack text-center"><div class="result-icon is-success" style="margin:0 auto">${UI.icon('check-circle', 34)}</div><h2>Hồ sơ đã gửi — ${UI.badge('approval', 'PENDING_0', true)}</h2><p class="text-muted">Mã hồ sơ <span class="mono text-strong">${UI.esc(r.registration.id)}</span>. Bộ phận quản trị duyệt 2 lớp trong 1–2 ngày làm việc.</p>
+      <div class="alert alert-info" style="text-align:left">${UI.icon('sms', 20)}<div class="text-sm">Khi được duyệt, email từ <strong>${UI.esc(CONFIG.email.from)}</strong> gửi tới <strong>${UI.esc(p.email)}</strong> gồm: link giới thiệu, link mua hàng cá nhân <span class="mono">${UI.esc(RULES.publicPurchaseUrl(Store.genPurchaseAlias(p.fullName, phone)))}</span> và cổng thành viên.</div></div>
+      <div class="actions actions-row"><a class="btn btn-secondary btn-lg" href="#A-06?state=pending&phone=${UI.esc(phone)}">Xem trạng thái hồ sơ</a><a class="btn btn-primary btn-lg" href="#HOME">Về trang chủ</a></div></div>`;
   }
 };

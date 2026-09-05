@@ -123,3 +123,6 @@
 }
 #feat-toggle .ico { transition: transform var(--transition); }
 #feat-toggle.is-open .ico { transform: rotate(180deg); }
+
+/* Hộp điều khoản (A-06) */
+.tc-box { max-height: 220px; overflow: auto; padding: 14px 16px; background: var(--bg-alt); border: 1px solid var(--border); border-radius: var(--r-md); white-space: pre-wrap; font-size: var(--fs-sm); line-height: 1.55; }

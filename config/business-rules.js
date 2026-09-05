@@ -1,110 +1,88 @@
 /**
- * HOMI365 / Medigo prototype v2 — cấu hình & quy tắc nghiệp vụ
+ * HOMI365 prototype v2 — cấu hình & quy tắc nghiệp vụ (CHANGE SPEC v3, 05/09/2026)
  *
  * QUY ƯỚC: file này chỉ chứa SỐ GỐC và HÀM SUY DIỄN. Giao diện không viết số cứng.
- * Các giá trị đánh dấu [đề xuất] là con số đề xuất trong PRD (BR-05/06/07) — chưa chốt với khách.
- * Giả định theo kế hoạch redesign mục 6 (chờ TTS chốt):
- *   (1) Nhận diện HOMI365 ở header/logo; gói vẫn là CN02 "Bác sĩ 24/7".
- *   (2) Gói CN02 10.000.000đ, có giao hàng vật lý (đồng hồ HW01).
- *   (3) Bỏ hạng thành viên & điểm; không hiển thị danh sách tuyến dưới.
- *   (4) D-07 gộp duyệt hoa hồng + duyệt rút tiền, 2 tab.
- *   (5) Cổng online: nút chung "Thanh toán qua cổng" + màn redirect giả lập.
- *   (6) Hoa hồng mặc định 3 tầng F1/F2/F3 (cấu hình động ở D-06).
- *   (7) Kích hoạt thiết bị qua app — web chỉ hiển thị.
+ * Mô hình: thành viên (agent) 6 hạng Copper → Lithium; hoa hồng CHÊNH LỆCH CẤP BẬC (VNĐ/gói)
+ * ghi nhận ngay khi đơn PAID; đăng ký thành viên & rút tiền duyệt 2 lớp; admin 2 vai.
+ * Các điểm chờ xác nhận (spec mục 9) đặt tại CONFIG với ghi chú [cần xác nhận].
  */
 
 const CONFIG = {
   brand: {
     name: 'HOMI365',
     productLine: 'Medigo',
+    publicDomain: 'Homi365.com.vn',
     supportHotline: '1900 6868',
     supportHours: '08:00 – 20:00 hằng ngày',
     company: 'CÔNG TY TNHH GIẢI PHÁP CÔNG NGHỆ HUY GIÁP',
-    baseUrl: 'https://homi-dev-ui.netlify.app'   // bản deploy demo; khi lên tên miền thật đổi thành https://homi365.vn và bỏ '#' trong referralUrl
+    baseUrl: 'https://homi-dev-ui.netlify.app'   // bản deploy demo; khi lên tên miền thật đổi thành https://homi365.com.vn và bỏ '#' trong referralUrl/purchaseUrl
   },
+  terminology: { agent: 'Thành viên', agentShort: 'Agent', agents: 'Thành viên' },
 
-  /** Mốc "hôm nay" của bản demo — dữ liệu mẫu sinh quanh mốc này. */
-  today: '2026-09-04T09:30:00',
-
-  /** Gói mặc định (D-04 quản lý nhiều gói, giai đoạn này vận hành 1 gói). */
   defaultPackageId: 'CN02',
 
-  /** BR-05 · OTP [đề xuất] */
-  otp: {
-    length: 6,
-    ttlSeconds: 300,          // hiệu lực 5 phút
-    maxWrong: 5,              // tối đa 5 lần nhập sai / 1 mã
-    resendSeconds: 60,        // gửi lại sau 60 giây
-    maxSendsPerWindow: 5,     // tối đa 5 lần gửi / SĐT / 30 phút
-    windowMinutes: 30,
-    lockMinutes: 30,          // vượt ngưỡng → khoá gửi OTP 30 phút
-    mockCode: '123456'
-  },
+  /** OTP (7.2.3: hiệu lực 5', sai 3 lần → khoá tạm) */
+  otp: { length: 6, ttlSeconds: 300, maxWrong: 3, resendSeconds: 60, maxSendsPerWindow: 5, windowMinutes: 30, lockMinutes: 30, mockCode: '123456' },
 
-  /** BR-06 · thời hạn giữ đơn [đề xuất] */
-  order: {
-    holdSeconds: 900,         // 15 phút
-    warnSeconds: 60,          // < 60s đếm ngược chuyển đỏ
-    reconcilePollSeconds: 10, // A-03 polling khi chờ đối soát
-    idPrefix: 'HM'
-  },
+  /** Giữ đơn / QR (LP-4/5) */
+  order: { holdSeconds: 900, warnSeconds: 60, reconcilePollSeconds: 10, idPrefix: 'HM' },
 
-  /** BR-07 · session [đề xuất] */
-  session: {
-    refDays: 7,
-    sellerHours: 24,
-    rememberDays: 30
-  },
+  session: { refDays: 7, agentHours: 24, rememberDays: 30 },
 
-  /** D-00 · đăng nhập quản trị */
-  admin: {
-    maxLoginFail: 5,
-    lockMinutes: 15,
-    pageSize: 10,
-    mockUser: 'admin',
-    mockPassword: 'Homi@2026'
-  },
-
-  /** Tài khoản nhận chuyển khoản VietQR (chờ khách cung cấp) */
-  vietqr: {
-    bankName: 'Vietcombank',
-    bankShort: 'VCB',
-    accountNo: '0108294845',
-    accountName: 'CONG TY TNHH GIAI PHAP CONG NGHE HUY GIAP'
-  },
-
-  /** Cổng online (chưa chốt nhà cung cấp) */
-  gateway: {
-    label: 'Cổng thanh toán online',
-    desc: 'Thẻ ATM nội địa, thẻ quốc tế, ví điện tử. Chuyển hướng sang cổng, kết quả cập nhật ngay.'
-  },
-
-  /** D-05 · kho mã */
-  stock: {
-    lowThreshold: 20,
-    codePrefix: 'HOMI'
-  },
-
-  /** Trạng thái giao hàng (admin cập nhật thủ công tại D-03). */
-  shippingSteps: ['PENDING', 'PACKING', 'SHIPPING', 'DELIVERED'],
-
-  /** Bộ lọc kỳ thống kê (C-01, D-01). */
-  periods: [
-    { id: 'week',  label: '7 ngày' },
-    { id: 'month', label: '30 ngày' },
-    { id: 'quarter', label: '90 ngày' }
+  /** Hạng thành viên — threshold = TỔNG gói bán luỹ kế để ĐẠT hạng. Sheet: 10, +8, +6, +4, +2 [cần xác nhận] */
+  ranks: [
+    { id: 'COPPER',   label: 'Copper',   threshold: 0,  canRecruit: false, tone: 'neutral' },
+    { id: 'SILVER',   label: 'Silver',   threshold: 10, canRecruit: true,  tone: 'info' },
+    { id: 'GOLD',     label: 'Gold',     threshold: 18, canRecruit: true,  tone: 'warning' },
+    { id: 'DIAMOND',  label: 'Diamond',  threshold: 24, canRecruit: true,  tone: 'navy' },
+    { id: 'TITANIUM', label: 'Titanium', threshold: 28, canRecruit: true,  tone: 'navy' },
+    { id: 'LITHIUM',  label: 'Lithium',  threshold: 30, canRecruit: true,  tone: 'success' }
   ],
+  /** Quy tắc hạng: bán < 1 gói/tháng → giáng 1 bậc (không dưới Copper). Giáng KHÔNG reset luỹ kế [cần xác nhận] */
+  rankRules: { minSalesPerMonth: 1, demoteSteps: 1, demoteResetsCumulative: false, jobTime: '0h ngày cuối tháng' },
+  /** Điểm = hoa hồng đã ghi nhận, 1 điểm = 1 VNĐ [cần xác nhận: ×10? redeem?] */
+  points: { perVnd: 1 },
+  /** Rút tiền: 1 lần/tháng, không ngưỡng tối thiểu, không holding, chi trả tay đầu tháng sau */
+  withdraw: { maxPerMonth: 1, payoutNote: 'Chi trả đầu tháng kế tiếp', minAmount: 0, holdingDays: 0, requireOtp: false },
+  /** Duyệt 2 lớp (đăng ký thành viên & rút tiền) */
+  approval: { requiredConfirms: 2, headCanFinalizeAlone: true, sameUserTwice: false, creatorCannotApprove: true },
+
+  admin: {
+    maxLoginFail: 5, lockMinutes: 15, pageSize: 10,
+    roles: { SPECIALIST: 'Admin Specialist', HEAD: 'Head Admin' },
+    /** Tài khoản demo khởi tạo (bản thật: Head Admin cấp tại D-10) */
+    accounts: [
+      { username: 'head',   password: 'Homi@2026', role: 'HEAD',       fullName: 'Trưởng bộ phận' },
+      { username: 'admin',  password: 'Homi@2026', role: 'SPECIALIST', fullName: 'Chuyên viên 1' },
+      { username: 'admin2', password: 'Homi@2026', role: 'SPECIALIST', fullName: 'Chuyên viên 2' }
+    ]
+  },
+
+  /** Quy tắc tuỳ chọn ngoài requirement — mặc định TẮT [cần xác nhận] */
+  rules: { onePackagePerPhone: false, rejectedCanResubmit: true, copperLinkBuyerCanRegisterLater: true },
+
+  /** Điều khoản & điều kiện (7.2.6) */
+  tc: {
+    version: '1.0', updatedAt: '2026-09-04',
+    text: 'ĐIỀU KHOẢN & ĐIỀU KIỆN THÀNH VIÊN HOMI365 (bản nháp — nội dung chính thức chờ khách cung cấp)\n\n1. Thành viên là cá nhân đã mua gói sản phẩm HOMI365 và được người giới thiệu đủ điều kiện mời tham gia.\n2. Hoa hồng được tính theo chênh lệch cấp bậc giữa các hạng, ghi nhận khi đơn hàng thanh toán thành công.\n3. Hạng thành viên được xét vào cuối mỗi tháng theo tổng số gói bán luỹ kế; không bán được gói nào trong tháng sẽ bị giáng một bậc.\n4. Thành viên được rút hoa hồng tối đa một lần mỗi tháng; công ty chi trả vào đầu tháng kế tiếp sau khi duyệt.\n5. Thành viên cam kết không quảng cáo sai sự thật, không spam link giới thiệu; vi phạm sẽ bị khoá tài khoản.\n6. Thông tin cá nhân được bảo mật theo chính sách của công ty.'
+  },
+  email: { from: 'admin@homi365.com.vn' },
+
+  vietqr: { bankName: 'Vietcombank', bankShort: 'VCB', accountNo: '0108294845', accountName: 'CONG TY TNHH GIAI PHAP CONG NGHE HUY GIAP' },
+  gateway: { label: 'Cổng thanh toán online', desc: 'Thẻ ATM nội địa, thẻ quốc tế, ví điện tử. Chuyển hướng sang cổng; kết quả cập nhật qua callback của cổng thanh toán.' },
+
+  /** Kho mã kích hoạt & thiết bị (7.8) */
+  stock: { lowThreshold: 50, codePrefix: 'HOMI', deviceSku: 'HW01', seedCount: 1200 },
+
+  shippingSteps: ['PENDING', 'PACKING', 'SHIPPING', 'DELIVERED'],
+  periods: [{ id: 'week', label: '7 ngày' }, { id: 'month', label: '30 ngày' }, { id: 'quarter', label: '90 ngày' }, { id: 'custom', label: 'Tuỳ chọn' }],
   defaultPeriod: 'month',
 
-  /**
-   * Nội dung giới thiệu sản phẩm hiển thị ở cột phải A-01 (chuyển từ trang chủ A0 của prototype v1,
-   * đổi nhận diện GoCare → HOMI365). Nội dung tĩnh theo mã gói; D-04 quản lý giá/thời hạn/quyền lợi ngắn.
-   */
+  /** Nội dung giới thiệu sản phẩm (cột phải A-01). */
   productContent: {
     CN02: {
       lead: 'Gói dịch vụ cao cấp bao gồm 01 đồng hồ thông minh HW01 theo dõi nhịp tim / SOS giao tận nơi và 01 năm phần mềm Bác sĩ 24/7 (mã kích hoạt gửi qua SMS).',
       intro: 'Gói Bác sĩ 24/7 hỗ trợ, tư vấn sức khoẻ (ký hiệu CN02) cung cấp các tính năng nâng cao của nền tảng HOMI365. Ngoài việc tự theo dõi sức khoẻ cá nhân, người dùng được Trợ lý sức khoẻ theo dõi 24/7, được tư vấn trực tuyến từ đội ngũ bác sĩ, và khi có tình huống bất thường khẩn cấp hệ thống tự động gọi tới người thân kèm vị trí của người dùng để hỗ trợ kịp thời.',
-      storageYears: 10, storageSizeMB: 50,
       gallery: [
         { src: './public/product/nc-1.png', thumb: './public/product/thumbs/nc-1.png', title: 'Theo dõi, quản lý sức khoẻ cá nhân' },
         { src: './public/product/nc-2.png', thumb: './public/product/thumbs/nc-2.png', title: 'Thu nhận dữ liệu vào ứng dụng' },
@@ -130,16 +108,17 @@ const CONFIG = {
 
   demo: {
     simulatedLatencyMs: 450,
-    navigator: false,          // nút "Demo" góc phải (chỉ bật khi review nội bộ) — bản gửi KH tắt
-    seedNewSeller: true,       // seller vừa tạo được sinh sẵn click/đơn/hoa hồng mẫu để dashboard không trống
-    smsErrorPhone: '0911111111', // SĐT mẫu: gửi OTP luôn báo lỗi dịch vụ SMS (A-01 trạng thái g)
-    adminPhone: '0900000000',    // SĐT mẫu của tài khoản admin (A-05 từ chối theo BR-12)
-    reconcileAutoSeconds: 0    // > 0: tự động đối soát sau N giây (0 = chờ admin ở D-03)
+    navigator: false,          // bảng điều hướng demo (F9) — bản gửi KH tắt
+    seedNewAgent: true,        // agent vừa được duyệt: sinh sẵn click/đơn mẫu để dashboard không trống
+    smsErrorPhone: '0911111111',
+    adminPhone: '0900000000',
+    agentPassword: 'Homi@123',
+    reconcileAutoSeconds: 0
   }
 };
 
 /* ------------------------------------------------------------------ */
-/* Nhãn & phân loại trạng thái (dùng cho badge — luôn có chữ)          */
+/* Nhãn & phân loại trạng thái (badge luôn có chữ)                     */
 /* ------------------------------------------------------------------ */
 const LABELS = {
   orderStatus: {
@@ -151,171 +130,131 @@ const LABELS = {
     REJECTED:           { text: 'Bị từ chối',      tone: 'error' }
   },
   shipping: {
-    NONE:      { text: 'Chưa giao',      tone: 'neutral' },
-    PENDING:   { text: 'Chờ xử lý',      tone: 'warning' },
-    PACKING:   { text: 'Đang đóng gói',  tone: 'info' },
-    SHIPPING:  { text: 'Đang giao',      tone: 'info' },
-    DELIVERED: { text: 'Đã giao',        tone: 'success' }
+    NONE: { text: 'Chưa giao', tone: 'neutral' }, PENDING: { text: 'Chờ xử lý', tone: 'warning' }, PACKING: { text: 'Đang đóng gói', tone: 'info' },
+    SHIPPING: { text: 'Đang giao', tone: 'info' }, DELIVERED: { text: 'Đã giao', tone: 'success' }
   },
   license: {
-    IN_STOCK: { text: 'Trong kho',  tone: 'neutral' },
-    ISSUED:   { text: 'Đã cấp',     tone: 'info' },
-    BOUND:    { text: 'Đã kích hoạt', tone: 'success' },
-    PENDING:  { text: 'Chờ cấp',    tone: 'warning' }
+    IN_STOCK:  { text: 'Sẵn hàng',          tone: 'neutral' },
+    ASSIGNED:  { text: 'Đã gắn đơn hàng',   tone: 'info' },
+    ACTIVATED: { text: 'Đã kích hoạt',      tone: 'success' },
+    PENDING:   { text: 'Chờ cấp',           tone: 'warning' }
   },
-  commission: {
-    PENDING:   { text: 'Chờ duyệt',   tone: 'warning' },
-    APPROVED:  { text: 'Đã duyệt',    tone: 'info' },
-    PAID:      { text: 'Đã chi',      tone: 'success' },
-    CANCELLED: { text: 'Đã huỷ',      tone: 'error' }
+  approval: {
+    PENDING_0: { text: 'Chờ duyệt (0/2)', tone: 'warning' },
+    PENDING_1: { text: 'Chờ duyệt (1/2)', tone: 'info' },
+    APPROVED:  { text: 'Đã duyệt',        tone: 'success' },
+    REJECTED:  { text: 'Từ chối',         tone: 'error' }
   },
   withdrawal: {
-    PENDING:  { text: 'Chờ duyệt', tone: 'warning' },
-    APPROVED: { text: 'Đã duyệt',  tone: 'info' },
-    PAID:     { text: 'Đã chi',    tone: 'success' },
-    REJECTED: { text: 'Từ chối',   tone: 'error' }
+    PENDING_0: { text: 'Chờ duyệt (0/2)',        tone: 'warning' },
+    PENDING_1: { text: 'Chờ duyệt (1/2)',        tone: 'info' },
+    APPROVED:  { text: 'Đã duyệt – chờ chi trả', tone: 'navy' },
+    PAID:      { text: 'Đã chi trả',             tone: 'success' },
+    REJECTED:  { text: 'Từ chối',                tone: 'error' }
   },
-  user: {
-    active: { text: 'Đang hoạt động', tone: 'success' },
-    locked: { text: 'Đã khoá',        tone: 'error' }
+  commission: {
+    RECORDED:  { text: 'Đã ghi nhận', tone: 'success' },
+    CANCELLED: { text: 'Đã huỷ',      tone: 'error' }
   },
-  userType: {
-    buyer:  { text: 'Người mua (chưa TK)', tone: 'neutral' },
-    seller: { text: 'Seller',              tone: 'navy' }
+  commissionKind: {
+    SELF:    { text: 'Tự bán',               tone: 'navy' },
+    DIFF:    { text: 'Chênh lệch tuyến dưới', tone: 'info' },
+    COMPANY: { text: 'Về công ty',           tone: 'neutral' }
   },
-  method: {
-    gateway: 'Cổng online',
-    bank: 'Chuyển khoản VietQR',
-    exception: 'Cấp ngoại lệ'
+  rankEvent: {
+    INIT: { text: 'Khởi tạo', tone: 'neutral' }, PROMOTE: { text: 'Thăng hạng', tone: 'success' },
+    DEMOTE: { text: 'Giáng hạng', tone: 'error' }, ASSIGN: { text: 'Chỉ định', tone: 'navy' }
   },
+  user: { active: { text: 'Đang hoạt động', tone: 'success' }, locked: { text: 'Đã khoá', tone: 'error' } },
+  userType: { buyer: { text: 'Người mua (chưa TV)', tone: 'neutral' }, agent: { text: 'Thành viên', tone: 'navy' } },
+  adminStatus: { active: { text: 'Đang hoạt động', tone: 'success' }, disabled: { text: 'Vô hiệu', tone: 'error' } },
+  role: { HEAD: { text: 'Head Admin', tone: 'navy' }, SPECIALIST: { text: 'Admin Specialist', tone: 'info' } },
+  method: { gateway: 'Cổng online', bank: 'Chuyển khoản VietQR', exception: 'Cấp ngoại lệ' },
   ledger: {
-    COMMISSION_PENDING:   'Hoa hồng ghi nhận (chờ duyệt)',
-    COMMISSION_AVAILABLE: 'Hoa hồng đã duyệt',
-    WITHDRAW_HOLD:        'Tạo yêu cầu rút tiền',
-    WITHDRAW_PAID:        'Đã chi rút tiền',
-    WITHDRAW_REJECTED:    'Hoàn lại (rút tiền bị từ chối)',
-    COMMISSION_CANCELLED: 'Huỷ hoa hồng (đơn hoàn tiền)'
+    COMMISSION_RECORDED: 'Hoa hồng ghi nhận', COMMISSION_CANCELLED: 'Huỷ hoa hồng (đơn hoàn tiền)',
+    WITHDRAW_HOLD: 'Tạo yêu cầu rút tiền', WITHDRAW_PAID: 'Đã chi trả rút tiền', WITHDRAW_REJECTED: 'Hoàn lại (rút tiền bị từ chối)'
   }
 };
+// LABELS.rank sinh từ CONFIG.ranks để chỉ có một nguồn
+LABELS.rank = {};
+CONFIG.ranks.forEach(r => { LABELS.rank[r.id] = { text: r.label, tone: r.tone }; });
 
 /* ------------------------------------------------------------------ */
 /* Hàm suy diễn                                                         */
 /* ------------------------------------------------------------------ */
 const RULES = {
-  now: function() { return new Date(CONFIG.today); },
+  now: function() { return new Date(); },
+  formatMoney: function(num) { const n = Math.round(Number(num) || 0); return (n < 0 ? '-' : '') + Math.abs(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + 'đ'; },
+  formatNumber: function(num) { return Math.round(Number(num) || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.'); },
+  formatPercent: function(rate, digits) { const d = digits === undefined ? 0 : digits; return (Number(rate || 0) * 100).toFixed(d).replace('.', ',') + '%'; },
+  formatDate: function(iso) { if (!iso) return ''; const d = new Date(iso); const p = (v) => String(v).padStart(2, '0'); return `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()}`; },
+  formatDateTime: function(iso) { if (!iso) return ''; const d = new Date(iso); const p = (v) => String(v).padStart(2, '0'); return `${p(d.getHours())}:${p(d.getMinutes())} ${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()}`; },
+  formatMonth: function(iso) { const d = new Date(iso); return String(d.getMonth() + 1).padStart(2, '0') + '/' + d.getFullYear(); },
+  formatDuration: function(seconds) { const s = Math.max(0, Math.floor(seconds)); const p = (v) => String(v).padStart(2, '0'); return `${p(Math.floor(s / 60))}:${p(s % 60)}`; },
 
-  formatMoney: function(num) {
-    const n = Math.round(Number(num) || 0);
-    return (n < 0 ? '-' : '') + Math.abs(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.') + 'đ';
-  },
-  formatNumber: function(num) {
-    return Math.round(Number(num) || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-  },
-  formatPercent: function(rate, digits) {
-    const d = digits === undefined ? 0 : digits;
-    return (Number(rate || 0) * 100).toFixed(d).replace('.', ',') + '%';
-  },
-  formatDate: function(iso) {
-    if (!iso) return '';
-    const d = new Date(iso);
-    const p = (v) => String(v).padStart(2, '0');
-    return `${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()}`;
-  },
-  formatDateTime: function(iso) {
-    if (!iso) return '';
-    const d = new Date(iso);
-    const p = (v) => String(v).padStart(2, '0');
-    return `${p(d.getHours())}:${p(d.getMinutes())} ${p(d.getDate())}/${p(d.getMonth() + 1)}/${d.getFullYear()}`;
-  },
-  formatDuration: function(seconds) {
-    const s = Math.max(0, Math.floor(seconds));
-    const p = (v) => String(v).padStart(2, '0');
-    return `${p(Math.floor(s / 60))}:${p(s % 60)}`;
-  },
-
-  /** BR-02: chuẩn hoá SĐT di động VN về 0xxxxxxxxx. Trả về '' nếu không hợp lệ. */
   normalizePhone: function(raw) {
     let p = String(raw || '').replace(/[^\d+]/g, '');
-    if (p.startsWith('+84')) p = '0' + p.slice(3);
-    else if (p.startsWith('84') && p.length === 11) p = '0' + p.slice(2);
+    if (p.startsWith('+84')) p = '0' + p.slice(3); else if (p.startsWith('84') && p.length === 11) p = '0' + p.slice(2);
     return /^0(3|5|7|8|9)\d{8}$/.test(p) ? p : '';
   },
-  maskPhone: function(phone) {
-    const p = String(phone || '');
-    return p.length >= 6 ? `${p.slice(0, 3)}•••${p.slice(-3)}` : p;
+  isEmail: function(s) { return /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(String(s || '').trim()); },
+  maskPhone: function(phone) { const p = String(phone || ''); return p.length >= 6 ? `${p.slice(0, 3)}•••${p.slice(-3)}` : p; },
+  maskAccount: function(acc) { const a = String(acc || ''); return a.length >= 7 ? `${a.slice(0, 4)}•••${a.slice(-3)}` : a; },
+  maskEmail: function(e) { const s = String(e || ''); const i = s.indexOf('@'); return i > 2 ? s.slice(0, 2) + '•••' + s.slice(i) : s; },
+  initials: function(fullName) { const parts = String(fullName || '').trim().split(/\s+/); return (parts[parts.length - 1] || '?').charAt(0).toUpperCase(); },
+
+  /** Bỏ dấu tiếng Việt (8.1.C-4). */
+  deaccent: function(str) {
+    return String(str || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
   },
-  maskAccount: function(acc) {
-    const a = String(acc || '');
-    return a.length >= 7 ? `${a.slice(0, 4)}•••${a.slice(-3)}` : a;
+  /** Alias link mua hàng cá nhân [EEEE][PPPP]: chữ cái đầu mỗi từ của họ tên (bỏ dấu, in hoa) + 4 số cuối SĐT. 'Hoàng Thị Mỹ Trinh','0937630083' → 'HTMT0083'. */
+  purchaseAlias: function(fullName, phone) {
+    const initials = this.deaccent(fullName).trim().split(/\s+/).filter(Boolean).map(w => w.charAt(0).toUpperCase()).join('').replace(/[^A-Z]/g, '');
+    return (initials || 'TV') + String(phone || '').slice(-4);
   },
-  maskCccd: function(id) {
-    const a = String(id || '');
-    return a.length >= 8 ? `${a.slice(0, 4)}••••${a.slice(-2)}` : a;
-  },
-  initials: function(fullName) {
-    const parts = String(fullName || '').trim().split(/\s+/);
-    return (parts[parts.length - 1] || '?').charAt(0).toUpperCase();
+  referralUrl: function(code) { return `${CONFIG.brand.baseUrl}/#r/${code}`; },
+  referralHash: function(code) { return `#r/${code}`; },
+  purchaseUrl: function(alias) { return `${CONFIG.brand.baseUrl}/#p/${alias}`; },
+  purchaseHash: function(alias) { return `#p/${alias}`; },
+  publicPurchaseUrl: function(alias) { return `${CONFIG.brand.publicDomain}/${alias}`; },
+
+  orderExpiry: function(createdIso) { return new Date(new Date(createdIso).getTime() + CONFIG.order.holdSeconds * 1000).toISOString(); },
+  ownsPackage: function(orders, phone) { return orders.some(o => o.phone === phone && (o.status === 'PAID' || o.status === 'AWAITING_RECONCILE')); },
+
+  // ----- Hạng -----
+  rankIndex: function(id) { return Math.max(0, CONFIG.ranks.findIndex(r => r.id === id)); },
+  rank: function(id) { return CONFIG.ranks.find(r => r.id === id) || CONFIG.ranks[0]; },
+  nextRank: function(id) { const i = this.rankIndex(id); return CONFIG.ranks[i + 1] || null; },
+  prevRank: function(id) { const i = this.rankIndex(id); return CONFIG.ranks[Math.max(0, i - 1)]; },
+  rankByCumulativeSales: function(n) { let best = CONFIG.ranks[0]; CONFIG.ranks.forEach(r => { if (n >= r.threshold) best = r; }); return best; },
+  salesToNextRank: function(cum, rankId) { const nx = this.nextRank(rankId); return nx ? Math.max(0, nx.threshold - cum) : 0; },
+  canRecruit: function(rankId) { return !!this.rank(rankId).canRecruit; },
+  topRank: function() { return CONFIG.ranks[CONFIG.ranks.length - 1]; },
+  pointsOf: function(vnd) { return Math.round((Number(vnd) || 0) * CONFIG.points.perVnd); },
+  inSameMonth: function(a, b) { const x = new Date(a), y = new Date(b || Date.now()); return x.getFullYear() === y.getFullYear() && x.getMonth() === y.getMonth(); },
+  monthStart: function(iso) { const d = new Date(iso || Date.now()); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString(); },
+
+  /** Tổng hoa hồng một đơn theo bảng hạng = mức Lithium. */
+  commissionTotal: function(byRank) { return Number(byRank[this.topRank().id] || 0); },
+  /** Bảng hoa hồng phải tăng đơn điệu theo hạng. */
+  validateCommissionTable: function(byRank) {
+    let prev = -1;
+    for (const r of CONFIG.ranks) { const v = Number(byRank[r.id]); if (!(v >= 0)) return { ok: false, message: 'Thiếu mức hoa hồng cho hạng ' + r.label + '.' }; if (v < prev) return { ok: false, message: 'Mức hoa hồng hạng ' + r.label + ' phải ≥ hạng thấp hơn.' }; prev = v; }
+    return { ok: true };
   },
 
-  /** Link giới thiệu /r/{mã} — tuyệt đối theo brand.baseUrl. */
-  referralUrl: function(code) {
-    return `${CONFIG.brand.baseUrl}/#r/${code}`; // prototype dùng hash router; bản thật là /r/{mã}
-  },
-  /** Link nội bộ của prototype mở được ngay (hash router). */
-  referralHash: function(code) {
-    return `#r/${code}`;
-  },
-
-  /** Hạn giữ đơn từ thời điểm tạo. */
-  orderExpiry: function(createdIso) {
-    return new Date(new Date(createdIso).getTime() + CONFIG.order.holdSeconds * 1000).toISOString();
-  },
-
-  /** BR-03: SĐT được xem là "đã sở hữu gói" khi có đơn PAID hoặc AWAITING_RECONCILE. */
-  ownsPackage: function(orders, phone) {
-    return orders.some(o => o.phone === phone && (o.status === 'PAID' || o.status === 'AWAITING_RECONCILE'));
-  },
-
-  /** Nhãn tầng: F1, F2… */
-  tierLabel: function(tier) { return 'F' + tier; },
-
-  /** Tổng tỉ lệ chi ra của một chính sách. */
-  totalRate: function(policy) {
-    return (policy.tiers || []).reduce((s, t) => s + Number(t.rate || 0), 0);
-  },
-
-  /** Ngày hoa hồng khả dụng = ngày ghi nhận + holding period của chính sách. */
-  availableAt: function(createdIso, policy) {
-    return new Date(new Date(createdIso).getTime() + (policy.holdingDays || 0) * 86400000).toISOString();
-  },
-
-  /** Kiểm tra số tiền rút. */
-  validateWithdrawal: function(amount, available, policy) {
+  validateWithdrawal: function(amount, available) {
     const amt = Number(amount) || 0;
-    const min = policy.minWithdraw || 0;
     if (amt <= 0) return { ok: false, message: 'Vui lòng nhập số tiền muốn rút.' };
-    if (amt < min) return { ok: false, message: `Số tiền rút tối thiểu là ${RULES.formatMoney(min)}.` };
-    if (amt > available) return { ok: false, message: `Vượt quá số dư khả dụng (${RULES.formatMoney(available)}).` };
+    if (CONFIG.withdraw.minAmount && amt < CONFIG.withdraw.minAmount) return { ok: false, message: `Số tiền rút tối thiểu là ${this.formatMoney(CONFIG.withdraw.minAmount)}.` };
+    if (amt > available) return { ok: false, message: `Vượt quá số dư khả dụng (${this.formatMoney(available)}).` };
     return { ok: true, message: '' };
   },
+  validatePassword: function(pw) { const s = String(pw || ''); if (s.length < 8) return 'Mật khẩu tối thiểu 8 ký tự.'; if (!/[A-Za-z]/.test(s) || !/\d/.test(s)) return 'Mật khẩu cần có cả chữ và số.'; return ''; },
 
-  /** Tỷ lệ chuyển đổi = đơn paid / click. */
-  conversion: function(paid, clicks) {
-    return clicks > 0 ? paid / clicks : 0;
-  },
-
+  conversion: function(paid, clicks) { return clicks > 0 ? paid / clicks : 0; },
   shippingLabel: function(step) { return (LABELS.shipping[step] || LABELS.shipping.NONE).text; },
-  nextShippingStep: function(step) {
-    const i = CONFIG.shippingSteps.indexOf(step);
-    return i >= 0 && i < CONFIG.shippingSteps.length - 1 ? CONFIG.shippingSteps[i + 1] : null;
-  },
-
-  /** Số tiền hoa hồng làm tròn về đồng. */
-  commissionAmount: function(price, rate) {
-    return Math.round(price * rate);
-  }
+  nextShippingStep: function(step) { const i = CONFIG.shippingSteps.indexOf(step); return i >= 0 && i < CONFIG.shippingSteps.length - 1 ? CONFIG.shippingSteps[i + 1] : null; }
 };
 
-if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { CONFIG, LABELS, RULES };
-}
+if (typeof module !== 'undefined' && module.exports) { module.exports = { CONFIG, LABELS, RULES }; }
