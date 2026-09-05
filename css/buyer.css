@@ -117,7 +117,9 @@
 @media (max-width: 899px) { .a01-pkg { order: 0; } .a01-ref { order: 1; } .a01-form { order: 2; } .a01-intro { order: 3; } }
 @media (min-width: 900px) {
   .a01-grid { grid-template-columns: 7fr 5fr; gap: 24px 28px; grid-template-areas: "ref pkg" "form intro"; align-items: stretch; }
-  .a01-ref { grid-area: ref; } .a01-pkg { grid-area: pkg; } .a01-form { grid-area: form; } .a01-intro { grid-area: intro; }
+  .a01-ref { grid-area: ref; } .a01-pkg { grid-area: pkg; }
+  /* hàng 2 không kéo giãn theo nhau: mở rộng chi tiết bên phải không làm form bên trái cao theo */
+  .a01-form { grid-area: form; align-self: start; } .a01-intro { grid-area: intro; align-self: start; }
 }
 #feat-toggle .ico { transition: transform var(--transition); }
 #feat-toggle.is-open .ico { transform: rotate(180deg); }
