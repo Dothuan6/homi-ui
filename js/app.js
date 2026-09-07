@@ -13,6 +13,7 @@ const App = {
     'C-01': (q) => Seller.C01(q), 'C-02': (q) => Seller.C02(q), 'C-03': (q) => Seller.C03(q), 'C-PROFILE': (q) => Seller.profile(q),
     'D-00': (q) => Admin.D00(q), 'D-01': (q) => Admin.D01(q), 'D-02': (q) => Admin.D02(q), 'D-03': (q) => Admin.D03(q), 'D-04': (q) => Admin.D04(q), 'D-05': (q) => Admin.D05(q),
     'D-06': (q) => Admin.D06(q), 'D-07': (q) => Admin.D07(q), 'D-08': (q) => Admin.D08(q), 'D-09': (q) => Admin.D09(q), 'D-10': (q) => Admin.D10(q),
+    'POLICY': (q) => App.pagePolicy(q),
     '403': () => App.page403(), 'STYLEGUIDE': () => { window.location.href = './styleguide.html'; }
   },
 
@@ -64,6 +65,7 @@ const App = {
       <footer class="site-footer"><div class="site-footer-inner">
         <div>${UI.logo({ size: 28 })}<p class="mt-2">${UI.esc(CONFIG.brand.company)}</p><p>Hỗ trợ <strong>${UI.esc(CONFIG.brand.supportHotline)}</strong> · ${UI.esc(CONFIG.brand.supportHours)}</p></div>
         <div><div class="footer-title">Khách hàng</div><a href="#A-04">Tra cứu đơn hàng</a><a href="#A-05">Đăng nhập thành viên</a><a href="#A-06">Đăng ký thành viên</a><a href="#HOME">Trang giới thiệu prototype</a></div>
+        <div><div class="footer-title">Chính sách</div>${POLICIES.map(p => `<a href="#POLICY?s=${p.id}">${UI.esc(p.title)}</a>`).join('')}</div>
         <div><div class="footer-title">Quản trị</div><a href="#D-00">Đăng nhập quản trị</a><a href="./styleguide.html">Bộ thành phần giao diện</a></div>
       </div></footer>
     </div>`;
@@ -126,6 +128,24 @@ const App = {
       </div></div>`;
   },
   logoutAdmin: function() { Store.logoutAdmin(); this.navigate('D-00'); },
+
+  // ---------------- Trang chính sách (một trang, danh mục bên phải) ----------------
+  pagePolicy: function(q) {
+    const id = q.get('s') || POLICIES[0].id; const p = POLICIES.find(x => x.id === id) || POLICIES[0];
+    const item = (it) => typeof it === 'string' ? `<p>${UI.esc(it)}</p>` : it.list ? `<ul class="policy-list">${it.list.map(t => `<li>${UI.esc(t)}</li>`).join('')}</ul>` : it.steps ? `<ol class="policy-steps">${it.steps.map((t, i) => `<li><strong>Bước ${i + 1}:</strong> ${UI.esc(t)}</li>`).join('')}</ol>` : '';
+    const html = `<div class="policy">
+      <nav class="policy-crumb" aria-label="Breadcrumb"><a href="#HOME">Trang chủ</a><span>/</span><span>${UI.esc(p.title)}</span></nav>
+      <div class="policy-grid">
+        <article class="policy-body">
+          <h1>${UI.esc(p.title)}</h1>
+          ${p.intro ? `<p class="policy-intro">${UI.esc(p.intro)}</p>` : ''}
+          ${p.sections.map((sec, i) => `<section class="policy-section" id="sec-${i + 1}"><h2>${UI.esc(sec.h)}</h2>${sec.items.map(item).join('')}</section>`).join('')}
+          <p class="text-caption mt-6">Cập nhật 09/2026 · ${UI.esc(CONFIG.brand.company)} · Hỗ trợ ${UI.esc(CONFIG.brand.supportHotline)}</p>
+        </article>
+        <aside class="policy-side"><div class="policy-menu"><div class="policy-menu-title">Danh mục chính sách</div>${POLICIES.map(x => `<a href="#POLICY?s=${x.id}" class="${x.id === p.id ? 'is-active' : ''}" ${x.id === p.id ? 'aria-current="page"' : ''}>${UI.esc(x.title)}</a>`).join('')}</div></aside>
+      </div></div>`;
+    return this.buyerShell(html);
+  },
 
   page403: function(kind) {
     const spec = kind === 'specialist';
