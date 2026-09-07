@@ -70,3 +70,7 @@
 
 /* QR nằm dưới nút chia sẻ trong khối link (C-01) */
 .ref-qr-inline { max-width: 220px; margin: var(--sp-4) auto 0; }
+
+/* C-01: 3 tab sticky dưới header (Thống kê · Hoa hồng · Tuyến) */
+.c01-tabs { position: sticky; top: 64px; z-index: 40; background: var(--bg-alt); padding: 6px 0 0; margin-top: var(--sp-3) !important; }
+.c01-tabs .tabs { background: var(--white); border: 1px solid var(--border-soft); border-bottom: 2px solid var(--border-soft); border-radius: var(--r-lg) var(--r-lg) 0 0; padding: 0 8px; box-shadow: var(--shadow-sm); }

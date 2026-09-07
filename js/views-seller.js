@@ -2,7 +2,8 @@
  * Nhóm C · Dashboard thành viên (spec v3, 7.3) — C-01 Tổng quan · C-02 Gói & mã · C-03 Ví & rút tiền · Hồ sơ
  */
 const Seller = {
-  state: { period: CONFIG.defaultPeriod, from: '', to: '', cmKind: '', cmPage: 1, wdTab: 'requests', wdStep: null },
+  state: { tab: 'stats', period: CONFIG.defaultPeriod, from: '', to: '', cmKind: '', cmPage: 1, wdTab: 'requests', wdStep: null },
+  setTab: function(t) { this.state.tab = t; App.reload(); const bar = document.querySelector('.c01-tabs'); if (bar) window.scrollTo({ top: Math.max(0, bar.getBoundingClientRect().top + window.scrollY - 64), behavior: 'auto' }); },
 
   range: function() {
     const days = { week: 7, month: 30, quarter: 90 }[this.state.period];
@@ -25,9 +26,8 @@ const Seller = {
     const sold = Store.salesThisMonth(u.id); const rr = Store.rules().rankRules; const w = Store.wallet(u.id); const cw = Store.canWithdraw(u.id);
     const refUrl = RULES.referralUrl(u.refCode); const aliasUrl = RULES.purchaseUrl(u.purchaseAlias);
     const pct = nx ? Math.min(100, Math.round(((u.cumulativeSales - rk.threshold) / Math.max(1, nx.threshold - rk.threshold)) * 100)) : 100;
-    const html = `<div class="stack-lg">
-      <div class="page-title"><div><h1>Xin chào, ${UI.esc(u.fullName)}</h1><p class="row-wrap">${UI.badge('rank', u.rank, true)}<span>Mã giới thiệu <span class="mono text-strong">${UI.esc(u.refCode)}</span> · thành viên từ ${UI.date(u.activatedAt || u.createdAt)}</span></p></div></div>
-
+    const tab = this.state.tab || 'stats';
+    const tabStats = `<div class="stack-lg">
       <div class="grid-2 grid-2-wide">
         <div class="card"><div class="card-head"><h2>Link của bạn</h2>${RULES.canRecruit(u.rank) ? '<span class="text-sm text-muted">Khách mua qua link được tính vào tuyến của bạn</span>' : '<span class="badge badge-warning">Hạng Copper: chỉ bán, chưa được tuyển thành viên</span>'}</div>
           <div class="card-body stack">
@@ -49,7 +49,8 @@ const Seller = {
       </div>
 
       <div class="card"><div class="card-head"><h2>Thống kê</h2>${this.periodSeg()}</div><div class="card-body" id="c01-stats">${UI.skeletonCards(2)}</div></div>
-
+    </div>`;
+    const tabCm = `<div class="stack-lg">
       <div class="card"><div class="card-head"><h2>Hoa hồng</h2><button class="btn btn-accent" ${cw.ok ? '' : 'disabled'} title="${cw.ok ? '' : UI.esc(cw.message)}" onclick="App.navigate('C-03?withdraw=1')">${UI.icon('cash', 18)} Rút tiền</button></div>
         <div class="card-body">
           <div class="stat-grid stat-grid-4">
@@ -66,10 +67,17 @@ const Seller = {
           <select class="select" style="min-height:40px;width:auto" aria-label="Lọc nguồn" onchange="Seller.state.cmKind=this.value; Seller.state.cmPage=1; Seller.renderCommissions()"><option value="">Tất cả nguồn</option><option value="SELF" ${this.state.cmKind === 'SELF' ? 'selected' : ''}>Tự bán</option><option value="DIFF" ${this.state.cmKind === 'DIFF' ? 'selected' : ''}>Chênh lệch tuyến dưới</option></select>
           <button class="btn btn-secondary btn-sm" onclick="Seller.exportCommissions()">${UI.icon('download', 16)} Xuất Excel</button></div></div>
         <div class="card-body" id="c01-cm">${UI.skeletonTable(6, 5)}</div></div>
-
+    </div>`;
+    const tabTree = `<div class="stack-lg">
       <div class="card"><div class="card-head"><h2>Tuyến dưới (F1 · F2 · F3)</h2><span class="text-sm text-muted">${this.downlineCounts(u).map((n, i) => 'F' + (i + 1) + ': ' + n).join(' · ')}</span></div><div class="card-body">${this.downlineTree(u)}</div></div>
     </div>`;
-    App.after(() => { UI.withLoading('c01-stats', UI.skeletonCards(2), () => this.renderStats()); UI.withLoading('c01-cm', UI.skeletonTable(6, 5), () => this.renderCommissions()); this.renderCmChart(); });
+    const tabBar = `<div class="c01-tabs"><div class="tabs" role="tablist">${[['stats', 'Thống kê', 'chart'], ['commission', 'Hoa hồng', 'cash'], ['tree', 'Tuyến', 'users']].map(([id, label, ico]) => `<button class="tab ${tab === id ? 'is-active' : ''}" role="tab" aria-selected="${tab === id}" onclick="Seller.setTab('${id}')">${UI.icon(ico, 18)} ${label}${id === 'tree' ? ` <span class="count">${this.downlineCounts(u).reduce((a, b) => a + b, 0)}</span>` : ''}</button>`).join('')}</div></div>`;
+    const html = `<div class="stack-lg">
+      <div class="page-title"><div><h1>Xin chào, ${UI.esc(u.fullName)}</h1><p class="row-wrap">${UI.badge('rank', u.rank, true)}<span>Mã giới thiệu <span class="mono text-strong">${UI.esc(u.refCode)}</span> · thành viên từ ${UI.date(u.activatedAt || u.createdAt)}</span></p></div></div>
+      ${tabBar}
+      ${tab === 'stats' ? tabStats : tab === 'commission' ? tabCm : tabTree}
+    </div>`;
+    App.after(() => { if (tab === 'stats') UI.withLoading('c01-stats', UI.skeletonCards(2), () => this.renderStats()); if (tab === 'commission') { UI.withLoading('c01-cm', UI.skeletonTable(6, 5), () => this.renderCommissions()); this.renderCmChart(); } });
     return App.sellerShell('C-01', html);
   },
   shareZalo: function(url) { UI.copy(url, 'Đã sao chép link — dán vào tin nhắn Zalo để chia sẻ.'); window.open('https://zalo.me/', '_blank', 'noopener'); },
