@@ -30,12 +30,11 @@ const Seller = {
 
       <div class="grid-2 grid-2-wide">
         <div class="card"><div class="card-head"><h2>Link của bạn</h2>${RULES.canRecruit(u.rank) ? '<span class="text-sm text-muted">Khách mua qua link được tính vào tuyến của bạn</span>' : '<span class="badge badge-warning">Hạng Copper: chỉ bán, chưa được tuyển thành viên</span>'}</div>
-          <div class="card-body ref-block"><div class="stack">
+          <div class="card-body stack">
             <div><div class="field-label mb-2">Link giới thiệu (ref_code)</div><div class="ref-url"><input class="input" readonly value="${UI.esc(refUrl)}" aria-label="Link giới thiệu" onclick="this.select()"><button class="btn btn-primary" onclick="UI.copy('${UI.esc(refUrl)}', 'Đã sao chép link giới thiệu.')">${UI.icon('copy', 18)} Sao chép</button></div></div>
             <div><div class="field-label mb-2">Link mua hàng cá nhân · <span class="mono">${UI.esc(RULES.publicPurchaseUrl(u.purchaseAlias))}</span></div><div class="ref-url"><input class="input" readonly value="${UI.esc(aliasUrl)}" aria-label="Link mua hàng cá nhân" onclick="this.select()"><button class="btn btn-secondary" onclick="UI.copy('${UI.esc(aliasUrl)}', 'Đã sao chép link mua hàng cá nhân.')">${UI.icon('copy', 18)} Sao chép</button></div></div>
             <div class="share-row"><button class="btn btn-secondary share-btn" onclick="Seller.shareZalo('${UI.esc(aliasUrl)}')"><span class="share-mark share-zalo">Z</span> Zalo</button><button class="btn btn-secondary share-btn" onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent('${UI.esc(aliasUrl)}'), '_blank', 'noopener')"><span class="share-mark share-fb">f</span> Facebook</button><button class="btn btn-secondary share-btn" onclick="UI.share('${UI.esc(aliasUrl)}', 'Gói Bác sĩ 24/7 HOMI365')">${UI.icon('share', 18)} Khác</button></div>
-          </div>
-          <div class="ref-qr">${UI.qrSvg(aliasUrl, 150)}<div class="qr-label">QR link mua hàng cá nhân</div><button class="btn btn-ghost btn-sm mt-1" onclick="Seller.downloadQr('${UI.esc(u.purchaseAlias)}')">${UI.icon('download', 16)} Tải QR</button></div>
+            <div class="ref-qr ref-qr-inline">${UI.qrSvg(aliasUrl, 150)}<div class="qr-label">QR link mua hàng cá nhân</div><button class="btn btn-ghost btn-sm mt-1" onclick="Seller.downloadQr('${UI.esc(u.purchaseAlias)}')">${UI.icon('download', 16)} Tải QR</button></div>
           </div></div>
         <div class="stack">
           <div class="card card-tint"><div class="card-body">

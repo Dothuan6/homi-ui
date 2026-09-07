@@ -67,3 +67,6 @@
 /* Thiết bị (C-02) */
 .device { display: flex; gap: 14px; align-items: center; padding: 14px; background: var(--bg-alt); border-radius: var(--r-md); }
 .device-icon { width: 48px; height: 48px; border-radius: var(--r-md); background: var(--white); border: 1px solid var(--border); display: inline-flex; align-items: center; justify-content: center; color: var(--navy-600); flex-shrink: 0; }
+
+/* QR nằm dưới nút chia sẻ trong khối link (C-01) */
+.ref-qr-inline { max-width: 220px; margin: 0 auto; }
