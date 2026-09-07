@@ -440,8 +440,10 @@ const Store = {
   // ---------- Rút tiền (7.6) ----------
   canWithdraw: function(agentId, amount) {
     const w = this.wallet(agentId);
-    const thisMonth = this.withdrawalsOf(agentId).find(x => ['PENDING_0', 'PENDING_1', 'APPROVED'].includes(x.status) && RULES.inSameMonth(x.createdAt));
-    if (thisMonth) return { ok: false, reason: 'monthly', message: `Chỉ được rút ${CONFIG.withdraw.maxPerMonth} lần/tháng. Yêu cầu ${thisMonth.id} đang xử lý.`, existing: thisMonth };
+    // 1 lần/tháng: mọi yêu cầu tạo trong tháng (trừ yêu cầu bị từ chối) đều tính — kể cả đã chi trả
+    const monthCount = this.withdrawalsOf(agentId).filter(x => x.status !== 'REJECTED' && RULES.inSameMonth(x.createdAt));
+    const limit = (this.rules().withdraw && this.rules().withdraw.maxPerMonth) || CONFIG.withdraw.maxPerMonth;
+    if (monthCount.length >= limit) { const last = monthCount[0]; return { ok: false, reason: 'monthly', message: `Chỉ được rút ${limit} lần/tháng. Tháng ${RULES.formatMonth(last.createdAt)} bạn đã có yêu cầu ${last.id} (${LABELS.withdrawal[last.status].text.toLowerCase()}). Có thể tạo yêu cầu mới từ tháng sau.`, existing: last }; }
     if (amount !== undefined) { const v = RULES.validateWithdrawal(amount, w.available); if (!v.ok) return { ok: false, reason: 'amount', message: v.message }; }
     if (w.available <= 0) return { ok: false, reason: 'balance', message: 'Chưa có số dư khả dụng để rút.' };
     const u = this.user(agentId); if (!u.bank || !u.bank.accountNo) return { ok: false, reason: 'bank', message: 'Chưa có tài khoản ngân hàng nhận hoa hồng. Cập nhật tại Hồ sơ.' };
