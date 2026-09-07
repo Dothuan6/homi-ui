@@ -1,0 +1,18 @@
+<!-- D-04 · Modal thêm / sửa gói sản phẩm: p (gói hoặc mặc định), editing (true khi sửa) · part = 'body' | 'foot' -->
+{% if part === 'body' %}
+<form class="form-grid form-grid-2" novalidate>
+  {{{ UI.field({ id: 'pk-id', label: 'Mã gói', required: true, mono: true, value: p.id, attrs: editing ? 'readonly' : '' }) }}}
+  {{{ UI.field({ id: 'pk-name', label: 'Tên gói', required: true, value: p.name }) }}}
+  {{{ UI.field({ id: 'pk-price', label: 'Giá (đ)', required: true, mono: true, value: p.price, attrs: 'inputmode="numeric"' }) }}}
+  {{{ UI.field({ id: 'pk-image', label: 'Ảnh (đường dẫn)', value: p.image || '', placeholder: './public/product/og-cover.png' }) }}}
+  <div style="grid-column:1/-1">{{{ UI.field({ id: 'pk-full', label: 'Tên đầy đủ hiển thị', required: true, value: p.fullName }) }}}</div>
+  <div style="grid-column:1/-1">{{{ UI.field({ id: 'pk-desc', label: 'Mô tả', type: 'textarea', rows: 2, value: p.desc }) }}}</div>
+  <div style="grid-column:1/-1">{{{ UI.field({ id: 'pk-benefits', label: 'Quyền lợi (mỗi dòng một mục)', type: 'textarea', rows: 4, value: (p.benefits || []).join('\n') }) }}}</div>
+  {{{ UI.field({ id: 'pk-months', label: 'Thời hạn license (tháng, tuỳ chọn)', mono: true, value: p.licenseMonths || '' }) }}}
+  <label class="check"><input type="checkbox" id="pk-ship" {{{ p.hasShipping ? 'checked' : '' }}}> Có giao hàng vật lý</label>
+</form>
+{% if !editing %}<p class="text-caption mt-2">Sau khi tạo, thêm bảng hoa hồng 6 hạng bằng nút "Bảng HH".</p>{% endif %}
+{% elif part === 'foot' %}
+<button class="btn btn-secondary" onclick="UI.closeModal()">Huỷ</button>
+<button class="btn btn-primary" onclick="Admin.savePackage({{{ editing ? 'true' : 'false' }}})">Lưu</button>
+{% endif %}

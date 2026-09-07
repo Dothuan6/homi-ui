@@ -1,0 +1,6 @@
+<h2 class="mb-4">Đặt mật khẩu mới</h2>
+<form novalidate onsubmit="Buyer.a05Reset(event, '{{ phone }}')">
+  {{{ UI.field({ id: 'rs-pw', label: 'Mật khẩu mới', type: 'password', required: true, hint: 'Tối thiểu 8 ký tự, có chữ và số' }) }}}
+  {{{ UI.field({ id: 'rs-pw2', label: 'Nhập lại mật khẩu mới', type: 'password', required: true }) }}}
+  <div class="actions"><button class="btn btn-primary btn-lg btn-block">Đặt lại mật khẩu</button></div>
+</form>

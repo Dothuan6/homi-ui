@@ -1,0 +1,9 @@
+<!-- D-05 · Modal nhập mã từ file / dán danh sách · part = 'body' | 'foot' -->
+{% if part === 'body' %}
+<div class="dropzone" onclick="document.getElementById('imp-file').click()">{{{ icon('upload', 28) }}}<div class="mt-2">Chọn file .csv (mỗi dòng: mã kích hoạt;serial thiết bị)</div><input type="file" id="imp-file" accept=".csv,.txt" hidden onchange="Admin.readImportFile(this)"></div>
+<div class="mt-4">{{{ UI.field({ id: 'imp-sku', label: 'Mã sản phẩm thiết bị', mono: true, value: CONFIG.stock.deviceSku }) }}}</div>
+<div class="mt-4">{{{ UI.field({ id: 'imp-text', label: 'Hoặc dán danh sách', type: 'textarea', rows: 5, placeholder: 'HOMI-AB12-CD34-EF56;HW01-001301\nHOMI-…' }) }}}</div>
+{% elif part === 'foot' %}
+<button class="btn btn-secondary" onclick="UI.closeModal()">Huỷ</button>
+<button class="btn btn-primary" onclick="Admin.importCodes()">Nhập vào kho</button>
+{% endif %}

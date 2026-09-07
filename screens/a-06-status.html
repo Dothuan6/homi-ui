@@ -1,0 +1,32 @@
+<!-- Trạng thái hồ sơ đăng ký: chờ duyệt / đã duyệt / bị từ chối -->
+<div class="card"><div class="card-body stack">
+  <div class="text-center">
+    <div class="result-icon {% if reg.status === 'APPROVED' %}is-success{% elif reg.status === 'REJECTED' %}is-error{% else %}is-pending{% endif %}" style="margin:0 auto">{{{ icon(reg.status === 'APPROVED' ? 'check-circle' : reg.status === 'REJECTED' ? 'x-circle' : 'clock', 34) }}}</div>
+    <h2 class="mt-3">{% if reg.status === 'APPROVED' %}Hồ sơ đã được duyệt{% elif reg.status === 'REJECTED' %}Hồ sơ bị từ chối{% else %}Hồ sơ đang chờ duyệt{% endif %}</h2>
+    <div class="mt-2">{{{ badge('approval', reg.status, true) }}}</div>
+  </div>
+
+  <div class="steps" style="justify-content:center">
+    {% each s, i in steps %}
+    <div class="step {% if s.done %}is-done{% endif %}"><span class="step-dot">{% if s.done %}{{{ icon('check', 14) }}}{% else %}{{ i + 1 }}{% endif %}</span><span>{{ s.label }}</span></div>
+    {% if i < steps.length - 1 %}<span class="step-line"></span>{% endif %}
+    {% endeach %}
+  </div>
+
+  <dl class="dl">
+    <dt>Mã hồ sơ</dt><dd class="mono">{{ reg.id }}</dd>
+    <dt>Nộp lúc</dt><dd>{{{ dt(reg.createdAt) }}}</dd>
+    <dt>Người giới thiệu</dt><dd>{{ referrerName || '—' }}</dd>
+  </dl>
+
+  {% if rej %}
+  <div class="alert alert-error">{{{ icon('x-circle', 18) }}}<div><span class="alert-title">Lý do từ chối</span>{{ rej.reason || '' }}</div></div>
+  {% else %}
+  <div class="alert alert-info">{{{ icon('sms', 18) }}}<div class="text-sm">Khi được duyệt, bạn nhận email từ <strong>{{ CONFIG.email.from }}</strong> gồm link giới thiệu, link mua hàng cá nhân và cổng thành viên.</div></div>
+  {% endif %}
+
+  <div class="actions actions-row">
+    {% if reg.status === 'REJECTED' && CONFIG.rules.rejectedCanResubmit %}<a class="btn btn-primary btn-lg" href="#A-06?phone={{ phone }}&resubmit=1">Nộp lại hồ sơ</a>{% endif %}
+    {% if reg.status === 'APPROVED' %}<a class="btn btn-primary btn-lg" href="#A-05">Đăng nhập thành viên</a>{% else %}<a class="btn btn-secondary btn-lg" href="#A-05">Về đăng nhập</a>{% endif %}
+  </div>
+</div></div>

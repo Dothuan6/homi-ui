@@ -1,0 +1,22 @@
+<!-- (c) FAILED + Thử lại (nếu còn hạn) -->
+<div class="card"><div class="card-body stack">
+  <div class="result-hero">
+    <div class="result-icon is-error">{{{ icon('x-circle', 40) }}}</div>
+    <h1>Thanh toán thất bại</h1>
+    <p>{{ order.failReason || 'Giao dịch không thành công.' }}</p>
+  </div>
+  {{{ info }}}
+  {% if canRetry %}
+  <div class="row-between"><span class="text-sm text-muted">Đơn còn hiệu lực</span>{{{ UI.countdown.markup('a03-countdown') }}}</div>
+  {% else %}
+  <div class="alert alert-warning">{{{ icon('clock', 20) }}}<div>Đơn đã hết thời gian giữ. Vui lòng đặt lại.</div></div>
+  {% endif %}
+  <div class="actions actions-row">
+    <a class="btn btn-secondary btn-lg" href="#A-04">Tra cứu đơn</a>
+    {% if canRetry %}
+    <button class="btn btn-primary btn-lg" onclick="Store.retryOrder('{{ order.id }}'); App.navigate('A-02')">{{{ icon('refresh', 18) }}} Thử lại</button>
+    {% else %}
+    <button class="btn btn-primary btn-lg" onclick="App.navigate('A-01')">Đặt lại</button>
+    {% endif %}
+  </div>
+</div></div>

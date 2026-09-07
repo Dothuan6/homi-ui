@@ -1,0 +1,35 @@
+<!-- A-01 · Trang mua hàng: (a) form · (b) OTP tại chỗ · (c) lỗi field · (g) SMS lỗi -->
+<div class="a01-grid">
+  <div class="a01-pkg">{{{ include('partials/pkg-header', { pkg: pkg, tag: 'h1' }) }}}</div>
+
+  <div class="a01-ref">
+    <div class="card card-tint"><div class="card-body ref-card">
+      <span class="avatar" aria-hidden="true">{{ RULES.initials(seller.fullName) }}</span>
+      <div>
+        <div class="text-sm text-muted">Người giới thiệu</div>
+        <div class="text-strong">{{ seller.fullName }}</div>
+        <div class="text-caption mono">Mã {{ seller.refCode }}</div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="card a01-form" id="a01-card">
+    <div class="card-head"><h2>Thông tin nhận hàng</h2><span class="text-sm text-muted">Bước 1/3</span></div>
+    <div class="card-body" id="a01-body">
+      <form id="a01-form" novalidate onsubmit="Buyer.a01Submit(event)">
+        {{{ UI.field({ id: 'fullName', label: 'Họ và tên', required: true, placeholder: 'Nguyễn Văn A', value: draft.fullName, attrs: 'autocomplete="name"' }) }}}
+        {{{ UI.field({ id: 'phone', label: 'Số điện thoại', required: true, type: 'tel', placeholder: '0912 345 678', value: draft.phone, mono: true, hint: 'Dùng để nhận mã OTP, mã kích hoạt và đăng nhập sau này.', attrs: 'autocomplete="tel" inputmode="numeric"' }) }}}
+        {{{ UI.field({ id: 'email', label: 'Email', required: true, type: 'email', placeholder: 'ban@email.com', value: draft.email, hint: 'Nhận xác nhận đơn hàng và thông tin thành viên.', attrs: 'autocomplete="email"' }) }}}
+        {{{ UI.field({ id: 'address', label: 'Địa chỉ nhận hàng', required: true, type: 'textarea', rows: 2, placeholder: 'Số nhà, đường, phường/xã, tỉnh/thành phố', value: draft.address, attrs: 'autocomplete="street-address"' }) }}}
+        {{{ UI.field({ id: 'note', label: 'Ghi chú', type: 'textarea', rows: 2, placeholder: 'Ví dụ: giao giờ hành chính, gọi trước khi giao…', value: draft.note }) }}}
+        <div class="qty-fixed mt-4"><span>Số lượng</span><strong>1 gói (cố định)</strong></div>
+        <div class="total-row"><span>Tổng thanh toán</span><span class="total-amt">{{{ money(pkg.price) }}}</span></div>
+        <div id="a01-alert" class="mt-4" hidden></div>
+        <div class="actions"><button type="submit" class="btn btn-primary btn-lg btn-block" id="a01-submit">{{{ icon('sms', 20) }}} Gửi OTP &amp; tiếp tục</button></div>
+        <p class="text-caption text-center mt-3">Bằng việc tiếp tục, bạn đồng ý nhận SMS xác thực từ HOMI365.</p>
+      </form>
+    </div>
+  </div>
+
+  <div class="a01-intro stack">{{{ include('partials/product-intro', { pkg: pkg, pc: pc, g0: g0 }) }}}</div>
+</div>

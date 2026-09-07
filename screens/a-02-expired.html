@@ -1,0 +1,12 @@
+<!-- (e) EXPIRED + Đặt lại (giữ mã giới thiệu — BR-06/07) -->
+<div class="card"><div class="card-body stack text-center">
+  <div class="result-icon is-pending" style="margin:0 auto">{{{ icon('clock', 34) }}}</div>
+  <div class="error-code">ĐƠN {{ order.id }} · HẾT HẠN</div>
+  <h1>Đơn hàng đã hết thời gian giữ</h1>
+  <p class="text-muted">Đơn chưa được thanh toán trong {{ holdMin }} phút nên đã hết hiệu lực. Thông tin và người giới thiệu của bạn vẫn được giữ — bạn có thể đặt lại ngay.</p>
+  <div class="alert alert-info" style="text-align:left">{{{ icon('info', 20) }}}<div>Nếu bạn <strong>đã chuyển khoản</strong> cho đơn này, đừng chuyển lại. Liên hệ hỗ trợ {{ CONFIG.brand.supportHotline }} kèm mã đơn để được đối soát.</div></div>
+  <div class="actions actions-row">
+    <a class="btn btn-secondary btn-lg" href="#A-04">Tra cứu đơn</a>
+    <button class="btn btn-primary btn-lg" onclick="App.navigate('A-01')">{{{ icon('refresh', 18) }}} Đặt lại</button>
+  </div>
+</div></div>

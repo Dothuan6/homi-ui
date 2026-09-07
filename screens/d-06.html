@@ -1,0 +1,66 @@
+<!-- D-06 · Hạng & quy tắc chương trình: r = Store.rules(), head = Head Admin?, tcNext = phiên bản T&C kế tiếp -->
+<div class="split-2 split-2-eq">
+  <div class="stack">
+    <div class="card">
+      <div class="card-head"><h2>Bảng hạng thành viên</h2><span class="text-sm text-muted">Ngưỡng = tổng gói bán luỹ kế [cần xác nhận]</span></div>
+      <div class="card-body">
+        <div class="table-wrap"><table class="table" style="min-width:0">
+          <thead><tr><th>Hạng</th><th class="num">Ngưỡng luỹ kế</th><th class="num">Bước</th><th>Quyền tuyển thành viên</th></tr></thead>
+          <tbody>
+          {% each k, i in CONFIG.ranks %}
+            <tr><td>{{{ badge('rank', k.id) }}}</td><td class="num mono">{{{ k.threshold }}} gói</td><td class="num mono">{% if i %}+{{{ k.threshold - CONFIG.ranks[i - 1].threshold }}}{% else %}—{% endif %}</td><td>{% if k.canRecruit %}<span class="badge badge-success">Được tuyển</span>{% else %}<span class="badge badge-neutral">Chỉ bán</span>{% endif %}</td></tr>
+          {% endeach %}
+          </tbody>
+        </table></div>
+        <p class="text-caption mt-2">Ngưỡng hạng cấu hình tại <span class="mono">CONFIG.ranks</span> (chờ khách chốt 10/18/24/28/30).</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>Quy tắc chương trình</h2></div>
+      <div class="card-body">
+        <form novalidate onsubmit="Admin.saveRules(event)">
+          <div class="form-grid form-grid-2">
+            {{{ UI.field({ id: 'rl-min', label: 'Bán tối thiểu / tháng để giữ hạng', mono: true, value: r.rankRules.minSalesPerMonth, attrs: head ? '' : 'readonly' }) }}}
+            {{{ UI.field({ id: 'rl-steps', label: 'Số bậc giáng khi không đạt', mono: true, value: r.rankRules.demoteSteps, attrs: head ? '' : 'readonly' }) }}}
+            {{{ UI.field({ id: 'rl-maxwd', label: 'Số lần rút tối đa / tháng', mono: true, value: r.withdraw.maxPerMonth, attrs: head ? '' : 'readonly' }) }}}
+            {{{ UI.field({ id: 'rl-points', label: 'Tỷ lệ điểm (điểm / 1đ hoa hồng)', mono: true, value: CONFIG.points.perVnd, attrs: 'readonly' }) }}}
+            <div style="grid-column:1/-1">{{{ UI.field({ id: 'rl-payout', label: 'Ghi chú thời điểm chi trả', value: r.withdraw.payoutNote, attrs: head ? '' : 'readonly' }) }}}</div>
+          </div>
+          <div class="check mt-3"><input type="checkbox" id="rl-reset" {{{ r.rankRules.demoteResetsCumulative ? 'checked' : '' }}} {{{ head ? '' : 'disabled' }}}> Giáng hạng reset luỹ kế [cần xác nhận]</div>
+          {% if head %}
+          <div class="mt-4">{{{ UI.field({ id: 'rl-note', label: 'Ghi chú thay đổi', placeholder: 'Lý do…' }) }}}</div>
+          <div class="actions"><button class="btn btn-primary">Lưu quy tắc</button></div>
+          {% else %}
+          <p class="text-caption mt-3">Chỉ Head Admin được sửa.</p>
+          {% endif %}
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="stack">
+    <div class="card">
+      <div class="card-head"><h2>Điều khoản & điều kiện (T&C)</h2><span class="badge badge-navy badge-plain">v{{ r.tc.version }} · {{ r.tc.updatedAt }}</span></div>
+      <div class="card-body">
+        <form novalidate onsubmit="Admin.saveTc(event)">
+          {{{ UI.field({ id: 'tc-ver', label: 'Phiên bản mới', mono: true, value: tcNext, attrs: head ? '' : 'readonly' }) }}}
+          <div class="mt-3">{{{ UI.field({ id: 'tc-text', label: 'Nội dung', type: 'textarea', rows: 12, value: r.tc.text, attrs: head ? '' : 'readonly' }) }}}</div>
+          {% if head %}<div class="actions"><button class="btn btn-primary">Lưu T&C phiên bản mới</button></div>{% endif %}
+        </form>
+        <p class="text-caption mt-2">Thành viên đăng ký sau ngày hiệu lực chấp nhận phiên bản mới; phiên bản đã chấp nhận lưu trong hồ sơ.</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>Lịch sử thay đổi</h2></div>
+      <div class="card-body">
+        <ul class="timeline">
+          {% each h in history %}
+          <li><span class="timeline-time">{{ dt(h.at) }}</span><span class="timeline-text"><strong>{{ h.by }}</strong> · {{ h.note }}</span></li>
+          {% endeach %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

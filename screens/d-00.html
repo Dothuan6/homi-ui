@@ -1,0 +1,28 @@
+<!-- D-00 · Đăng nhập quản trị -->
+<div class="admin-login">
+  <div class="admin-login-side">
+    <div>{{{ UI.logo({ size: 40, invert: true }) }}}</div>
+    <div>
+      <h2>Khu vực quản trị HOMI365</h2>
+      <p>Duyệt đăng ký thành viên, đối soát đơn hàng, quản lý kho mã & thiết bị, bảng hoa hồng theo hạng, duyệt rút tiền 2 lớp.</p>
+    </div>
+    <p class="text-sm" style="color:var(--sky-200)">{{ CONFIG.brand.company }}</p>
+  </div>
+  <div class="admin-login-form">
+    <div class="card"><div class="card-body">
+      <h1>Đăng nhập quản trị</h1>
+      <p class="text-muted mt-1 mb-4">Tài khoản do Head Admin cấp. Thành viên vui lòng đăng nhập tại <a href="#A-05">cổng thành viên</a>.</p>
+      <form novalidate onsubmit="Admin.login(event)">
+        {{{ UI.field({ id: 'ad-user', label: 'Tên đăng nhập', required: true, attrs: 'autocomplete="username"' }) }}}
+        <div class="field mt-4" id="ad-pass-field">
+          <label class="field-label" for="ad-pass">Mật khẩu<span class="req">*</span></label>
+          <div class="input-affix"><input class="input" type="password" id="ad-pass" autocomplete="current-password" required><button type="button" class="btn btn-ghost affix-btn" aria-label="Hiện mật khẩu" onclick="UI.togglePassword('ad-pass', this)">{{{ icon('eye', 20) }}}</button></div>
+          <div class="field-error" id="ad-pass-err"></div>
+        </div>
+        <div id="ad-alert" class="mt-4" hidden></div>
+        <div class="actions"><button class="btn btn-primary btn-lg btn-block" id="ad-submit">{{{ icon('lock', 18) }}} Đăng nhập</button></div>
+      </form>
+      <div class="demo-hint">Demo: <strong>head</strong> (Head Admin) · <strong>admin</strong> · <strong>admin2</strong> (Specialist) / mật khẩu <strong>{{{ CONFIG.admin.accounts[0].password }}}</strong></div>
+    </div></div>
+  </div>
+</div>

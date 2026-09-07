@@ -1,0 +1,24 @@
+<!-- D-04 · Modal tạo phiên bản bảng hoa hồng mới: rows = [{ r, value, diff }], today · part = 'body' | 'foot' -->
+{% if part === 'body' %}
+<div class="table-wrap"><table class="table" style="min-width:0">
+  <thead><tr><th>Hạng</th><th>Mức hoa hồng (đ)</th><th class="num">Chênh lệch</th></tr></thead>
+  <tbody>
+  {% each row in rows %}
+    <tr>
+      <td>{{{ badge('rank', row.r.id) }}}</td>
+      <td><input class="input input-mono" id="ct-{{{ row.r.id }}}" value="{{{ row.value }}}" inputmode="numeric" oninput="Admin.ctRecalc()" aria-label="Mức {{{ row.r.label }}}"></td>
+      <td class="num mono" id="ct-diff-{{{ row.r.id }}}">{% if row.diff !== null %}+{{ money(row.diff) }}{% else %}—{% endif %}</td>
+    </tr>
+  {% endeach %}
+  </tbody>
+</table></div>
+<div class="field-error mt-2" id="ct-err"></div>
+<div class="form-grid form-grid-2 mt-4">
+  {{{ UI.field({ id: 'ct-eff', label: 'Ngày hiệu lực', required: true, type: 'date', value: today }) }}}
+  {{{ UI.field({ id: 'ct-note', label: 'Ghi chú phiên bản', placeholder: 'Lý do thay đổi…' }) }}}
+</div>
+<p class="text-caption mt-2">Đơn thanh toán từ ngày hiệu lực áp dụng bảng mới; hoa hồng đã ghi nhận giữ nguyên.</p>
+{% elif part === 'foot' %}
+<button class="btn btn-secondary" onclick="UI.closeModal()">Huỷ</button>
+<button class="btn btn-primary" onclick="Admin.saveCommissionTable('{{ p.id }}')">Lưu phiên bản</button>
+{% endif %}

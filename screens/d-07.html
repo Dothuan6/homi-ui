@@ -1,0 +1,8 @@
+<!-- D-07 · Rút tiền & sổ hoa hồng: khung tab (nội dung tab render động vào #d07-body bằng d-07-withdraw / d-07-ledger) -->
+<div class="card">
+  <div class="tabs" role="tablist" style="padding:0 20px">
+    <button class="tab {{ tab === 'withdraw' ? 'is-active' : '' }}" onclick="Admin.st.d07.tab='withdraw'; App.reload()">{{{ icon('cash', 18) }}} Rút tiền <span class="count">{{{ pending }}}</span></button>
+    <button class="tab {{ tab === 'ledger' ? 'is-active' : '' }}" onclick="Admin.st.d07.tab='ledger'; App.reload()">{{{ icon('layers', 18) }}} Sổ hoa hồng</button>
+  </div>
+  <div class="card-body" id="d07-body"></div>
+</div>

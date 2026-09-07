@@ -1,0 +1,29 @@
+<!-- D-09 · Bảng hồ sơ đăng ký: rows = [{ r, ref, refRankLabel, cb, cell }], pg = UI.paginate(...) -->
+{% if !rows.length %}
+{{{ UI.empty('user', 'Không có hồ sơ', 'Chưa có đăng ký nào ở trạng thái này.') }}}
+{% else %}
+<div class="table-wrap"><table class="table">
+  <thead><tr><th>Mã</th><th>Người đăng ký</th><th>Người giới thiệu</th><th>Đơn gốc</th><th>Ngày nộp</th><th>Tiến trình</th><th>Hành động</th></tr></thead>
+  <tbody>
+  {% each row in rows %}
+  {% set r = row.r %}
+    <tr>
+      <td class="mono">{{ r.id }}</td>
+      <td><span class="cell-main">{{ r.fullName }}</span><span class="cell-sub mono">{{ r.phone }}</span><span class="cell-sub">{{ r.email }}</span></td>
+      <td>{% if row.ref %}{{ row.ref.fullName }}<span class="cell-sub"><span class="mono">{{ row.ref.refCode }}</span> · {{{ row.refRankLabel }}} lúc nộp</span>{% else %}—{% endif %}</td>
+      <td><button class="btn-link mono" onclick="Admin.orderDrawer('{{ r.orderId }}')">{{ r.orderId }}</button></td>
+      <td>{{ dt(r.createdAt) }}</td>
+      <td>{{{ row.cell }}}</td>
+      <td><div class="row-actions">
+        {% if r.status.startsWith('PENDING') %}
+        <button class="btn btn-success btn-sm" {{{ row.cb.ok ? '' : 'disabled' }}} title="{{{ row.cb.why || '' }}}" onclick="Admin.regApprove('{{ r.id }}')">Xác nhận</button>
+        <button class="btn btn-danger-outline btn-sm" onclick="Admin.regReject('{{ r.id }}')">Từ chối</button>
+        {% endif %}
+        <button class="btn btn-secondary btn-sm" onclick="Admin.regDrawer('{{ r.id }}')">Chi tiết</button>
+      </div></td>
+    </tr>
+  {% endeach %}
+  </tbody>
+</table></div>
+{{{ UI.pagination(pg, 'Admin.gotoRegs') }}}
+{% endif %}

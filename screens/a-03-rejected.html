@@ -1,0 +1,15 @@
+<!-- (e) Admin từ chối đối soát -->
+<div class="card"><div class="card-body stack">
+  <div class="result-hero">
+    <div class="result-icon is-error">{{{ icon('x-circle', 40) }}}</div>
+    <h1>Chuyển khoản chưa được xác nhận</h1>
+    <p>Bộ phận đối soát không tìm thấy giao dịch khớp với đơn hàng này.</p>
+  </div>
+  <div class="alert alert-error">{{{ icon('warning', 20) }}}<div><span class="alert-title">Lý do</span>{{ order.rejectReason || '—' }}</div></div>
+  {{{ info }}}
+  <div class="alert alert-info">{{{ icon('phone', 20) }}}<div>Nếu bạn đã chuyển khoản, vui lòng liên hệ <strong>{{ CONFIG.brand.supportHotline }}</strong> kèm ảnh chụp giao dịch và mã đơn <span class="mono">{{ order.id }}</span> để được hỗ trợ.</div></div>
+  <div class="actions actions-row">
+    <a class="btn btn-secondary btn-lg" href="#A-04">Tra cứu đơn</a>
+    <button class="btn btn-primary btn-lg" onclick="App.navigate('A-01')">Đặt đơn mới</button>
+  </div>
+</div></div>

@@ -1,0 +1,29 @@
+{% if el.ok %}
+<div class="row">
+  <span class="result-icon is-info" style="width:44px;height:44px;margin:0">{{{ icon('gift', 22) }}}</span>
+  <div class="grow"><h2 style="font-size:var(--fs-lg)">Trở thành thành viên HOMI365</h2>
+    <p class="text-sm text-muted">Được {{ ref ? ref.fullName : 'người giới thiệu' }} (hạng {{ refRankLabel }}) mời tham gia. Đăng ký hồ sơ để nhận link bán hàng cá nhân và hoa hồng theo hạng; hồ sơ được duyệt trong 1–2 ngày làm việc.</p></div>
+</div>
+<div class="actions actions-row">
+  <button class="btn btn-secondary btn-lg" onclick="Buyer.a03Later('{{ order.id }}', true)">Thoát ra</button>
+  <a class="btn btn-primary btn-lg" href="#A-06?order={{ order.id }}">{{{ icon('user', 18) }}} Đăng ký thành viên</a>
+</div>
+{% elif el.reason === 'agent' %}
+<div class="row">
+  <span class="result-icon is-info" style="width:44px;height:44px;margin:0">{{{ icon('user', 22) }}}</span>
+  <div class="grow"><h2 style="font-size:var(--fs-lg)">Bạn đã là thành viên HOMI365</h2><p class="text-sm text-muted">Đăng nhập để xem gói, mã kích hoạt và hoa hồng.</p></div>
+</div>
+<div class="actions"><a class="btn btn-primary btn-lg btn-block" href="#A-05">Đăng nhập thành viên</a></div>
+{% elif el.reason === 'pending' %}
+<div class="row">
+  <span class="result-icon is-info" style="width:44px;height:44px;margin:0">{{{ icon('clock', 22) }}}</span>
+  <div class="grow"><h2 style="font-size:var(--fs-lg)">Hồ sơ thành viên đang chờ duyệt</h2><p class="text-sm text-muted">Trạng thái: {{ label('approval', el.registration.status) }}. Chúng tôi sẽ gửi email khi hồ sơ được duyệt.</p></div>
+</div>
+<div class="actions"><a class="btn btn-secondary btn-lg btn-block" href="#A-06?state=pending&phone={{ order.phone }}">Xem trạng thái hồ sơ</a></div>
+{% else %}
+<div class="row">
+  <span class="result-icon is-info" style="width:44px;height:44px;margin:0">{{{ icon('check-circle', 22) }}}</span>
+  <div class="grow"><h2 style="font-size:var(--fs-lg)">Đơn hàng thành công</h2><p class="text-sm text-muted">Mã kích hoạt và hướng dẫn đã được gửi qua SMS/email. Bạn có thể đăng ký thành viên sau tại mục Đăng nhập thành viên khi đủ điều kiện.</p></div>
+</div>
+<div class="actions"><button class="btn btn-secondary btn-lg btn-block" onclick="Buyer.a03Later('{{ order.id }}', true)">Thoát ra</button></div>
+{% endif %}

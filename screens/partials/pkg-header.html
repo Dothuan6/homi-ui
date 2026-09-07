@@ -1,0 +1,8 @@
+<div class="pkg">
+  <div class="pkg-icon">{{{ icon('watch', 30) }}}</div>
+  <div class="grow">
+    <{{{ tag }}} class="pkg-name">{{ pkg.name }}</{{{ tag }}}>
+    <div class="pkg-meta">{{ pkg.id }} · License {{ pkg.licenseMonths }} tháng{% if pkg.hasShipping %} · kèm đồng hồ HW01{% endif %}</div>
+  </div>
+  <div class="pkg-price">{{{ money(pkg.price) }}}</div>
+</div>

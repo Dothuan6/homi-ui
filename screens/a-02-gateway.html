@@ -1,0 +1,17 @@
+<!-- (b) Cổng online — loading rồi màn cổng giả lập -->
+<div class="card"><div class="card-body">
+  <div id="gw-loading" class="gateway-sim">
+    <div class="gateway-logo">{{{ icon('zap', 20) }}} {{ CONFIG.gateway.label }}</div>
+    <p class="pulse text-strong">Đang chuyển hướng tới cổng thanh toán…</p>
+    <p class="text-sm text-muted mt-2">Vui lòng không đóng trình duyệt. Số tiền: <strong>{{{ money(order.price) }}}</strong> · Mã đơn <span class="mono">{{ order.id }}</span></p>
+  </div>
+  <div id="gw-sim" class="gateway-sim" hidden>
+    <div class="gateway-logo">{{{ icon('shield', 20) }}} Cổng thanh toán (mô phỏng)</div>
+    <p class="text-muted text-sm">Màn hình này mô phỏng trang của cổng thanh toán. Khi tích hợp thật, cổng gọi callback về hệ thống và người mua được đưa về màn kết quả (A-03).</p>
+    <div class="actions">
+      <button class="btn btn-success btn-lg btn-block" onclick="Store.markPaid('{{ order.id }}', 'gateway'); App.navigate('A-03')">{{{ icon('check', 18) }}} Thanh toán thành công (callback PAID)</button>
+      <button class="btn btn-danger-outline btn-lg btn-block" onclick="Store.failOrder('{{ order.id }}'); App.navigate('A-02')">Huỷ giao dịch trên cổng (FAILED)</button>
+      <button class="btn btn-ghost" onclick="App.navigate('A-02')">{{{ icon('arrow-left', 16) }}} Chọn phương thức khác</button>
+    </div>
+  </div>
+</div></div>

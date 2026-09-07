@@ -1,0 +1,107 @@
+<!-- D-02 · Drawer chi tiết thành viên · part = 'title' | 'body' | 'foot' -->
+{% if part === 'title' %}
+<h2>{{ u.fullName }}</h2>
+<div class="row-wrap mt-1">{{{ badge('userType', u.type) }}}{{{ u.rank ? badge('rank', u.rank) : '' }}}{{{ badge('user', u.status) }}}<span class="text-sm text-muted mono">{{ u.id }}</span></div>
+
+{% elif part === 'body' %}
+<div class="section">
+  <div class="section-title">Hồ sơ</div>
+  <dl class="dl">
+    <dt>SĐT</dt><dd class="mono">{{ u.phone }}</dd>
+    <dt>Email</dt><dd>{{ u.email || '—' }}</dd>
+    <dt>Địa chỉ</dt><dd>{{ u.address || '—' }}</dd>
+    <dt>ref_code</dt><dd class="mono">{{ u.refCode || '—' }}</dd>
+    <dt>Link cá nhân</dt><dd class="mono">{% if u.purchaseAlias %}{{ RULES.publicPurchaseUrl(u.purchaseAlias) }}{% else %}—{% endif %}</dd>
+    <dt>TK nhận hoa hồng</dt><dd>{% if u.bank %}{{ u.bank.bankName }} · <span class="mono">{{ u.bank.accountNo }}</span> · {{ u.bank.owner }}{% else %}—{% endif %}</dd>
+    <dt>T&C</dt><dd>{% if u.tcConsent %}v{{ u.tcConsent.version }} · {{ dt(u.tcConsent.at) }}{% else %}—{% endif %}</dd>
+    <dt>Tham gia</dt><dd>{{ dt(u.activatedAt || u.createdAt) }}</dd>
+    {% if u.status === 'locked' %}<dt>Lý do khoá</dt><dd class="text-error">{{ u.lockedReason }} ({{ dt(u.lockedAt) }})</dd>{% endif %}
+  </dl>
+</div>
+
+{% if u.type === 'agent' %}
+<div class="section">
+  <div class="row-between">
+    <div class="section-title">Hạng & điểm</div>
+    {% if head %}<button class="btn btn-secondary btn-sm" onclick="Admin.assignRankModal('{{ u.id }}')">{{{ icon('edit', 14) }}} Chỉ định hạng</button>{% endif %}
+  </div>
+  <dl class="dl">
+    <dt>Hạng</dt><dd>{{{ badge('rank', u.rank) }}} từ {{ date(u.rankSince) }}</dd>
+    <dt>Luỹ kế / tháng này</dt><dd>{{{ u.cumulativeSales }}} gói · {{{ salesThisMonth }}} gói tháng này</dd>
+    <dt>Hoa hồng ghi nhận</dt><dd>{{ money(w.recorded) }} ({{ num(w.points) }} điểm)</dd>
+    <dt>Khả dụng / đang giữ / đã rút</dt><dd>{{ money(w.available) }} · {{ money(w.held) }} · {{ money(w.withdrawn) }}</dd>
+  </dl>
+  <div class="section-title mt-3">Lịch sử thăng/giáng hạng</div>
+  <ul class="timeline">
+    {% each h in rankHistory %}
+    <li><span class="timeline-time">{{ dt(h.at) }}</span><span class="timeline-text">{{{ badge('rankEvent', h.event) }}} {% if h.from %}{{{ RULES.rank(h.from).label }}} → {% endif %}{{{ RULES.rank(h.to).label }}} · {{ h.reason || '' }} · {{ h.by || '' }}</span></li>
+    {% endeach %}
+  </ul>
+</div>
+{% endif %}
+
+<div class="section">
+  <div class="section-title">Tuyến trên (đến gốc)</div>
+  {% if chain.length %}
+  <ol class="stack-sm" style="padding-left:20px">
+    {% each c, i in chain %}
+    <li>F{{{ i + 1 }}}: <strong>{{ c.fullName }}</strong> {{{ badge('rank', c.rank) }}} <span class="mono text-muted">{{ c.refCode }}</span></li>
+    {% endeach %}
+  </ol>
+  {% else %}
+  <p class="text-muted">Không có (thành viên gốc)</p>
+  {% endif %}
+</div>
+
+<div class="section">
+  <div class="section-title">Cây tuyến dưới (3 cấp)</div>
+  {% if tree.length %}{{{ include('partials/admin-tree', { nodes: tree }) }}}{% else %}<p class="text-muted">Chưa có</p>{% endif %}
+</div>
+
+<div class="section">
+  <div class="section-title">Lịch sử đơn</div>
+  <dl class="dl">
+    <dt>Đã mua</dt><dd>{{{ bought.length }}} đơn ({{{ boughtPaid }}} thanh toán)</dd>
+    <dt>Đã bán (qua link)</dt><dd>{{{ soldPaid }}} / {{{ sold.length }}}</dd>
+  </dl>
+  {% each o in soldRecent %}
+  <div class="row-between text-sm mt-2"><span class="mono">{{ o.id }}</span><span>{{ o.fullName }}</span>{{{ badge('orderStatus', o.status) }}}<button class="btn-link" onclick="Admin.orderDrawer('{{ o.id }}')">Xem</button></div>
+  {% endeach %}
+</div>
+
+{% if u.type === 'agent' %}
+<div class="section">
+  <div class="section-title">Lịch sử hoa hồng ({{{ cms.length }}})</div>
+  {% if cms.length %}
+  <div class="table-wrap"><table class="table" style="min-width:0">
+    <thead><tr><th>Ngày</th><th>Đơn</th><th>Nguồn</th><th class="num">Số tiền</th></tr></thead>
+    <tbody>
+    {% each c in cmsRecent %}
+      <tr><td>{{ date(c.createdAt) }}</td><td class="mono">{{ c.orderId }}</td><td>{{{ c.source }}} · {{{ RULES.rank(c.rankAtCalc).label }}}</td><td class="num mono">{{ money(c.amount) }}</td></tr>
+    {% endeach %}
+    </tbody>
+  </table></div>
+  {% else %}
+  <p class="text-muted">Chưa có</p>
+  {% endif %}
+</div>
+{% endif %}
+
+<div class="section">
+  <div class="section-title">Nhật ký & audit</div>
+  {{{ include('partials/admin-audit-list', { list: audit }) }}}
+  <ul class="timeline mt-2">
+    {% each l in logs %}
+    <li><span class="timeline-time">{{ dt(l.at) }}</span><span class="timeline-text">{{ l.text }}</span></li>
+    {% endeach %}
+  </ul>
+</div>
+
+{% elif part === 'foot' %}
+{% if head && u.type === 'agent' %}<button class="btn btn-secondary" onclick="Admin.changeReferrerModal('{{ u.id }}')">{{{ icon('users', 16) }}} Đổi người giới thiệu</button>{% endif %}
+{% if u.status === 'active' %}
+<button class="btn btn-danger-outline" onclick="Admin.lockUser('{{ u.id }}')">{{{ icon('lock', 16) }}} Khoá</button>
+{% else %}
+<button class="btn btn-success" onclick="Admin.unlockUser('{{ u.id }}')">{{{ icon('unlock', 16) }}} Mở khoá</button>
+{% endif %}
+{% endif %}

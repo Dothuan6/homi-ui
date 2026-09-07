@@ -1,0 +1,16 @@
+<div class="card">
+  <div class="card-head"><h2>Chọn phương thức thanh toán</h2><span class="text-sm text-muted">Bước 3/3</span></div>
+  <div class="card-body stack-sm" role="radiogroup" aria-label="Phương thức thanh toán">
+    {% each m in methods %}
+    <label class="radio-card {% if sel === m.id %}is-selected{% endif %}" for="pm-{{ m.id }}">
+      <input type="radio" name="pm" id="pm-{{ m.id }}" value="{{ m.id }}" {% if sel === m.id %}checked{% endif %} onchange="Buyer._a02Method='{{ m.id }}'; App.reload()">
+      <div class="grow"><div class="radio-card-title">{{ m.title }}</div><div class="radio-card-desc">{{ m.desc }}</div></div>
+      {{{ icon(m.ico, 24, 'text-navy') }}}
+    </label>
+    {% endeach %}
+    <div class="actions">
+      <button class="btn btn-primary btn-lg btn-block" onclick="Buyer.a02Go('{{ order.id }}')">Tiếp tục {{{ icon('arrow-right', 18) }}}</button>
+      <button class="btn btn-ghost" onclick="Buyer.a02Cancel('{{ order.id }}')">Huỷ đơn, quay về trang mua hàng</button>
+    </div>
+  </div>
+</div>

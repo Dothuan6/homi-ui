@@ -1,0 +1,13 @@
+<!-- C-01 · nội dung #c01-stats sau khi tải: 6 ô số liệu kỳ + biểu đồ đơn/click — data: st, conversion, rangeLabel, chartHtml -->
+<div class="stat-grid stat-grid-6">
+  <div class="stat"><div class="stat-label">{{{ icon('external', 16) }}} Lượt click</div><div class="stat-value">{{ num(st.clicks) }}</div></div>
+  <div class="stat"><div class="stat-label">{{{ icon('inbox', 16) }}} Đơn đã đặt</div><div class="stat-value">{{ num(st.orders) }}</div></div>
+  <div class="stat"><div class="stat-label">{{{ icon('check-circle', 16) }}} Đơn thanh toán</div><div class="stat-value">{{ num(st.paid) }}</div><div class="stat-sub">Chuyển đổi {{ conversion }}</div></div>
+  <div class="stat"><div class="stat-label">{{{ icon('bars', 16) }}} Doanh số kỳ</div><div class="stat-value">{{ money(st.revenue) }}</div></div>
+  <div class="stat stat-accent"><div class="stat-label">{{{ icon('cash', 16) }}} Hoa hồng kỳ</div><div class="stat-value">{{ money(st.commission) }}</div></div>
+  <div class="stat"><div class="stat-label">{{{ icon('calendar', 16) }}} Kỳ</div><div class="stat-value" style="font-size:var(--fs-md)">{{ rangeLabel }}</div></div>
+</div>
+<div class="mt-6">
+  <h3 class="mb-2">Xu hướng đơn & click</h3>
+  {{{ chartHtml }}}
+</div>

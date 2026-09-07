@@ -1,0 +1,17 @@
+<!-- C-01 · Tổng quan: tiêu đề + thanh tab (Thống kê · Hoa hồng · Tuyến) — data: u, tab, tabs, treeCount, tabHtml -->
+<div class="stack-lg">
+  <div class="page-title">
+    <div>
+      <h1>Xin chào, {{ u.fullName }}</h1>
+      <p class="row-wrap">{{{ badge('rank', u.rank, true) }}}<span>Mã giới thiệu <span class="mono text-strong">{{ u.refCode }}</span> · thành viên từ {{ date(u.activatedAt || u.createdAt) }}</span></p>
+    </div>
+  </div>
+  <div class="c01-tabs">
+    <div class="tabs" role="tablist">
+      {% each t in tabs %}
+      <button class="tab {{ tab === t.id ? 'is-active' : '' }}" role="tab" aria-selected="{{ tab === t.id }}" onclick="Seller.setTab('{{ t.id }}')">{{{ icon(t.ico, 18) }}} {{ t.label }}{% if t.id === 'tree' %} <span class="count">{{ treeCount }}</span>{% endif %}</button>
+      {% endeach %}
+    </div>
+  </div>
+  {{{ tabHtml }}}
+</div>

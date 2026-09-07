@@ -1,0 +1,23 @@
+<!-- D-05 · Bảng kho mã: rows = [{ c, a (thành viên bán), hasOrder }], pg = UI.paginate(...) -->
+{% if !rows.length %}
+{{{ UI.empty('key', 'Không có mã phù hợp', 'Thử đổi bộ lọc hoặc từ khoá.') }}}
+{% else %}
+<div class="table-wrap"><table class="table">
+  <thead><tr><th>Mã sản phẩm</th><th>Mã kích hoạt</th><th>Đơn</th><th>Thành viên bán</th><th>Ngày nhập kho</th><th>Trạng thái</th><th></th></tr></thead>
+  <tbody>
+  {% each row in rows %}
+  {% set c = row.c %}
+    <tr>
+      <td><span class="cell-main mono">{{ c.deviceSku }}</span><span class="cell-sub mono">{{ c.deviceSerial || '' }}</span></td>
+      <td class="mono">{{ c.code }}</td>
+      <td>{% if c.orderId %}{% if row.hasOrder %}<button class="btn-link mono" onclick="Admin.orderDrawer('{{ c.orderId }}')">{{ c.orderId }}</button>{% else %}<span class="mono">{{ c.orderId }}</span>{% endif %}{% else %}—{% endif %}</td>
+      <td>{% if row.a %}{{ row.a.fullName }}{% else %}—{% endif %}</td>
+      <td>{{ date(c.stockedAt) }}<span class="cell-sub mono">{{ c.batch }}</span></td>
+      <td>{{{ badge('license', c.status) }}}</td>
+      <td><div class="row-actions"><button class="btn btn-secondary btn-sm" onclick="Admin.codeDrawer('{{ c.code }}')">Chi tiết</button></div></td>
+    </tr>
+  {% endeach %}
+  </tbody>
+</table></div>
+{{{ UI.pagination(pg, 'Admin.gotoCodes') }}}
+{% endif %}

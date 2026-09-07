@@ -1,0 +1,25 @@
+<!-- C-01 · bảng kê hoa hồng trong #c01-cm (có phân trang)
+     data: rows [{ c, o, phone, source, showSeller, seller, sellerRankLabel }], pg, count, total -->
+{% if !count %}
+{{{ UI.empty('cash', 'Chưa có khoản hoa hồng trong kỳ', 'Hoa hồng ghi nhận ngay khi đơn của bạn hoặc tuyến dưới thanh toán thành công.') }}}
+{% else %}
+<div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Ngày</th><th>Đơn</th><th>Nguồn</th><th>Hạng lúc tính</th><th class="num">Số tiền</th><th>Trạng thái</th></tr></thead>
+    <tbody>
+      {% each r in rows %}
+      <tr>
+        <td>{{ date(r.c.createdAt) }}</td>
+        <td><span class="cell-main mono">{{ r.c.orderId }}</span><span class="cell-sub">{% if r.o %}{{ r.o.fullName }} · {{ r.phone }}{% endif %}</span></td>
+        <td><span class="badge badge-{{ r.c.kind === 'SELF' ? 'navy' : 'info' }} badge-plain">{{ r.source }}</span>{% if r.showSeller %}<span class="cell-sub">bán bởi {{ r.seller.fullName }} ({{ r.sellerRankLabel }})</span>{% endif %}</td>
+        <td>{{{ badge('rank', r.c.rankAtCalc) }}}</td>
+        <td class="num mono text-strong">{{ money(r.c.amount) }}</td>
+        <td>{{{ badge('commission', r.c.status) }}}</td>
+      </tr>
+      {% endeach %}
+    </tbody>
+    <tfoot><tr><th colspan="4">Tổng {{ count }} khoản</th><th class="num">{{ money(total) }}</th><th></th></tr></tfoot>
+  </table>
+</div>
+{{{ UI.pagination(pg, 'Seller.gotoCmPage') }}}
+{% endif %}

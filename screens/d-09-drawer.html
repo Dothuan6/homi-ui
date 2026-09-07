@@ -1,0 +1,52 @@
+<!-- D-09 · Drawer chi tiết hồ sơ đăng ký: r, ref, refRankLabel, o (đơn gốc), agent, mail, timeline (html), audit (html), canApprove · part = 'title' | 'body' | 'foot' -->
+{% if part === 'title' %}
+<h2>{{ r.fullName }}</h2>
+<div class="row-wrap mt-1">{{{ badge('approval', r.status, true) }}}<span class="mono text-sm text-muted">{{ r.id }}</span></div>
+
+{% elif part === 'body' %}
+<div class="section">
+  <div class="section-title">Hồ sơ đã nộp</div>
+  <dl class="dl">
+    <dt>SĐT</dt><dd class="mono">{{ r.phone }}</dd>
+    <dt>Email</dt><dd>{{ r.email }}</dd>
+    <dt>Ngân hàng</dt><dd>{{ r.bank.bankName }} · <span class="mono">{{ r.bank.accountNo }}</span> · {{ r.bank.owner }}</dd>
+    <dt>T&C</dt><dd>v{{ r.tcVersion }} · {{ dt(r.tcAt) }}</dd>
+    <dt>Nộp lúc</dt><dd>{{ dt(r.createdAt) }}</dd>
+  </dl>
+</div>
+<div class="section">
+  <div class="section-title">Người giới thiệu & đơn gốc</div>
+  <dl class="dl">
+    <dt>Người giới thiệu</dt><dd>{% if ref %}{{ ref.fullName }} · <span class="mono">{{ ref.refCode }}</span> · {{{ badge('rank', ref.rank) }}} (lúc nộp: {{{ refRankLabel }}}){% else %}—{% endif %}</dd>
+    <dt>Đơn</dt><dd>{% if o %}<span class="mono">{{ o.id }}</span> · {{ money(o.price) }} · {{ date(o.paidAt) }}{% else %}—{% endif %}</dd>
+  </dl>
+</div>
+<div class="section">
+  <div class="section-title">Tiến trình</div>
+  {{{ timeline }}}
+</div>
+{% if agent %}
+<div class="section">
+  <div class="section-title">Đã kích hoạt</div>
+  <dl class="dl">
+    <dt>ref_code</dt><dd class="mono">{{ agent.refCode }}</dd>
+    <dt>Link cá nhân</dt><dd class="mono">{{ RULES.publicPurchaseUrl(agent.purchaseAlias) }}</dd>
+    <dt>Hạng</dt><dd>{{{ badge('rank', agent.rank) }}}</dd>
+  </dl>
+  {% if mail %}
+  <div class="alert alert-success mt-3">{{{ icon('sms', 18) }}}<div class="text-sm"><span class="alert-title">Email kích hoạt (mock) → {{ mail.to }}</span><pre style="white-space:pre-wrap;font-family:inherit;margin-top:6px">{{ mail.body }}</pre></div></div>
+  {% endif %}
+</div>
+{% endif %}
+<div class="section">
+  <div class="section-title">Audit</div>
+  {{{ audit }}}
+</div>
+
+{% elif part === 'foot' %}
+{% if r.status.startsWith('PENDING') %}
+<button class="btn btn-danger-outline" onclick="Admin.regReject('{{ r.id }}')">Từ chối</button>
+<button class="btn btn-success" {{{ canApprove ? '' : 'disabled' }}} onclick="Admin.regApprove('{{ r.id }}')">Xác nhận</button>
+{% endif %}
+{% if agent %}<button class="btn btn-secondary" onclick="Admin.userDrawer('{{ agent.id }}')">Xem thành viên</button>{% endif %}
+{% endif %}

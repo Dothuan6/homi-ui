@@ -1,0 +1,11 @@
+<!-- (f) Kho mã hết → chờ cấp -->
+<div class="card"><div class="card-body stack">
+  <div class="result-hero">
+    <div class="result-icon is-success">{{{ icon('check-circle', 40) }}}</div>
+    <h1>Thanh toán thành công</h1>
+    <p>Đơn hàng đã được ghi nhận.</p>
+  </div>
+  <div class="alert alert-warning">{{{ icon('clock', 22) }}}<div><span class="alert-title">Mã kích hoạt đang chờ cấp</span>Mã kích hoạt sẽ được gửi qua SMS tới <strong class="mono">{{ RULES.maskPhone(order.phone) }}</strong> trong thời gian sớm nhất. Bạn cũng có thể xem mã tại mục tra cứu đơn hàng.</div></div>
+  {{{ info }}}
+  <div class="card card-tint"><div class="card-body">{{{ cta }}}</div></div>
+</div></div>

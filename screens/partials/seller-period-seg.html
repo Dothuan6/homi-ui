@@ -1,0 +1,16 @@
+<!-- Chọn kỳ thống kê (tuần / tháng / quý / tuỳ chọn) — data: periods, period, from, to -->
+<div class="row-wrap">
+  <div class="seg" role="group" aria-label="Kỳ thống kê">
+    {% each p in periods %}
+    <button class="{{ period === p.id ? 'is-active' : '' }}" onclick="Seller.setPeriod('{{ p.id }}')">{{ p.label }}</button>
+    {% endeach %}
+  </div>
+  {% if period === 'custom' %}
+  <div class="row">
+    <input type="date" class="input" style="min-height:40px;width:auto" id="rg-from" value="{{ from }}" aria-label="Từ ngày">
+    <span>–</span>
+    <input type="date" class="input" style="min-height:40px;width:auto" id="rg-to" value="{{ to }}" aria-label="Đến ngày">
+    <button class="btn btn-secondary btn-sm" onclick="Seller.applyRange()">Áp dụng</button>
+  </div>
+  {% endif %}
+</div>

@@ -1,0 +1,35 @@
+<div class="policy">
+  <nav class="policy-crumb" aria-label="Breadcrumb"><a href="#HOME">Trang chủ</a><span>/</span><span>{{ p.title }}</span></nav>
+  <div class="policy-grid">
+    <article class="policy-body">
+      <h1>{{ p.title }}</h1>
+      {% if p.intro %}<p class="policy-intro">{{ p.intro }}</p>{% endif %}
+
+      {% each sec, i in p.sections %}
+      <section class="policy-section" id="sec-{{ i + 1 }}">
+        <h2>{{ sec.h }}</h2>
+        {% each it in sec.items %}
+          {% if typeof it === 'string' %}
+          <p>{{ it }}</p>
+          {% elif it.list %}
+          <ul class="policy-list">{% each t in it.list %}<li>{{ t }}</li>{% endeach %}</ul>
+          {% elif it.steps %}
+          <ol class="policy-steps">{% each t, k in it.steps %}<li><strong>Bước {{ k + 1 }}:</strong> {{ t }}</li>{% endeach %}</ol>
+          {% endif %}
+        {% endeach %}
+      </section>
+      {% endeach %}
+
+      <p class="text-caption mt-6">Cập nhật 09/2026 · {{ CONFIG.brand.company }} · Hỗ trợ {{ CONFIG.brand.supportHotline }}</p>
+    </article>
+
+    <aside class="policy-side">
+      <div class="policy-menu">
+        <div class="policy-menu-title">Danh mục chính sách</div>
+        {% each x in POLICIES %}
+        <a href="#POLICY?s={{ x.id }}" class="{% if x.id === p.id %}is-active{% endif %}" {% if x.id === p.id %}aria-current="page"{% endif %}>{{ x.title }}</a>
+        {% endeach %}
+      </div>
+    </aside>
+  </div>
+</div>

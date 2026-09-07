@@ -1,0 +1,76 @@
+<!-- D-03 · Drawer chi tiết đơn hàng · part = 'title' | 'body' | 'foot' -->
+{% if part === 'title' %}
+<h2 class="mono">{{ o.id }}</h2>
+<div class="row-wrap mt-1">{{{ badge('orderStatus', o.status) }}}{{{ o.status === 'PAID' ? badge('shipping', o.shipping) : '' }}}{% if o.flags && o.flags.lateCallback %}<span class="badge badge-warning">Callback muộn</span>{% endif %}{% if o.refunded %}<span class="badge badge-error">Đã hoàn tiền</span>{% endif %}</div>
+
+{% elif part === 'body' %}
+<div class="section">
+  <div class="section-title">Đơn hàng</div>
+  <dl class="dl">
+    <dt>Gói</dt><dd>{{ pkg.fullName }}</dd>
+    <dt>Số tiền</dt><dd>{{ money(o.price) }}</dd>
+    <dt>Phương thức</dt><dd>{{ LABELS.method[o.method] || '—' }}</dd>
+    <dt>Tạo lúc</dt><dd>{{ dt(o.createdAt) }}</dd>
+    {% if o.paidAt %}<dt>Thanh toán lúc</dt><dd>{{ dt(o.paidAt) }}</dd>{% endif %}
+  </dl>
+</div>
+
+<div class="section">
+  <div class="section-title">Người mua & giao hàng</div>
+  <dl class="dl">
+    <dt>Họ tên</dt><dd>{{ o.fullName }}</dd>
+    <dt>SĐT</dt><dd class="mono">{{ o.phone }}</dd>
+    <dt>Email</dt><dd>{{ o.email || '—' }}</dd>
+    <dt>Địa chỉ</dt><dd>{{ o.address }}</dd>
+    <dt>Ghi chú</dt><dd>{{ o.note || '—' }}</dd>
+    <dt>Người bán</dt><dd>{% if s %}{{ s.fullName }} · <span class="mono">{{ o.refCode }}</span> · {% if o.referrerRankAtOrder %}{{{ RULES.rank(o.referrerRankAtOrder).label }}} lúc đơn{% endif %}{% else %}—{% endif %}</dd>
+  </dl>
+  {% if o.status === 'PAID' && pkg.hasShipping %}
+  <div class="row-between mt-3">
+    <span>Giao hàng: {{{ badge('shipping', o.shipping) }}}</span>
+    {% if next %}
+    <button class="btn btn-primary btn-sm" onclick="Admin.updateShipping('{{ o.id }}', '{{ next }}')">{{{ icon('truck', 16) }}} Chuyển sang "{{{ RULES.shippingLabel(next) }}}"</button>
+    {% else %}
+    <span class="text-sm text-success">Đã giao xong</span>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+
+<div class="section">
+  <div class="section-title">Mã kích hoạt & thiết bị</div>
+  {% if code %}
+  <div class="code-box">
+    <div class="grow"><span class="code-label">{{{ label('license', code.status) }}} · {{ code.deviceSku }} {{ code.deviceSerial || '' }}</span><span class="code-value">{{ code.code }}</span></div>
+    <button class="btn btn-secondary btn-icon" aria-label="Sao chép" onclick="UI.copy('{{{ code.code }}}')">{{{ icon('copy', 18) }}}</button>
+  </div>
+  {% if code.device %}<p class="text-sm text-muted mt-2">Thiết bị: {{ code.device.name }} · <span class="mono">{{ code.device.deviceId }}</span> · {{ dt(code.activatedAt) }}</p>{% endif %}
+  {% elif o.status === 'PAID' %}
+  <div class="alert alert-warning">{{{ icon('warning', 18) }}}<div class="text-sm">Đã thanh toán nhưng chưa có mã (kho hết). <a href="#D-05">Bổ sung kho</a>.</div></div>
+  {% else %}
+  <p class="text-muted">Chưa gắn (đơn chưa thanh toán).</p>
+  {% endif %}
+</div>
+
+<div class="section">
+  <div class="section-title">Phân bổ hoa hồng theo chuỗi tuyến</div>
+  {{{ allocation }}}
+</div>
+
+<div class="section">
+  <div class="section-title">Dòng thời gian</div>
+  {{{ include('partials/admin-timeline', { rows: timeline }) }}}
+</div>
+
+{% elif part === 'foot' %}
+{% if o.status === 'AWAITING_RECONCILE' %}
+<button class="btn btn-danger-outline" onclick="Admin.rejectReconcile('{{ o.id }}')">Từ chối</button>
+<button class="btn btn-success" onclick="Admin.confirmReconcile('{{ o.id }}')">{{{ icon('check', 16) }}} Xác nhận đã nhận tiền</button>
+{% endif %}
+{% if o.flags && o.flags.lateCallback && !o.flags.lateChecked %}
+<button class="btn btn-secondary" onclick="Store.clearLateFlag('{{ o.id }}'); UI.toast('Đã đánh dấu kiểm tra.'); App.reload()">{{{ icon('check', 16) }}} Đã kiểm tra</button>
+{% endif %}
+{% if o.status === 'PAID' && !o.refunded %}
+<button class="btn btn-danger-outline" onclick="Admin.refundOrder('{{ o.id }}')">Hoàn tiền & huỷ hoa hồng</button>
+{% endif %}
+{% endif %}

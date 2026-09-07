@@ -1,0 +1,20 @@
+<!-- (d) AWAITING_RECONCILE — polling -->
+<div class="stack">
+  <div class="card"><div class="card-body stack">
+    <div class="result-hero">
+      <div class="result-icon is-pending pulse">{{{ icon('clock', 40) }}}</div>
+      <h1>Đang chờ xác nhận chuyển khoản</h1>
+      <p>Chúng tôi đang đối soát giao dịch của bạn. Trang này tự cập nhật mỗi {{ CONFIG.order.reconcilePollSeconds }} giây — bạn có thể đóng trang và tra cứu lại sau.</p>
+    </div>
+    {{{ info }}}
+    <div class="text-caption text-center" id="poll-status" aria-live="polite">Đang kiểm tra…</div>
+    <div class="actions actions-row">
+      <a class="btn btn-secondary btn-lg" href="#A-04">Tra cứu đơn sau</a>
+      <button class="btn btn-outline btn-lg" onclick="App.reload()">{{{ icon('refresh', 18) }}} Kiểm tra ngay</button>
+    </div>
+  </div></div>
+  <div class="demo-hint">Mô phỏng: admin xác nhận/từ chối tại <a href="#D-03" target="_blank">D-03</a> (mở tab mới) — trang này sẽ tự chuyển.
+    <button class="btn-link" onclick="Store.confirmReconcile('{{ order.id }}'); App.reload()">Giả lập admin xác nhận</button> ·
+    <button class="btn-link" onclick="Store.rejectReconcile('{{ order.id }}', 'Không tìm thấy giao dịch khớp'); App.reload()">Giả lập từ chối</button>
+  </div>
+</div>

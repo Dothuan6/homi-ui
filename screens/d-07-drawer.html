@@ -1,0 +1,38 @@
+<!-- D-07 · Drawer chi tiết yêu cầu rút tiền: w, u, wal, timeline (html), audit (html), canApprove · part = 'title' | 'body' | 'foot' -->
+{% if part === 'title' %}
+<h2 class="mono">{{ w.id }}</h2>
+<div class="row-wrap mt-1">{{{ badge('withdrawal', w.status, true) }}}<span class="text-strong">{{ money(w.amount) }}</span></div>
+
+{% elif part === 'body' %}
+<div class="section">
+  <div class="section-title">Thành viên</div>
+  <dl class="dl">
+    <dt>Họ tên</dt><dd>{{ u.fullName }} {{{ badge('rank', u.rank) }}}</dd>
+    <dt>SĐT</dt><dd class="mono">{{ u.phone }}</dd>
+    <dt>Số dư</dt><dd>Ghi nhận {{ money(wal.recorded) }} · giữ {{ money(wal.held) }} · đã rút {{ money(wal.withdrawn) }} · khả dụng {{ money(wal.available) }}</dd>
+  </dl>
+</div>
+<div class="section">
+  <div class="section-title">Tài khoản nhận</div>
+  <dl class="dl">
+    <dt>Ngân hàng</dt><dd>{{ w.bank.bankName }}</dd>
+    <dt>Số TK</dt><dd class="mono">{{ w.bank.accountNo }}</dd>
+    <dt>Chủ TK</dt><dd>{{ w.bank.owner }}</dd>
+  </dl>
+</div>
+<div class="section">
+  <div class="section-title">Tiến trình duyệt</div>
+  {{{ timeline }}}
+</div>
+<div class="section">
+  <div class="section-title">Audit</div>
+  {{{ audit }}}
+</div>
+
+{% elif part === 'foot' %}
+{% if w.status.startsWith('PENDING') %}
+<button class="btn btn-danger-outline" onclick="Admin.wdReject('{{ w.id }}')">Từ chối</button>
+<button class="btn btn-success" {{{ canApprove ? '' : 'disabled' }}} onclick="Admin.wdApprove('{{ w.id }}')">Xác nhận</button>
+{% endif %}
+{% if w.status === 'APPROVED' %}<button class="btn btn-primary" onclick="Admin.wdPaid('{{ w.id }}')">Đánh dấu đã chi trả</button>{% endif %}
+{% endif %}

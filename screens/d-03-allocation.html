@@ -1,0 +1,21 @@
+<!-- D-03 · Phân bổ hoa hồng theo chuỗi tuyến của một đơn: rows = [{ c, level, who, rate }], total, expected, ok -->
+{% if !rows.length %}
+<p class="text-muted">Chưa có (đơn chưa thanh toán hoặc không có người bán).</p>
+{% else %}
+<div class="table-wrap"><table class="table" style="min-width:0">
+  <thead><tr><th>Cấp</th><th>Người thụ hưởng</th><th>Hạng lúc tính</th><th class="num">Mức hạng</th><th class="num">Nhận</th><th>TT</th></tr></thead>
+  <tbody>
+  {% each row in rows %}
+    <tr>
+      <td>{{{ row.level }}}</td>
+      <td>{% if row.c.beneficiaryId === 'COMPANY' %}<strong>HOMI365</strong>{% else %}{{ row.who }}{% endif %}</td>
+      <td>{{{ badge('rank', row.c.rankAtCalc) }}}</td>
+      <td class="num mono">{{ money(row.rate) }}</td>
+      <td class="num mono text-strong">{{ money(row.c.amount) }}</td>
+      <td>{{{ badge('commission', row.c.status) }}}</td>
+    </tr>
+  {% endeach %}
+  </tbody>
+  <tfoot><tr><th colspan="4">Tổng (kiểm: {{ money(expected) }})</th><th class="num {{ ok ? 'text-success' : 'text-error' }}">{{ money(total) }}</th><th></th></tr></tfoot>
+</table></div>
+{% endif %}

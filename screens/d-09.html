@@ -1,0 +1,9 @@
+<!-- D-09 · Duyệt đăng ký thành viên: bộ lọc + vùng bảng (bảng render động bằng d-09-table) -->
+<div class="card"><div class="card-body">
+  <div class="alert alert-info mb-4">{{{ icon('info', 18) }}}<div class="text-sm">Duyệt <strong>2 lớp</strong> (người thứ 2 phải khác người thứ 1; Head Admin tự chốt). Khi <strong>Đã duyệt</strong>: tạo tài khoản thành viên hạng Copper, sinh ref_code + link cá nhân, gửi email kích hoạt. Duyệt không ảnh hưởng đơn, tuyến và hoa hồng đã ghi.</div></div>
+  <div class="table-toolbar">
+    <div class="field field-search"><label class="field-label" for="rg-q">Tìm kiếm</label><input class="input" id="rg-q" placeholder="Họ tên, SĐT, email" value="{{ f.q }}" oninput="Admin.st.regs.q=this.value; Admin.st.regs.page=1; Admin.renderRegs()"></div>
+    <div class="field"><label class="field-label" for="rg-status">Trạng thái</label><select class="select" id="rg-status" onchange="Admin.st.regs.status=this.value; Admin.st.regs.page=1; Admin.renderRegs()"><option value="">Tất cả</option>{% each k in Object.keys(LABELS.approval) %}<option value="{{ k }}" {{ f.status === k ? 'selected' : '' }}>{{{ LABELS.approval[k].text }}}</option>{% endeach %}</select></div>
+  </div>
+  <div id="rg-table">{{{ UI.skeletonTable(7, 5) }}}</div>
+</div></div>

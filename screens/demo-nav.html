@@ -1,0 +1,11 @@
+<div class="row-between"><strong>Demo navigator</strong><button class="modal-close" aria-label="Đóng" onclick="App.toggleDemoNav()">{{{ icon('x', 18) }}}</button></div>
+{% each g in groups %}
+<h4>{{ g.title }}</h4>
+{% each it in g.items %}<a class="demo-link" href="#{{ it.hash }}" onclick="App.toggleDemoNav()"><code>#{{ it.hash.split('?')[0] }}</code>{{ it.label }}</a>{% endeach %}
+{% endeach %}
+<h4>Tiện ích</h4>
+<a class="demo-link" href="javascript:void(0)" onclick="Store.loginAgentById('U001'); App.toggleDemoNav(); App.navigate('C-01')">Đăng nhập nhanh thành viên An</a>
+<a class="demo-link" href="javascript:void(0)" onclick="Store.adminLogin('head','Homi@2026'); App.toggleDemoNav(); App.navigate('D-01')">Đăng nhập nhanh Head Admin</a>
+<a class="demo-link" href="javascript:void(0)" onclick="Store.expireAgentSession(); App.toggleDemoNav(); App.navigate('C-01')">Giả lập hết phiên</a>
+<a class="demo-link" href="javascript:void(0)" onclick="Store.otpResetAll(); UI.toast('Đã gỡ mọi khoá OTP.')">Gỡ khoá OTP</a>
+<a class="demo-link text-error" href="javascript:void(0)" onclick="if (confirm('Nạp lại toàn bộ dữ liệu mẫu?')) Store.reset()">Nạp lại dữ liệu mẫu</a>

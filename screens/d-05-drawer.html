@@ -1,0 +1,29 @@
+<!-- D-05 · Drawer chi tiết mã kích hoạt: c = Store.codeInfo, o (đơn), a (thành viên bán), stepIdx · part = 'title' | 'body' | 'foot' -->
+{% if part === 'title' %}
+<h2 class="mono">{{ c.code }}</h2>
+<div class="row-wrap mt-1">{{{ badge('license', c.status, true) }}}<span class="mono text-sm text-muted">{{ c.deviceSku }} · {{ c.deviceSerial || '' }}</span></div>
+
+{% elif part === 'body' %}
+<div class="section">
+  <div class="section-title">Vòng đời (một chiều)</div>
+  <div class="steps">
+    {% each s, i in ['IN_STOCK', 'ASSIGNED', 'ACTIVATED'] %}
+    <div class="step {{ c.status === s ? 'is-active' : '' }} {{ stepIdx > i ? 'is-done' : '' }}"><span class="step-dot">{{{ i + 1 }}}</span><span>{{{ LABELS.license[s].text }}}</span></div>
+    {% if i < 2 %}<span class="step-line"></span>{% endif %}
+    {% endeach %}
+  </div>
+  <dl class="dl mt-4">
+    <dt>Nhập kho</dt><dd>{{ dt(c.stockedAt) }} · lô {{ c.batch }}</dd>
+    <dt>Gắn đơn</dt><dd>{% if c.assignedAt %}{{ dt(c.assignedAt) }} · <span class="mono">{{ c.orderId }}</span>{% else %}—{% endif %}</dd>
+    <dt>Thành viên bán</dt><dd>{% if a %}{{ a.fullName }} · {{{ badge('rank', a.rank) }}}{% else %}—{% endif %}</dd>
+    <dt>Người mua</dt><dd>{% if o %}{{ o.fullName }} · <span class="mono">{{ o.phone }}</span>{% else %}—{% endif %}</dd>
+    <dt>Kích hoạt</dt><dd>{% if c.activatedAt %}{{ dt(c.activatedAt) }} · {{ c.device.name }} · <span class="mono">{{ c.device.deviceId }}</span>{% else %}—{% endif %}</dd>
+  </dl>
+</div>
+
+{% elif part === 'foot' %}
+{% if c.status === 'ASSIGNED' %}
+<button class="btn btn-primary" onclick="Store.activateCode('{{ c.code }}', { name: 'Samsung Galaxy A54 (mô phỏng)' }); UI.toast('Đã mô phỏng kích hoạt từ app.'); Admin.renderCodes(); Admin.codeDrawer('{{ c.code }}')">{{{ icon('device', 16) }}} Mô phỏng kích hoạt từ app</button>
+{% endif %}
+{% if o %}<button class="btn btn-secondary" onclick="Admin.orderDrawer('{{ o.id }}')">Xem đơn</button>{% endif %}
+{% endif %}

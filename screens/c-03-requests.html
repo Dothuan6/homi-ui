@@ -1,0 +1,23 @@
+<!-- C-03 · tab Lịch sử rút tiền — data: list [{ w, maskedAccount, rejectReason, timelineHtml }] -->
+{% if !list.length %}
+{{{ UI.empty('cash', 'Chưa có yêu cầu rút tiền', 'Bấm "Tạo yêu cầu rút tiền" khi có số dư khả dụng.') }}}
+{% else %}
+<div class="stack">
+  {% each x in list %}
+  <div class="order-card">
+    <div class="order-card-head">
+      <div><div class="text-sm text-muted">Yêu cầu</div><div class="mono text-strong">{{ x.w.id }}</div></div>
+      <div class="text-right"><div class="text-strong">{{ money(x.w.amount) }}</div><div class="text-sm text-muted">{{ dt(x.w.createdAt) }}</div></div>
+    </div>
+    <div class="status-row">{{{ badge('withdrawal', x.w.status, true) }}}<span class="text-sm text-muted">Nhận về {{ x.w.bank.bankName }} · <span class="mono">{{ x.maskedAccount }}</span></span></div>
+    {% if x.w.status === 'REJECTED' %}
+    <div class="alert alert-error mt-3">{{{ icon('x-circle', 18) }}}<div class="text-sm"><span class="alert-title">Lý do từ chối</span>{{ x.rejectReason }}</div></div>
+    {% endif %}
+    <details class="feature mt-2">
+      <summary>Tiến trình duyệt</summary>
+      {{{ x.timelineHtml }}}
+    </details>
+  </div>
+  {% endeach %}
+</div>
+{% endif %}

@@ -1,0 +1,27 @@
+<!-- D-04 · Bảng hoa hồng hiện hành + lịch sử phiên bản của một gói (view-model từ Admin.commissionTableVm) -->
+<!-- rows = [{ r, amount, diff }] · versions = [{ v, isCurrent, state: 'upcoming' | 'current' | 'replaced', cells: [{ short, changed, prevK, curK }] }] -->
+<div class="table-wrap"><table class="table" style="min-width:0">
+  <thead><tr><th>Hạng</th><th class="num">Mức hoa hồng</th><th class="num">Chênh lệch so với hạng dưới</th></tr></thead>
+  <tbody>
+  {% each row in rows %}
+    <tr><td>{{{ badge('rank', row.r.id) }}}</td><td class="num mono text-strong">{{ money(row.amount) }}</td><td class="num mono">{% if row.diff !== null %}+{{ money(row.diff) }}{% else %}—{% endif %}</td></tr>
+  {% endeach %}
+  </tbody>
+</table></div>
+
+<h3 class="mt-4 mb-2">Lịch sử phiên bản</h3>
+{% if !versions.length %}
+<p class="text-muted">Chưa có</p>
+{% endif %}
+{% each ver in versions %}
+{% set v = ver.v %}
+<div class="policy-version {{ ver.isCurrent ? 'is-current' : '' }}">
+  <div class="row-between">
+    <strong>v{{{ v.version }}}</strong>
+    {% if ver.state === 'upcoming' %}<span class="badge badge-info">Sắp hiệu lực</span>{% elif ver.state === 'current' %}<span class="badge badge-success">Đang áp dụng</span>{% else %}<span class="badge badge-neutral">Đã thay thế</span>{% endif %}
+  </div>
+  <div class="text-sm text-muted">Hiệu lực {{ date(v.effectiveFrom) }} · {{ v.by }} · {{ dt(v.at) }}</div>
+  <div class="text-sm mt-1">{% each cell, i in ver.cells %}{% if i %} · {% endif %}<span class="mono">{{{ cell.short }}} {% if cell.changed %}<span class="diff-del">{{{ cell.prevK }}}k</span> <span class="diff-add">{{{ cell.curK }}}k</span>{% else %}{{{ cell.curK }}}k{% endif %}</span>{% endeach %}</div>
+  {% if v.note %}<div class="text-sm text-muted mt-1">"{{ v.note }}"</div>{% endif %}
+</div>
+{% endeach %}

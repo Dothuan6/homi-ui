@@ -1,8 +1,9 @@
 /**
  * HOMI365 prototype v2 — router (hash) · khung layout 3 nhóm · guard phiên & vai trò · trang bìa
+ * Markup các khung/trang nằm trong screens/*.html (TPL); file này chỉ giữ điều hướng, guard và dữ liệu.
  *
  * Route: #r/{ref_code} · #p/{alias}  → điểm vào (LP-1) → A-01
- *        #A-01 … #A-06 · #C-01 … #C-03 · #C-PROFILE · #D-00 … #D-10 · #403 · #HOME
+ *        #A-01 … #A-06 · #C-01 … #C-03 · #C-PROFILE · #D-00 … #D-10 · #403 · #HOME · #POLICY?s=
  */
 const App = {
   timers: {}, current: '', _suppress: false,
@@ -17,6 +18,14 @@ const App = {
     '403': () => App.page403(), 'STYLEGUIDE': () => { window.location.href = './styleguide.html'; }
   },
 
+  /** Khởi động: nạp toàn bộ template rồi mới render (cần chạy qua http server — fetch screens/*.html). */
+  boot: function() {
+    TPL.load().then(() => this.init()).catch((e) => {
+      const root = document.getElementById('app-root');
+      if (root) root.innerHTML = '<div style="max-width:560px;margin:40px auto;padding:20px;font-family:sans-serif"><h1 style="font-size:20px;color:#122544">Không nạp được giao diện</h1><p>' + UI.esc(e.message) + '</p><p>Prototype cần chạy qua máy chủ web (http://…), không mở trực tiếp file.</p></div>';
+      console.error(e);
+    });
+  },
   init: function() {
     window.addEventListener('hashchange', () => { if (this._suppress) { this._suppress = false; return; } this.render(window.location.hash.replace('#', '')); });
     this.render(window.location.hash.replace('#', '') || 'HOME');
@@ -53,45 +62,14 @@ const App = {
 
   // ---------------- Khung người mua (website) ----------------
   buyerShell: function(content, o) {
-    const opt = o || {}; const seller = Store.refSeller(); const cur = (this.current || '').split('?')[0];
-    const nav = (code, label, ico) => `<a href="#${code}" class="${cur === code ? 'is-active' : ''}">${UI.icon(ico, 18)}<span>${label}</span></a>`;
-    return `<div class="buyer">
-      <header class="buyer-header"><div class="buyer-header-inner">
-        <a href="#HOME" class="brand" aria-label="HOMI365 — trang giới thiệu">${UI.logo({ size: 34 })}</a>
-        <nav class="buyer-nav" aria-label="Điều hướng">${nav('A-04', 'Tra cứu đơn hàng', 'search')}${nav('A-05', 'Đăng nhập thành viên', 'key')}</nav>
-      </div></header>
-      ${opt.showRef && seller ? `<div class="ref-bar">Người giới thiệu: <strong>${UI.esc(seller.fullName)}</strong> · mã <span class="mono">${UI.esc(seller.refCode)}</span></div>` : ''}
-      <main class="buyer-main ${opt.narrow ? 'buyer-main-narrow' : ''}" id="buyer-main">${content}</main>
-      <footer class="site-footer"><div class="site-footer-inner">
-        <div>${UI.logo({ size: 28 })}<p class="mt-2">${UI.esc(CONFIG.brand.company)}</p><p>Hỗ trợ <strong>${UI.esc(CONFIG.brand.supportHotline)}</strong> · ${UI.esc(CONFIG.brand.supportHours)}</p></div>
-        <div><div class="footer-title">Khách hàng</div><a href="#A-04">Tra cứu đơn hàng</a><a href="#A-05">Đăng nhập thành viên</a><a href="#A-06">Đăng ký thành viên</a><a href="#HOME">Trang giới thiệu prototype</a></div>
-        <div><div class="footer-title">Chính sách</div>${POLICIES.map(p => `<a href="#POLICY?s=${p.id}">${UI.esc(p.title)}</a>`).join('')}</div>
-        <div><div class="footer-title">Quản trị</div><a href="#D-00">Đăng nhập quản trị</a><a href="./styleguide.html">Bộ thành phần giao diện</a></div>
-      </div></footer>
-    </div>`;
+    const opt = o || {};
+    return TPL.render('shell-buyer', { content, showRef: !!opt.showRef, narrow: !!opt.narrow, seller: Store.refSeller(), cur: (this.current || '').split('?')[0] });
   },
 
   // ---------------- Khung thành viên ----------------
+  sellerNav: [{ code: 'C-01', label: 'Tổng quan', ico: 'home' }, { code: 'C-02', label: 'Gói của tôi', ico: 'package' }, { code: 'C-03', label: 'Ví & rút tiền', ico: 'wallet' }],
   sellerShell: function(active, content) {
-    const u = Store.currentAgent();
-    const nav = [['C-01', 'Tổng quan', 'home'], ['C-02', 'Gói của tôi', 'package'], ['C-03', 'Ví & rút tiền', 'wallet']];
-    const link = () => nav.map(([code, label, ico]) => `<a href="#${code}" class="${active === code ? 'is-active' : ''}">${UI.icon(ico, 22)}<span>${label}</span></a>`).join('');
-    return `<div class="seller">
-      <header class="seller-header"><div class="seller-header-inner">
-        <a href="#C-01" class="brand" aria-label="HOMI365">${UI.logo({ size: 34 })}</a>
-        <nav class="seller-nav-top" aria-label="Điều hướng thành viên">${link()}</nav>
-        <div class="seller-user">
-          <button class="seller-user-btn" id="seller-user-btn" aria-haspopup="true" aria-expanded="false" onclick="App.toggleSellerMenu()"><span class="avatar" aria-hidden="true">${UI.esc(RULES.initials(u.fullName))}</span><span class="seller-user-name">${UI.esc(u.fullName)}</span>${UI.badge('rank', u.rank)}${UI.icon('chevron-down', 16)}</button>
-          <div class="seller-menu" id="seller-menu" hidden>
-            <div class="seller-menu-head"><div class="name">${UI.esc(u.fullName)}</div><div class="sub">${UI.esc(RULES.maskPhone(u.phone))} · ${UI.esc(u.refCode)}</div><div class="mt-1">${UI.badge('rank', u.rank)}</div></div>
-            <a href="#C-PROFILE">${UI.icon('user', 18)} Hồ sơ của tôi</a>
-            <button class="danger" onclick="App.logoutAgent()">${UI.icon('logout', 18)} Đăng xuất</button>
-          </div>
-        </div>
-      </div></header>
-      <main class="seller-main">${content}</main>
-      <nav class="seller-nav-bottom" aria-label="Điều hướng thành viên">${link()}</nav>
-    </div>`;
+    return TPL.render('shell-seller', { active, content, u: Store.currentAgent(), nav: this.sellerNav });
   },
   toggleSellerMenu: function(forceClose) { const m = document.getElementById('seller-menu'); const b = document.getElementById('seller-user-btn'); if (!m || !b) return; const open = forceClose ? false : m.hidden; m.hidden = !open; b.setAttribute('aria-expanded', String(open)); if (open) { this._menuOut = (e) => { if (!document.getElementById('seller-menu') || !e.target.closest('.seller-user')) this.toggleSellerMenu(true); }; setTimeout(() => document.addEventListener('click', this._menuOut), 0); } else if (this._menuOut) { document.removeEventListener('click', this._menuOut); this._menuOut = null; } },
   logoutAgent: function() { Store.logoutAgent(); UI.toast('Đã đăng xuất.', 'info'); this.navigate('A-05'); },
@@ -100,102 +78,60 @@ const App = {
   // ---------------- Khung quản trị ----------------
   adminShell: function(active, title, content, o) {
     const opt = o || {}; const st = Store.adminStats(30); const me = Store.currentAdmin(); const head = me.role === 'HEAD';
-    const badge = (n) => n ? `<span class="nav-badge">${n}</span>` : '';
-    const item = (code, label, ico, b) => `<a href="#${code}" class="${active === code ? 'is-active' : ''}">${UI.icon(ico, 18)}<span>${label}</span>${b || `<span class="nav-code">${code}</span>`}</a>`;
-    return `<div class="admin">
-      <aside class="admin-sidebar" id="admin-sidebar">
-        <div class="admin-sidebar-brand">${UI.logo({ size: 30, invert: true })}<span class="sub">Quản trị HOMI365</span></div>
-        <nav class="admin-nav" aria-label="Menu quản trị">
-          ${item('D-01', 'Tổng quan', 'home')}
-          <div class="admin-nav-group">Vận hành</div>
-          ${item('D-09', 'Duyệt đăng ký thành viên', 'user', badge(st.regPending))}
-          ${item('D-07', 'Rút tiền & sổ hoa hồng', 'cash', badge(st.withdrawPending + st.withdrawApproved))}
-          ${item('D-03', 'Đơn hàng & đối soát', 'inbox', badge(st.awaiting))}
-          ${item('D-02', 'Thành viên', 'users')}
-          ${item('D-05', 'Kho mã & thiết bị', 'key', st.stock <= CONFIG.stock.lowThreshold ? badge(st.stock) : '')}
-          ${CONFIG.rules.onePackagePerPhone ? item('D-08', 'Cấp phát ngoại lệ', 'gift') : ''}
-          <div class="admin-nav-group">Cấu hình</div>
-          ${item('D-04', 'Sản phẩm & hoa hồng', 'package')}
-          ${item('D-06', 'Hạng & quy tắc', 'settings')}
-          ${head ? item('D-10', 'Tài khoản admin', 'shield') : ''}
-        </nav>
-        <div class="admin-sidebar-foot"><div class="who">${UI.esc(me.fullName || me.username)}</div><div class="role">${UI.esc(LABELS.role[me.role] ? LABELS.role[me.role].text : me.role)} · ${UI.esc(me.username)}</div>
-          <button class="btn btn-sm btn-secondary" onclick="App.logoutAdmin()">${UI.icon('logout', 16)} Đăng xuất</button></div>
-      </aside>
-      <div class="admin-content">
-        <div class="admin-topbar"><div class="row"><button class="btn btn-icon btn-secondary admin-menu-btn" aria-label="Mở menu" onclick="document.getElementById('admin-sidebar').classList.toggle('is-open')">${UI.icon('menu', 20)}</button><div><div class="crumb">${active}</div><h1>${title}</h1></div></div><div class="row">${opt.actions || ''}</div></div>
-        <main class="admin-main">${content}</main>
-      </div></div>`;
+    const items = [
+      { code: 'D-01', label: 'Tổng quan', ico: 'home', badge: 0 },
+      { group: 'Vận hành' },
+      { code: 'D-09', label: 'Duyệt đăng ký thành viên', ico: 'user', badge: st.regPending },
+      { code: 'D-07', label: 'Rút tiền & sổ hoa hồng', ico: 'cash', badge: st.withdrawPending + st.withdrawApproved },
+      { code: 'D-03', label: 'Đơn hàng & đối soát', ico: 'inbox', badge: st.awaiting },
+      { code: 'D-02', label: 'Thành viên', ico: 'users', badge: 0 },
+      { code: 'D-05', label: 'Kho mã & thiết bị', ico: 'key', badge: st.stock <= CONFIG.stock.lowThreshold ? st.stock : 0 },
+      CONFIG.rules.onePackagePerPhone ? { code: 'D-08', label: 'Cấp phát ngoại lệ', ico: 'gift', badge: 0 } : null,
+      { group: 'Cấu hình' },
+      { code: 'D-04', label: 'Sản phẩm & hoa hồng', ico: 'package', badge: 0 },
+      { code: 'D-06', label: 'Hạng & quy tắc', ico: 'settings', badge: 0 },
+      head ? { code: 'D-10', label: 'Tài khoản admin', ico: 'shield', badge: 0 } : null
+    ].filter(Boolean);
+    return TPL.render('shell-admin', { active, title, content, actions: opt.actions || '', items, me, roleLabel: LABELS.role[me.role] ? LABELS.role[me.role].text : me.role });
   },
   logoutAdmin: function() { Store.logoutAdmin(); this.navigate('D-00'); },
 
   // ---------------- Trang chính sách (một trang, danh mục bên phải) ----------------
   pagePolicy: function(q) {
     const id = q.get('s') || POLICIES[0].id; const p = POLICIES.find(x => x.id === id) || POLICIES[0];
-    const item = (it) => typeof it === 'string' ? `<p>${UI.esc(it)}</p>` : it.list ? `<ul class="policy-list">${it.list.map(t => `<li>${UI.esc(t)}</li>`).join('')}</ul>` : it.steps ? `<ol class="policy-steps">${it.steps.map((t, i) => `<li><strong>Bước ${i + 1}:</strong> ${UI.esc(t)}</li>`).join('')}</ol>` : '';
-    const html = `<div class="policy">
-      <nav class="policy-crumb" aria-label="Breadcrumb"><a href="#HOME">Trang chủ</a><span>/</span><span>${UI.esc(p.title)}</span></nav>
-      <div class="policy-grid">
-        <article class="policy-body">
-          <h1>${UI.esc(p.title)}</h1>
-          ${p.intro ? `<p class="policy-intro">${UI.esc(p.intro)}</p>` : ''}
-          ${p.sections.map((sec, i) => `<section class="policy-section" id="sec-${i + 1}"><h2>${UI.esc(sec.h)}</h2>${sec.items.map(item).join('')}</section>`).join('')}
-          <p class="text-caption mt-6">Cập nhật 09/2026 · ${UI.esc(CONFIG.brand.company)} · Hỗ trợ ${UI.esc(CONFIG.brand.supportHotline)}</p>
-        </article>
-        <aside class="policy-side"><div class="policy-menu"><div class="policy-menu-title">Danh mục chính sách</div>${POLICIES.map(x => `<a href="#POLICY?s=${x.id}" class="${x.id === p.id ? 'is-active' : ''}" ${x.id === p.id ? 'aria-current="page"' : ''}>${UI.esc(x.title)}</a>`).join('')}</div></aside>
-      </div></div>`;
-    return this.buyerShell(html);
+    return this.buyerShell(TPL.render('policy', { p }));
   },
 
-  page403: function(kind) {
-    const spec = kind === 'specialist';
-    return `<div class="error-page"><div class="card error-card"><div class="card-body stack">
-      <div class="result-icon is-error" style="margin:0 auto">${UI.icon('ban', 36)}</div><div class="error-code">403 · FORBIDDEN</div>
-      <h1>${spec ? 'Chỉ Head Admin mới truy cập được mục này' : 'Bạn không có quyền truy cập khu vực quản trị'}</h1>
-      <p class="text-muted">${spec ? 'Quản lý tài khoản admin (D-10) thuộc quyền Head Admin. Tài khoản Admin Specialist của bạn không có quyền này.' : 'Phiên hiện tại là phiên thành viên. Khu vực quản trị yêu cầu tài khoản quản trị viên đăng nhập bằng tên đăng nhập và mật khẩu.'}</p>
-      <div class="actions actions-row">${spec ? `<a class="btn btn-primary btn-lg" href="#D-01">Về tổng quan quản trị</a>` : `<a class="btn btn-secondary btn-lg" href="#C-01">Về Dashboard thành viên</a><a class="btn btn-primary btn-lg" href="#D-00">Đăng nhập quản trị</a>`}</div>
-    </div></div></div>`;
-  },
+  page403: function(kind) { return TPL.render('403', { spec: kind === 'specialist' }); },
 
   // ---------------- Trang bìa prototype ----------------
   pageHome: function() {
-    const an = Store.user('U001'); const kim = Store.user('U101'); const bao = Store.user('U102'); const paidOrder = Store.orders().find(o => o.status === 'PAID' && o.phone === kim.phone) || Store.orders().find(o => o.status === 'PAID');
-    const card = (ico, title, desc, rows, actions) => `<div class="card"><div class="card-body"><div class="row mb-2"><span class="result-icon is-info" style="width:44px;height:44px;margin:0">${UI.icon(ico, 22)}</span><h2 style="font-size:var(--fs-lg)">${title}</h2></div><p class="text-sm text-muted">${desc}</p><dl class="dl dl-stack mt-3">${rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl><div class="actions">${actions}</div></div></div>`;
-    const content = `<div class="stack-lg">
-      <div class="text-center"><h1>Prototype giao diện HOMI365 · Medigo</h1><p class="text-muted mt-2">Bản mô phỏng luồng mua hàng, đăng ký & dashboard thành viên và quản trị (CHANGE SPEC v3). Dữ liệu mẫu lưu trên trình duyệt của bạn. Mã OTP dùng chung: <strong class="mono">${CONFIG.otp.mockCode}</strong>.</p></div>
-      <div class="grid-2">
-        ${card('users', 'Người mua', 'Vào bằng link giới thiệu hoặc link mua hàng cá nhân của thành viên. Họ tên · SĐT · email · địa chỉ → OTP → thanh toán → kết quả.',
-          [['Link giới thiệu (ref_code)', `<span class="mono">${UI.esc(RULES.referralUrl(an.refCode))}</span>`], ['Link mua hàng cá nhân (alias)', `<span class="mono">${UI.esc(RULES.purchaseUrl(an.purchaseAlias))}</span>`], ['SĐT gây lỗi gửi SMS', `<span class="mono">${UI.esc(CONFIG.demo.smsErrorPhone)}</span>`]],
-          `<a class="btn btn-primary btn-lg btn-block" href="${RULES.referralHash(an.refCode)}">${UI.icon('external', 18)} Mở link giới thiệu mẫu</a><a class="btn btn-secondary btn-block" href="${RULES.purchaseHash(an.purchaseAlias)}">Mở link mua hàng cá nhân ${UI.esc(an.purchaseAlias)}</a>`)}
-        ${card('user', 'Đăng ký thành viên', 'Sau khi mua, người mua đăng ký thành viên (hồ sơ + T&C + OTP) và chờ admin duyệt 2 lớp. Chỉ người giới thiệu từ hạng Silver mới được tuyển.',
-          [['Đã mua qua Lithium — đăng ký được', `<span class="mono">${UI.esc(kim.phone)}</span> · ${UI.esc(kim.fullName)}`], ['Đã mua qua Copper — bị chặn', `<span class="mono">${UI.esc(bao.phone)}</span> · ${UI.esc(bao.fullName)}`], ['Hồ sơ đang chờ duyệt (1/2)', `<span class="mono">0913000888</span>`], ['Hồ sơ bị từ chối', `<span class="mono">0914000999</span>`]],
-          `<a class="btn btn-primary btn-lg btn-block" href="#A-06">${UI.icon('user', 18)} Đăng ký thành viên</a><a class="btn btn-secondary btn-block" href="#A-04">Tra cứu đơn hàng (mã đơn mẫu <span class="mono">${UI.esc(paidOrder ? paidOrder.id : '')}</span>)</a>`)}
-        ${card('key', 'Thành viên', 'Đăng nhập bằng SĐT + mật khẩu (quên mật khẩu qua OTP). Dashboard: hạng & điểm, 2 link, thống kê, hoa hồng chênh lệch, F1, ví & rút tiền 1 lần/tháng.',
-          [['Thành viên Lithium', `<span class="mono">${UI.esc(an.phone)}</span> / <span class="mono">${UI.esc(CONFIG.demo.agentPassword)}</span> · ${UI.esc(an.fullName)}`], ['Gold · Silver · Copper', `<span class="mono">0912345678</span> · <span class="mono">0933222111</span> · <span class="mono">0987654321</span> (cùng mật khẩu)`], ['Bị khoá', `<span class="mono">0977000111</span>`]],
-          `<a class="btn btn-primary btn-lg btn-block" href="#A-05">${UI.icon('key', 18)} Đăng nhập thành viên</a>`)}
-        ${card('shield', 'Quản trị', '2 vai trò: Admin Specialist (duyệt lớp 1/2) và Head Admin (tự chốt, quản lý tài khoản admin, chỉ định hạng, tạo thành viên gốc, chạy job xét hạng).',
-          [['Head Admin', `<span class="mono">head</span> / <span class="mono">Homi@2026</span>`], ['Admin Specialist', `<span class="mono">admin</span> · <span class="mono">admin2</span> / <span class="mono">Homi@2026</span>`], ['Việc đang chờ', `${Store.registrations().filter(r => r.status.startsWith('PENDING')).length} đăng ký · ${Store.withdrawals().filter(w => w.status.startsWith('PENDING')).length} rút tiền · ${Store.orders().filter(o => o.status === 'AWAITING_RECONCILE').length} đối soát`]],
-          `<a class="btn btn-primary btn-lg btn-block" href="#D-00">${UI.icon('shield', 18)} Đăng nhập quản trị</a>`)}
-      </div>
-      <div class="alert alert-neutral">${UI.icon('info', 18)}<div class="text-sm">Muốn xem lại từ đầu với dữ liệu gốc: <button class="btn-link" onclick="if (confirm('Nạp lại toàn bộ dữ liệu mẫu? Mọi thao tác đã làm sẽ mất.')) Store.reset()">nạp lại dữ liệu mẫu</button>. Bộ thành phần giao diện: <a href="./styleguide.html">styleguide</a>.</div></div>
-    </div>`;
-    return `<div class="buyer"><header class="buyer-header"><div class="buyer-header-inner">${UI.logo({ size: 34 })}<span class="text-sm text-muted">Prototype v2 · spec v3 · 05/09/2026</span></div></header><main class="buyer-main">${content}</main><footer class="buyer-footer">${UI.esc(CONFIG.brand.company)}</footer></div>`;
+    const kim = Store.user('U101');
+    const paidOrder = Store.orders().find(o => o.status === 'PAID' && o.phone === kim.phone) || Store.orders().find(o => o.status === 'PAID');
+    return TPL.render('home', {
+      an: Store.user('U001'), kim, bao: Store.user('U102'), paidOrderId: paidOrder ? paidOrder.id : '',
+      pending: {
+        regs: Store.registrations().filter(r => r.status.startsWith('PENDING')).length,
+        wds: Store.withdrawals().filter(w => w.status.startsWith('PENDING')).length,
+        awaiting: Store.orders().filter(o => o.status === 'AWAITING_RECONCILE').length
+      }
+    });
   },
 
   // ---------------- Demo navigator (F9) ----------------
   mountDemoNav: function() { if (document.getElementById('demo-fab')) return; const fab = document.createElement('button'); fab.id = 'demo-fab'; fab.className = 'demo-fab'; fab.textContent = 'Demo'; fab.onclick = () => this.toggleDemoNav(); document.body.appendChild(fab); document.addEventListener('keydown', (e) => { if (e.key === 'F9') this.toggleDemoNav(); }); },
   toggleDemoNav: function() {
     const ex = document.getElementById('demo-panel'); if (ex) { ex.remove(); return; }
+    const g = (title, items) => ({ title, items: items.map(([hash, label]) => ({ hash, label })) });
     const groups = [
-      ['Điểm vào', [['r/AN7K2Q', 'Link giới thiệu'], ['p/NVA3456', 'Link mua hàng cá nhân'], ['r/XXXXXX', 'Link không hợp lệ'], ['r/EM9QZT', 'Thành viên bị khoá']]],
-      ['A', [['A-01', 'A-01'], ['A-02?state=demo', 'A-02'], ['A-03?state=paid', 'A-03 PAID'], ['A-03?state=reconcile', 'A-03 chờ đối soát'], ['A-04', 'A-04'], ['A-05', 'A-05'], ['A-05?view=forgot', 'A-05 quên MK'], ['A-06', 'A-06'], ['A-06?state=pending', 'A-06 chờ duyệt'], ['A-06?state=rejected', 'A-06 bị từ chối']]],
-      ['C', [['C-01', 'C-01'], ['C-02', 'C-02'], ['C-03', 'C-03'], ['C-PROFILE', 'Hồ sơ']]],
-      ['D', [['D-00', 'D-00'], ['D-01', 'D-01'], ['D-02', 'D-02'], ['D-03', 'D-03'], ['D-04', 'D-04'], ['D-05', 'D-05'], ['D-06', 'D-06'], ['D-07', 'D-07'], ['D-09', 'D-09'], ['D-10', 'D-10'], ['403', '403']]]
+      g('Điểm vào', [['r/AN7K2Q', 'Link giới thiệu'], ['p/NVA3456', 'Link mua hàng cá nhân'], ['r/XXXXXX', 'Link không hợp lệ'], ['r/EM9QZT', 'Thành viên bị khoá']]),
+      g('A', [['A-01', 'A-01'], ['A-02?state=demo', 'A-02'], ['A-03?state=paid', 'A-03 PAID'], ['A-03?state=reconcile', 'A-03 chờ đối soát'], ['A-04', 'A-04'], ['A-05', 'A-05'], ['A-05?view=forgot', 'A-05 quên MK'], ['A-06', 'A-06'], ['A-06?state=pending', 'A-06 chờ duyệt'], ['A-06?state=rejected', 'A-06 bị từ chối']]),
+      g('C', [['C-01', 'C-01'], ['C-02', 'C-02'], ['C-03', 'C-03'], ['C-PROFILE', 'Hồ sơ']]),
+      g('D', [['D-00', 'D-00'], ['D-01', 'D-01'], ['D-02', 'D-02'], ['D-03', 'D-03'], ['D-04', 'D-04'], ['D-05', 'D-05'], ['D-06', 'D-06'], ['D-07', 'D-07'], ['D-09', 'D-09'], ['D-10', 'D-10'], ['403', '403']])
     ];
     const p = document.createElement('div'); p.id = 'demo-panel'; p.className = 'demo-panel';
-    p.innerHTML = `<div class="row-between"><strong>Demo navigator</strong><button class="modal-close" aria-label="Đóng" onclick="App.toggleDemoNav()">${UI.icon('x', 18)}</button></div>${groups.map(([g, items]) => `<h4>${g}</h4>${items.map(([h, l]) => `<a class="demo-link" href="#${h}" onclick="App.toggleDemoNav()"><code>#${h.split('?')[0]}</code>${l}</a>`).join('')}`).join('')}
-      <h4>Tiện ích</h4><a class="demo-link" href="javascript:void(0)" onclick="Store.loginAgentById('U001'); App.toggleDemoNav(); App.navigate('C-01')">Đăng nhập nhanh thành viên An</a><a class="demo-link" href="javascript:void(0)" onclick="Store.adminLogin('head','Homi@2026'); App.toggleDemoNav(); App.navigate('D-01')">Đăng nhập nhanh Head Admin</a><a class="demo-link" href="javascript:void(0)" onclick="Store.expireAgentSession(); App.toggleDemoNav(); App.navigate('C-01')">Giả lập hết phiên</a><a class="demo-link" href="javascript:void(0)" onclick="Store.otpResetAll(); UI.toast('Đã gỡ mọi khoá OTP.')">Gỡ khoá OTP</a><a class="demo-link text-error" href="javascript:void(0)" onclick="if (confirm('Nạp lại toàn bộ dữ liệu mẫu?')) Store.reset()">Nạp lại dữ liệu mẫu</a>`;
+    p.innerHTML = TPL.render('demo-nav', { groups });
     document.body.appendChild(p);
   }
 };
-document.addEventListener('DOMContentLoaded', () => App.init());
+document.addEventListener('DOMContentLoaded', () => App.boot());

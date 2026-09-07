@@ -1,0 +1,6 @@
+<!-- Dòng thời gian đơn giản: rows = [{ at, text }] -->
+<ul class="timeline">
+  {% each r in rows %}
+  <li><span class="timeline-time">{{ dt(r.at) }}</span><span class="timeline-text">{{ r.text }}</span></li>
+  {% endeach %}
+</ul>

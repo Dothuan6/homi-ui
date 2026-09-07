@@ -1,0 +1,68 @@
+<!-- Hồ sơ thành viên: thông tin hạng, tài khoản nhận hoa hồng, thông tin cá nhân, đổi mật khẩu
+     data: u, ref, w, rankLabel, refRankLabel, publicUrl, purchaseUrl, history [{ at, event, fromLabel, toLabel, reason }], bank { bankName, accountNo, owner }, bankOptions -->
+<div class="page-title"><div><h1>Hồ sơ của tôi</h1><p>Thông tin thành viên, tài khoản nhận hoa hồng, mật khẩu</p></div></div>
+<div class="grid-2">
+  <div class="stack">
+    <div class="card">
+      <div class="card-head"><h2>Thành viên</h2>{{{ badge('rank', u.rank, true) }}}</div>
+      <div class="card-body">
+        <dl class="dl dl-stack">
+          <dt>Hạng hiện tại</dt><dd>{{ rankLabel }} (từ {{ date(u.rankSince) }}) · {{ num(u.cumulativeSales) }} gói luỹ kế · {{ num(w.points) }} điểm</dd>
+          <dt>Mã giới thiệu (ref_code)</dt><dd class="mono">{{ u.refCode }}</dd>
+          <dt>Link mua hàng cá nhân</dt><dd><span class="mono">{{ publicUrl }}</span> <button class="btn-link" onclick="UI.copy('{{ purchaseUrl }}')">Sao chép</button></dd>
+          <dt>Người giới thiệu</dt><dd>{% if ref %}{{ ref.fullName }} · <span class="mono">{{ ref.refCode }}</span> · {{ refRankLabel }}{% else %}Không có (thành viên gốc){% endif %}</dd>
+          <dt>Email</dt><dd>{{ u.email || '—' }}</dd>
+          <dt>Điều khoản đã chấp nhận</dt><dd>Phiên bản {{ u.tcConsent ? u.tcConsent.version : '—' }} · {% if u.tcConsent %}{{ dt(u.tcConsent.at) }}{% endif %}</dd>
+          <dt>Trạng thái</dt><dd>{{{ badge('user', u.status) }}}</dd>
+        </dl>
+        <h3 class="mt-4 mb-2">Lịch sử thăng / giáng hạng</h3>
+        <ul class="timeline">
+          {% each h in history %}
+          <li><span class="timeline-time">{{ dt(h.at) }}</span><span class="timeline-text">{{{ badge('rankEvent', h.event) }}} {% if h.fromLabel %}{{ h.fromLabel }} → {% endif %}{{ h.toLabel }} · {{ h.reason }}</span></li>
+          {% endeach %}
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>Tài khoản nhận hoa hồng</h2></div>
+      <div class="card-body">
+        <form novalidate onsubmit="Seller.saveBank(event)">
+          <div class="form-grid form-grid-2">
+            {{{ UI.field({ id: 'bk-bank', label: 'Ngân hàng', required: true, type: 'select', value: bank.bankName, options: bankOptions }) }}}
+            {{{ UI.field({ id: 'bk-acc', label: 'Số tài khoản', required: true, mono: true, value: bank.accountNo, attrs: 'inputmode="numeric"' }) }}}
+          </div>
+          <div class="mt-4">{{{ UI.field({ id: 'bk-owner', label: 'Chủ tài khoản', required: true, value: bank.owner, hint: 'Viết in hoa không dấu, trùng họ tên đăng ký' }) }}}</div>
+          <p class="text-caption mt-2">Thay đổi được ghi nhận vào nhật ký kiểm toán và áp dụng cho các yêu cầu rút tiền mới.</p>
+          <div class="actions"><button class="btn btn-primary">Lưu tài khoản</button></div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div class="stack">
+    <div class="card">
+      <div class="card-head"><h2>Thông tin cá nhân</h2></div>
+      <div class="card-body">
+        <form novalidate onsubmit="Seller.saveProfile(event)">
+          {{{ UI.field({ id: 'pf-name', label: 'Họ và tên', required: true, value: u.fullName }) }}}
+          {{{ UI.field({ id: 'pf-phone', label: 'Số điện thoại (định danh, không đổi)', value: u.phone, mono: true, attrs: 'readonly' }) }}}
+          {{{ UI.field({ id: 'pf-email', label: 'Email', type: 'email', required: true, value: u.email }) }}}
+          {{{ UI.field({ id: 'pf-address', label: 'Địa chỉ', type: 'textarea', rows: 2, value: u.address }) }}}
+          <div class="actions"><button class="btn btn-primary btn-lg">Lưu thay đổi</button></div>
+        </form>
+        <div class="section mt-6" style="border-top:1px solid var(--border-soft);padding-top:20px">
+          <h3 class="mb-3">Đổi mật khẩu</h3>
+          <form novalidate onsubmit="Seller.changePassword(event)">
+            {{{ UI.field({ id: 'pw-old', label: 'Mật khẩu hiện tại', type: 'password', required: true }) }}}
+            <div class="form-grid form-grid-2 mt-4">
+              {{{ UI.field({ id: 'pw-new', label: 'Mật khẩu mới', type: 'password', required: true, hint: 'Tối thiểu 8 ký tự, có chữ và số' }) }}}
+              {{{ UI.field({ id: 'pw-new2', label: 'Nhập lại mật khẩu mới', type: 'password', required: true }) }}}
+            </div>
+            <div class="actions"><button class="btn btn-outline btn-lg">Đổi mật khẩu</button></div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,17 @@
+<!-- (a) PAID — mã đơn + mã kích hoạt + mời đăng ký thành viên -->
+<div class="buyer-split buyer-split-rev">
+  <div class="card"><div class="card-body">
+    <div class="result-hero">
+      <div class="result-icon is-success">{{{ icon('check-circle', 40) }}}</div>
+      <h1>Thanh toán thành công</h1>
+      <p>Cảm ơn bạn đã mua {{ pkg.name }}. Đồng hồ HW01 sẽ được giao tới địa chỉ đã đăng ký.</p>
+    </div>
+    <div class="code-box code-box-lg code-box-navy mt-4">
+      <div class="grow"><span class="code-label">Mã kích hoạt của bạn</span><span class="code-value">{{ order.licenseCode }}</span></div>
+      <button class="btn btn-icon btn-secondary" aria-label="Sao chép mã kích hoạt" onclick="UI.copy('{{ order.licenseCode }}', 'Đã sao chép mã kích hoạt.')">{{{ icon('copy', 20) }}}</button>
+    </div>
+    <p class="text-sm text-muted mt-2">Nhập mã này trong ứng dụng HOMI365 trên điện thoại để kích hoạt gói. Mã chỉ dùng được trên 1 thiết bị.</p>
+    <div class="mt-4">{{{ info }}}</div>
+  </div></div>
+  <aside class="buyer-side"><div class="card card-tint"><div class="card-body">{{{ cta }}}</div></div></aside>
+</div>

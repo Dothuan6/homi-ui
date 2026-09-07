@@ -1,0 +1,27 @@
+<!-- Thang 6 hạng: ngưỡng luỹ kế, quyền tuyển, trạng thái so với hạng hiện tại
+     data: rows [{ id, threshold, canRecruit, isCur, state: 'done'|'current'|'ready'|'missing', missing }], rr -->
+<div class="table-wrap">
+  <table class="table" style="min-width:0">
+    <thead><tr><th>Hạng</th><th class="num">Ngưỡng luỹ kế</th><th>Quyền tuyển</th><th>Trạng thái</th></tr></thead>
+    <tbody>
+      {% each r in rows %}
+      <tr class="{{ r.isCur ? 'is-selected' : '' }}">
+        <td>{{{ badge('rank', r.id) }}}</td>
+        <td class="num mono">{{ r.threshold }} gói</td>
+        <td>{% if r.canRecruit %}{{{ icon('check', 16, 'text-success') }}} Được tuyển{% else %}<span class="text-muted">Chỉ bán</span>{% endif %}</td>
+        <td>
+          {% if r.state === 'done' %}<span class="badge badge-success">Đã đạt</span>
+          {% elif r.state === 'current' %}<span class="badge badge-navy">Hạng hiện tại</span>
+          {% elif r.state === 'ready' %}<span class="badge badge-info">Đủ luỹ kế · chờ xét</span>
+          {% else %}<span class="text-sm text-muted">Còn thiếu <strong>{{ r.missing }}</strong> gói</span>{% endif %}
+        </td>
+      </tr>
+      {% endeach %}
+    </tbody>
+  </table>
+</div>
+<ul class="pkg-benefits mt-3">
+  <li>{{{ icon('check', 16) }}}<span>Lên hạng khi <strong>tổng gói bán luỹ kế</strong> đạt ngưỡng; xét tự động cuối tháng, có thể nhảy nhiều bậc.</span></li>
+  <li>{{{ icon('check', 16) }}}<span>Giữ hạng: bán tối thiểu <strong>{{ rr.minSalesPerMonth }} gói/tháng</strong>; không đạt sẽ giáng {{ rr.demoteSteps }} bậc (không dưới Copper).</span></li>
+  <li>{{{ icon('check', 16) }}}<span>Hoa hồng mỗi gói tính theo hạng tại thời điểm đơn thanh toán; hạng cao hơn tuyến dưới nhận thêm phần chênh lệch.</span></li>
+</ul>

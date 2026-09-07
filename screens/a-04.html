@@ -1,0 +1,26 @@
+<!-- A-04 · Tra cứu đơn hàng (không cần đăng nhập) -->
+<div class="buyer-split">
+  <aside class="buyer-side">{{{ include('partials/intro-panel', intro) }}}</aside>
+  <div class="stack">
+    <div class="card"><div class="card-body" id="a04-body">
+      <div class="seg mb-4" role="tablist">
+        <button role="tab" aria-selected="{{ mode === 'phone' }}" class="{% if mode === 'phone' %}is-active{% endif %}" onclick="Buyer._a04Mode='phone'; App.reload()">Số điện thoại + OTP</button>
+        <button role="tab" aria-selected="{{ mode === 'order' }}" class="{% if mode === 'order' %}is-active{% endif %}" onclick="Buyer._a04Mode='order'; App.reload()">Mã đơn hàng</button>
+      </div>
+      {% if mode === 'phone' %}
+      <form novalidate onsubmit="Buyer.a04Phone(event)">
+        {{{ UI.field({ id: 'lk-phone', label: 'Số điện thoại đã mua', required: true, type: 'tel', mono: true, placeholder: '0912 345 678', value: prefill, attrs: 'inputmode="numeric" autocomplete="tel"' }) }}}
+        <div class="field-hint mt-2">Xác thực OTP để xem đầy đủ, bao gồm mã kích hoạt.</div>
+        <div class="actions"><button class="btn btn-primary btn-lg btn-block" id="lk-submit">{{{ icon('sms', 18) }}} Gửi OTP</button></div>
+      </form>
+      {% else %}
+      <form novalidate onsubmit="Buyer.a04Order(event)">
+        {{{ UI.field({ id: 'lk-order', label: 'Mã đơn hàng', required: true, mono: true, placeholder: 'HM260904001', hint: 'In trên màn kết quả thanh toán và trong SMS.', attrs: 'autocapitalize="characters"' }) }}}
+        <div class="alert alert-neutral mt-4">{{{ icon('info', 18) }}}<div class="text-sm">Tra cứu bằng mã đơn chỉ hiển thị trạng thái. Mã kích hoạt chỉ hiện khi xác thực OTP số điện thoại mua (BR-08).</div></div>
+        <div class="actions"><button class="btn btn-primary btn-lg btn-block">{{{ icon('search', 18) }}} Tra cứu</button></div>
+      </form>
+      {% endif %}
+    </div></div>
+    <div class="demo-hint">SĐT mẫu có đơn: <strong>{{ demoPhone }}</strong> (chưa có TK seller) · <strong>0908123456</strong> (seller) · mã đơn: <strong>{{ demoOrderId }}</strong></div>
+  </div>
+</div>

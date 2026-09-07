@@ -1,0 +1,6 @@
+<!-- D-00 · Thông báo đăng nhập thất bại (r = kết quả Store.adminLogin) -->
+{% if r.locked %}
+<div class="alert alert-error" role="alert">{{{ icon('lock', 20) }}}<div><span class="alert-title">Tài khoản tạm khoá</span>Nhập sai quá {{{ CONFIG.admin.maxLoginFail }}} lần. Thử lại sau {{{ r.minutes }}} phút.</div></div>
+{% else %}
+<div class="alert alert-error" role="alert">{{{ icon('x-circle', 20) }}}<div>Tên đăng nhập hoặc mật khẩu không đúng (hoặc tài khoản bị vô hiệu). Còn {{{ r.remaining }}} lần thử.</div></div>
+{% endif %}

@@ -1,0 +1,10 @@
+<!-- D-02 · Modal đổi người giới thiệu (Head Admin) · part = 'body' | 'foot' -->
+{% if part === 'body' %}
+<p class="text-muted">{{ u.fullName }} · hiện tại: {% if cur %}{{ cur.fullName }} (<span class="mono">{{ cur.refCode }}</span>){% else %}không có{% endif %}</p>
+<div class="alert alert-warning mt-3">{{{ icon('warning', 18) }}}<div class="text-sm">Nguyên tắc chương trình: tuyến được gán 100% chính xác và khoá tại thời điểm mua. Thao tác này là ngoại lệ, chỉ ảnh hưởng đơn phát sinh sau thời điểm đổi, bắt buộc lý do và được ghi audit.</div></div>
+<div class="mt-4">{{{ UI.field({ id: 'cr-code', label: 'ref_code người giới thiệu mới', required: true, mono: true, placeholder: 'VD: BINH88' }) }}}</div>
+<div class="mt-4">{{{ UI.field({ id: 'cr-reason', label: 'Lý do', required: true, type: 'textarea', rows: 2 }) }}}</div>
+{% elif part === 'foot' %}
+<button class="btn btn-secondary" onclick="UI.closeModal()">Huỷ</button>
+<button class="btn btn-primary" onclick="Admin.changeReferrer('{{ u.id }}')">Xác nhận đổi</button>
+{% endif %}

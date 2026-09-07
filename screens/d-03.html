@@ -1,0 +1,21 @@
+<!-- D-03 · Đơn hàng & đối soát: tab + bộ lọc + vùng bảng (bảng render động bằng d-03-table) -->
+<div class="card">
+  <div class="tabs" role="tablist" style="padding:0 20px">
+    <button class="tab {{ f.tab === 'all' ? 'is-active' : '' }}" onclick="Admin.st.orders.tab='all'; Admin.st.orders.page=1; App.reload()">Tất cả đơn</button>
+    <button class="tab {{ f.tab === 'awaiting' ? 'is-active' : '' }}" onclick="Admin.st.orders.tab='awaiting'; Admin.st.orders.page=1; App.reload()">Chờ đối soát <span class="count">{{{ awaiting }}}</span></button>
+    <button class="tab {{ f.tab === 'late' ? 'is-active' : '' }}" onclick="Admin.st.orders.tab='late'; Admin.st.orders.page=1; App.reload()">Callback sau hết hạn <span class="count">{{{ late }}}</span></button>
+  </div>
+  <div class="card-body">
+    {% if f.tab === 'awaiting' %}
+    <div class="alert alert-info mb-4">{{{ icon('info', 18) }}}<div class="text-sm">Đối chiếu sao kê theo <strong>nội dung CK = mã đơn</strong> và số tiền. Xác nhận → cấp mã (Đã gắn đơn hàng) + ghi nhận hoa hồng theo chuỗi tuyến ngay.</div></div>
+    {% endif %}
+    <div class="table-toolbar">
+      <div class="field field-search"><label class="field-label" for="o-q">Tìm kiếm</label><input class="input" id="o-q" placeholder="Mã đơn, tên, SĐT, ref_code" value="{{ f.q }}" oninput="Admin.st.orders.q=this.value; Admin.st.orders.page=1; Admin.renderOrders()"></div>
+      {% if f.tab === 'all' %}
+      <div class="field"><label class="field-label" for="o-status">Trạng thái</label><select class="select" id="o-status" onchange="Admin.st.orders.status=this.value; Admin.st.orders.page=1; Admin.renderOrders()"><option value="">Tất cả</option>{% each k in Object.keys(LABELS.orderStatus) %}<option value="{{ k }}" {{ f.status === k ? 'selected' : '' }}>{{{ LABELS.orderStatus[k].text }}}</option>{% endeach %}</select></div>
+      {% endif %}
+      <div class="toolbar-actions"><button class="btn btn-secondary" onclick="Admin.exportOrders()">{{{ icon('download', 16) }}} Xuất Excel</button></div>
+    </div>
+    <div id="o-table">{{{ UI.skeletonTable(8, 6) }}}</div>
+  </div>
+</div>

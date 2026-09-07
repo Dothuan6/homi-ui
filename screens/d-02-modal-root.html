@@ -1,0 +1,19 @@
+<!-- D-02 · Modal tạo thành viên gốc (Head Admin) · part = 'body' | 'foot' -->
+{% if part === 'body' %}
+<p class="text-sm text-muted">Thành viên gốc được kích hoạt ngay, không qua mua hàng và duyệt hồ sơ. Dùng cho đại lý đầu mối.</p>
+<form class="form-grid form-grid-2 mt-3" novalidate>
+  {{{ UI.field({ id: 'ra-name', label: 'Họ và tên', required: true }) }}}
+  {{{ UI.field({ id: 'ra-phone', label: 'Số điện thoại', required: true, mono: true }) }}}
+  {{{ UI.field({ id: 'ra-email', label: 'Email', required: true, type: 'email' }) }}}
+  {{{ UI.field({ id: 'ra-rank', label: 'Hạng khởi điểm', type: 'select', value: 'COPPER', options: CONFIG.ranks.map(r => ({ value: r.id, label: r.label })) }) }}}
+  {{{ UI.field({ id: 'ra-bank', label: 'Ngân hàng', type: 'select', value: CONFIG.banks[0], options: CONFIG.banks.map(b => ({ value: b, label: b })) }) }}}
+  {{{ UI.field({ id: 'ra-acc', label: 'Số tài khoản', mono: true }) }}}
+  {{{ UI.field({ id: 'ra-owner', label: 'Chủ tài khoản' }) }}}
+  {{{ UI.field({ id: 'ra-ref', label: 'ref_code tuyến trên (nếu có)', mono: true, placeholder: 'để trống = gốc' }) }}}
+  {{{ UI.field({ id: 'ra-pw', label: 'Mật khẩu tạm', required: true, value: CONFIG.demo.agentPassword }) }}}
+  <div style="grid-column:1/-1">{{{ UI.field({ id: 'ra-reason', label: 'Lý do', required: true, type: 'textarea', rows: 2 }) }}}</div>
+</form>
+{% elif part === 'foot' %}
+<button class="btn btn-secondary" onclick="UI.closeModal()">Huỷ</button>
+<button class="btn btn-primary" onclick="Admin.createRootAgent()">Tạo thành viên</button>
+{% endif %}

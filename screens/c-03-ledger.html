@@ -1,0 +1,16 @@
+<!-- C-03 · tab Sổ hoa hồng (tối đa 40 dòng) — data: rows [{ r, desc, sign, cls }] -->
+{% if !rows.length %}
+{{{ UI.empty('history', 'Chưa có biến động') }}}
+{% else %}
+<ul class="ledger">
+  {% each x in rows %}
+  <li>
+    <div>
+      <div class="ledger-desc">{{ x.desc }}</div>
+      <div class="ledger-meta">{{ dt(x.r.at) }} · <span class="mono">{{ x.r.ref }}</span></div>
+    </div>
+    <div class="ledger-amt {{ x.cls }}">{{ x.sign }}{{ money(x.r.amount) }}<span class="ledger-bal">Số dư {{ money(x.r.balance) }}</span></div>
+  </li>
+  {% endeach %}
+</ul>
+{% endif %}

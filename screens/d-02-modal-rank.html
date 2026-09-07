@@ -1,0 +1,9 @@
+<!-- D-02 · Modal chỉ định hạng (Head Admin) · part = 'body' | 'foot' -->
+{% if part === 'body' %}
+<p class="text-muted">{{ u.fullName }} · hiện tại {{{ RULES.rank(u.rank).label }}} · luỹ kế {{{ u.cumulativeSales }}} gói</p>
+<div class="mt-4">{{{ UI.field({ id: 'ar-rank', label: 'Hạng mới', type: 'select', value: u.rank, options: CONFIG.ranks.map(r => ({ value: r.id, label: r.label + ' (ngưỡng ' + r.threshold + ')' })) }) }}}</div>
+<div class="mt-4">{{{ UI.field({ id: 'ar-reason', label: 'Lý do', required: true, type: 'textarea', rows: 2 }) }}}</div>
+{% elif part === 'foot' %}
+<button class="btn btn-secondary" onclick="UI.closeModal()">Huỷ</button>
+<button class="btn btn-primary" onclick="Admin.assignRank('{{ u.id }}')">Chỉ định</button>
+{% endif %}

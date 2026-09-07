@@ -1,0 +1,11 @@
+<!-- Đăng ký đã gửi (bước 3/3) -->
+<div class="stack text-center">
+  <div class="result-icon is-success" style="margin:0 auto">{{{ icon('check-circle', 34) }}}</div>
+  <h2>Hồ sơ đã gửi — {{{ badge('approval', 'PENDING_0', true) }}}</h2>
+  <p class="text-muted">Mã hồ sơ <span class="mono text-strong">{{ regId }}</span>. Bộ phận quản trị duyệt 2 lớp trong 1–2 ngày làm việc.</p>
+  <div class="alert alert-info" style="text-align:left">{{{ icon('sms', 20) }}}<div class="text-sm">Khi được duyệt, email từ <strong>{{ CONFIG.email.from }}</strong> gửi tới <strong>{{ email }}</strong> gồm: link giới thiệu, link mua hàng cá nhân <span class="mono">{{ alias }}</span> và cổng thành viên.</div></div>
+  <div class="actions actions-row">
+    <a class="btn btn-secondary btn-lg" href="#A-06?state=pending&phone={{ phone }}">Xem trạng thái hồ sơ</a>
+    <a class="btn btn-primary btn-lg" href="#HOME">Về trang chủ</a>
+  </div>
+</div>

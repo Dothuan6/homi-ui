@@ -1,0 +1,46 @@
+{% if !pc %}
+<div class="card"><div class="card-body">
+  <p class="text-sm text-muted">{{ pkg.desc }}</p>
+  <ul class="pkg-benefits">{% each b in pkg.benefits %}<li>{{{ icon('check', 16) }}}<span>{{ b }}</span></li>{% endeach %}</ul>
+</div></div>
+{% else %}
+<div class="card product-card">
+  <div class="gallery">
+    <div class="gallery-main" id="gallery-main" tabindex="0" role="group" aria-roledescription="carousel" aria-label="Ảnh giới thiệu gói {{ pkg.id }}">
+      <img id="gallery-img" src="{{ g0.src }}" alt="{{ g0.title }}" width="1890" height="1063" decoding="async" draggable="false">
+      <button class="gallery-nav gallery-nav-prev" aria-label="Ảnh trước" onclick="Buyer.galleryStep(-1)">{{{ icon('arrow-left', 18) }}}</button>
+      <button class="gallery-nav gallery-nav-next" aria-label="Ảnh kế tiếp" onclick="Buyer.galleryStep(1)">{{{ icon('arrow-right', 18) }}}</button>
+      <span class="gallery-caption" id="gallery-caption" aria-live="polite">{{ g0.title }}</span>
+    </div>
+    <div class="gallery-thumbs" role="tablist" aria-label="Chọn ảnh">
+      {% each g, i in pc.gallery %}
+      <button class="gallery-thumb {% if i === 0 %}is-active{% endif %}" role="tab" id="gthumb-{{ i }}" aria-selected="{{ i === 0 }}" title="{{ g.title }}" onclick="Buyer.galleryTo({{ i }})">
+        <img src="{{ g.thumb }}" alt="" loading="lazy" decoding="async" draggable="false"><span class="sr-only">{{ g.title }}</span>
+      </button>
+      {% endeach %}
+    </div>
+  </div>
+  <div class="card-body">
+    <p>{{ pc.lead }}</p>
+    <ul class="pkg-benefits">{% each b in pkg.benefits %}<li>{{{ icon('check', 16) }}}<span>{{ b }}</span></li>{% endeach %}</ul>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <h2 style="font-size:var(--fs-lg)">Chi tiết tính năng gói {{ pkg.id }}</h2>
+    <button class="btn btn-ghost btn-sm" id="feat-toggle" aria-expanded="false" aria-controls="feat-body" onclick="Buyer.toggleFeatures()">Xem chi tiết {{{ icon('chevron-down', 18) }}}</button>
+  </div>
+  <div class="card-body" id="feat-body" hidden>
+    <p class="text-sm text-muted">{{ pc.intro }}</p>
+    <div class="feature-list mt-3">
+      {% each f, i in pc.features %}
+      <details class="feature" {% if i === 0 %}open{% endif %}>
+        <summary>{{ i + 1 }}. {{ f.title }}</summary>
+        <ul>{% each t in f.items %}<li>{{ t }}</li>{% endeach %}</ul>
+      </details>
+      {% endeach %}
+    </div>
+  </div>
+</div>
+{% endif %}

@@ -12,6 +12,8 @@ python serve.py           # http://localhost:5174/index.html
 
 Không cần build. Hash router, thuần HTML/CSS/JS, dữ liệu lưu `localStorage` (khoá `homi365_proto_v3`). Mở không có hash → trang bìa `#HOME` liệt kê điểm vào và tài khoản mẫu.
 
+**Phải chạy qua máy chủ web** (serve.py, Netlify…): giao diện các màn hình nằm trong `screens/*.html` và được nạp bằng `fetch` khi khởi động, nên mở trực tiếp `index.html` từ ổ đĩa (file://) sẽ không chạy.
+
 ## Tài khoản & điểm vào demo
 
 | Mục | Giá trị |
@@ -42,14 +44,22 @@ Không cần build. Hash router, thuần HTML/CSS/JS, dữ liệu lưu `localSto
 config/business-rules.js  CONFIG (ranks, rankRules, withdraw, approval, admin.accounts, tc, rules…) · LABELS · RULES (alias, hạng, kiểm tra bảng HH)
 mock/data.js              SEED (cây Case 5 + breakaway + nhánh gốc Gold, 1.200 mã, đăng ký/rút tiền 5 trạng thái) + Store (engine hoa hồng, ví, duyệt 2 lớp, job xét hạng, admin vai, audit)
 js/ui.js                  thành phần dùng chung (badge, modal, drawer, OTP, countdown, QR, VietQR, bảng, chart, CSV)
-js/app.js                 router (#r/ #p/), guard phiên & vai trò (D-10 Head), 3 khung layout, trang bìa
-js/views-buyer.js         A-01 → A-06
-js/views-seller.js        C-01 → C-03 + hồ sơ
-js/views-admin.js         D-00 → D-10
+js/tpl.js                 engine template ({{ }}, {% if %}, {% each %}, include) + manifest danh sách screens/ nạp khi khởi động
+js/app.js                 router (#r/ #p/), guard phiên & vai trò (D-10 Head), 3 khung layout, trang bìa — chỉ logic
+js/views-buyer.js         A-01 → A-06 — logic + view-model, gọi TPL.render
+js/views-seller.js        C-01 → C-03 + hồ sơ — logic + view-model
+js/views-admin.js         D-00 → D-10 — logic + view-model
+screens/                  MARKUP các màn hình (HTML): shell-*.html (3 khung), home, policy, 403, a-*.html, c-*.html, d-*.html,
+                          partials/ (khối dùng chung: pkg-header, product-intro, alert, admin-timeline, seller-tree…)
 css/                      tokens · base · components · buyer · seller · admin
 styleguide.html           design system
 docs/CHANGE-SPEC-v3.md    spec gốc
+docs/TEMPLATE-GUIDE.md    cú pháp template & quy ước tách markup/logic
+docs/check-templates.js   node docs/check-templates.js — biên dịch thử toàn bộ screens/ và đối chiếu manifest
+docs/sync-manifest.js     node docs/sync-manifest.js — cập nhật TPL.manifest theo file thực tế trong screens/
 ```
+
+Thêm/sửa màn hình: sửa file trong `screens/` (markup) và hàm tương ứng trong `js/views-*.js` (dữ liệu). Tạo file mới → chạy `node docs/sync-manifest.js` để đăng ký vào manifest.
 
 ## Điểm chờ xác nhận (spec mục 9 — đặt trong CONFIG)
 

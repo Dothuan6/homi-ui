@@ -1,0 +1,33 @@
+<div class="admin">
+  <aside class="admin-sidebar" id="admin-sidebar">
+    <div class="admin-sidebar-brand">{{{ UI.logo({ size: 30, invert: true }) }}}<span class="sub">Quản trị HOMI365</span></div>
+    <nav class="admin-nav" aria-label="Menu quản trị">
+      {% each it in items %}
+        {% if it.group %}
+        <div class="admin-nav-group">{{ it.group }}</div>
+        {% else %}
+        <a href="#{{ it.code }}" class="{% if active === it.code %}is-active{% endif %}">
+          {{{ icon(it.ico, 18) }}}<span>{{ it.label }}</span>
+          {% if it.badge %}<span class="nav-badge">{{ it.badge }}</span>{% else %}<span class="nav-code">{{ it.code }}</span>{% endif %}
+        </a>
+        {% endif %}
+      {% endeach %}
+    </nav>
+    <div class="admin-sidebar-foot">
+      <div class="who">{{ me.fullName || me.username }}</div>
+      <div class="role">{{ roleLabel }} · {{ me.username }}</div>
+      <button class="btn btn-sm btn-secondary" onclick="App.logoutAdmin()">{{{ icon('logout', 16) }}} Đăng xuất</button>
+    </div>
+  </aside>
+
+  <div class="admin-content">
+    <div class="admin-topbar">
+      <div class="row">
+        <button class="btn btn-icon btn-secondary admin-menu-btn" aria-label="Mở menu" onclick="document.getElementById('admin-sidebar').classList.toggle('is-open')">{{{ icon('menu', 20) }}}</button>
+        <div><div class="crumb">{{ active }}</div><h1>{{{ title }}}</h1></div>
+      </div>
+      <div class="row">{{{ actions }}}</div>
+    </div>
+    <main class="admin-main">{{{ content }}}</main>
+  </div>
+</div>
