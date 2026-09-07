@@ -30,11 +30,12 @@ const Seller = {
 
       <div class="grid-2 grid-2-wide">
         <div class="card"><div class="card-head"><h2>Link của bạn</h2>${RULES.canRecruit(u.rank) ? '<span class="text-sm text-muted">Khách mua qua link được tính vào tuyến của bạn</span>' : '<span class="badge badge-warning">Hạng Copper: chỉ bán, chưa được tuyển thành viên</span>'}</div>
-          <div class="card-body stack">
+          <div class="card-body ref-block"><div class="stack">
             <div><div class="field-label mb-2">Link giới thiệu (ref_code)</div><div class="ref-url"><input class="input" readonly value="${UI.esc(refUrl)}" aria-label="Link giới thiệu" onclick="this.select()"><button class="btn btn-primary" onclick="UI.copy('${UI.esc(refUrl)}', 'Đã sao chép link giới thiệu.')">${UI.icon('copy', 18)} Sao chép</button></div></div>
             <div><div class="field-label mb-2">Link mua hàng cá nhân · <span class="mono">${UI.esc(RULES.publicPurchaseUrl(u.purchaseAlias))}</span></div><div class="ref-url"><input class="input" readonly value="${UI.esc(aliasUrl)}" aria-label="Link mua hàng cá nhân" onclick="this.select()"><button class="btn btn-secondary" onclick="UI.copy('${UI.esc(aliasUrl)}', 'Đã sao chép link mua hàng cá nhân.')">${UI.icon('copy', 18)} Sao chép</button></div></div>
             <div class="share-row"><button class="btn btn-secondary share-btn" onclick="Seller.shareZalo('${UI.esc(aliasUrl)}')"><span class="share-mark share-zalo">Z</span> Zalo</button><button class="btn btn-secondary share-btn" onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent('${UI.esc(aliasUrl)}'), '_blank', 'noopener')"><span class="share-mark share-fb">f</span> Facebook</button><button class="btn btn-secondary share-btn" onclick="UI.share('${UI.esc(aliasUrl)}', 'Gói Bác sĩ 24/7 HOMI365')">${UI.icon('share', 18)} Khác</button></div>
-            <p class="text-caption">Mở thử trong prototype: <a href="${RULES.referralHash(u.refCode)}" target="_blank" rel="noopener">${RULES.referralHash(u.refCode)}</a> · <a href="${RULES.purchaseHash(u.purchaseAlias)}" target="_blank" rel="noopener">${RULES.purchaseHash(u.purchaseAlias)}</a></p>
+          </div>
+          <div class="ref-qr">${UI.qrSvg(aliasUrl, 150)}<div class="qr-label">QR link mua hàng cá nhân</div><button class="btn btn-ghost btn-sm mt-1" onclick="Seller.downloadQr('${UI.esc(u.purchaseAlias)}')">${UI.icon('download', 16)} Tải QR</button></div>
           </div></div>
         <div class="stack">
           <div class="card card-tint"><div class="card-body">
@@ -44,7 +45,7 @@ const Seller = {
             <div class="mt-3 ${sold < rr.minSalesPerMonth ? 'alert alert-warning' : 'alert alert-success'}">${UI.icon(sold < rr.minSalesPerMonth ? 'warning' : 'check-circle', 18)}<div class="text-sm">Tháng này đã bán <strong>${sold}</strong> gói. ${sold < rr.minSalesPerMonth ? 'Cần tối thiểu ' + rr.minSalesPerMonth + ' gói/tháng để giữ hạng — nếu không sẽ giáng 1 bậc vào cuối tháng.' : 'Đã đủ điều kiện giữ hạng tháng này.'}</div></div>
             <div class="mt-2 text-right"><a href="#C-PROFILE" class="btn-link">Lịch sử thăng/giáng hạng ${UI.icon('arrow-right', 14)}</a></div>
           </div></div>
-          <div class="ref-qr">${UI.qrSvg(aliasUrl, 150)}<div class="qr-label">QR link mua hàng cá nhân</div><button class="btn btn-ghost btn-sm mt-1" onclick="Seller.downloadQr('${UI.esc(u.purchaseAlias)}')">${UI.icon('download', 16)} Tải QR</button></div>
+          <div class="card"><div class="card-head"><h2 style="font-size:var(--fs-lg)">Thang hạng & điều kiện lên hạng</h2><span class="text-sm text-muted">Xét vào ${UI.esc(rr.jobTime || CONFIG.rankRules.jobTime)}</span></div><div class="card-body">${this.rankLadder(u)}</div></div>
         </div>
       </div>
 
@@ -67,7 +68,7 @@ const Seller = {
           <button class="btn btn-secondary btn-sm" onclick="Seller.exportCommissions()">${UI.icon('download', 16)} Xuất Excel</button></div></div>
         <div class="card-body" id="c01-cm">${UI.skeletonTable(6, 5)}</div></div>
 
-      <div class="card"><div class="card-head"><h2>Tuyến dưới trực tiếp (F1)</h2><span class="text-sm text-muted">${Store.downline(u.id).filter(x => x.type === 'agent').length} thành viên</span></div><div class="card-body">${this.f1Table(u)}</div></div>
+      <div class="card"><div class="card-head"><h2>Tuyến dưới (F1 · F2 · F3)</h2><span class="text-sm text-muted">${this.downlineCounts(u).map((n, i) => 'F' + (i + 1) + ': ' + n).join(' · ')}</span></div><div class="card-body">${this.downlineTree(u)}</div></div>
     </div>`;
     App.after(() => { UI.withLoading('c01-stats', UI.skeletonCards(2), () => this.renderStats()); UI.withLoading('c01-cm', UI.skeletonTable(6, 5), () => this.renderCommissions()); this.renderCmChart(); });
     return App.sellerShell('C-01', html);
@@ -100,6 +101,20 @@ const Seller = {
   },
   gotoCmPage: function(p) { this.state.cmPage = p; this.renderCommissions(); },
   exportCommissions: function() { const rows = this.filteredCommissions().map(c => [UI.date(c.createdAt), c.orderId, this.sourceLabel(c), RULES.rank(c.rankAtCalc).label, c.amount, LABELS.commission[c.status].text]); if (!rows.length) { UI.toast('Không có dữ liệu để xuất.', 'warning'); return; } UI.exportCsv('bang-ke-hoa-hong-' + Store.currentAgent().refCode + '.csv', ['Ngày', 'Đơn', 'Nguồn', 'Hạng lúc tính', 'Số tiền (đ)', 'Trạng thái'], rows); },
+  /** Thang 6 hạng: ngưỡng luỹ kế, quyền tuyển, trạng thái so với hạng hiện tại. */
+  rankLadder: function(u) {
+    const cur = RULES.rankIndex(u.rank); const rr = Store.rules().rankRules;
+    return `<div class="table-wrap"><table class="table" style="min-width:0"><thead><tr><th>Hạng</th><th class="num">Ngưỡng luỹ kế</th><th>Quyền tuyển</th><th>Trạng thái</th></tr></thead><tbody>${CONFIG.ranks.map((r, i) => { const st = i < cur ? '<span class="badge badge-success">Đã đạt</span>' : i === cur ? '<span class="badge badge-navy">Hạng hiện tại</span>' : (u.cumulativeSales >= r.threshold ? '<span class="badge badge-info">Đủ luỹ kế · chờ xét</span>' : `<span class="text-sm text-muted">Còn thiếu <strong>${r.threshold - u.cumulativeSales}</strong> gói</span>`); return `<tr class="${i === cur ? 'is-selected' : ''}"><td>${UI.badge('rank', r.id)}</td><td class="num mono">${r.threshold} gói</td><td>${r.canRecruit ? UI.icon('check', 16, 'text-success') + ' Được tuyển' : '<span class="text-muted">Chỉ bán</span>'}</td><td>${st}</td></tr>`; }).join('')}</tbody></table></div>
+      <ul class="pkg-benefits mt-3"><li>${UI.icon('check', 16)}<span>Lên hạng khi <strong>tổng gói bán luỹ kế</strong> đạt ngưỡng; xét tự động cuối tháng, có thể nhảy nhiều bậc.</span></li><li>${UI.icon('check', 16)}<span>Giữ hạng: bán tối thiểu <strong>${rr.minSalesPerMonth} gói/tháng</strong>; không đạt sẽ giáng ${rr.demoteSteps} bậc (không dưới Copper).</span></li><li>${UI.icon('check', 16)}<span>Hoa hồng mỗi gói tính theo hạng tại thời điểm đơn thanh toán; hạng cao hơn tuyến dưới nhận thêm phần chênh lệch.</span></li></ul>`;
+  },
+  downlineCounts: function(u) { const c = [0, 0, 0]; const walk = (id, lv) => { if (lv > 3) return; Store.downline(id).filter(x => x.type === 'agent').forEach(d => { c[lv - 1]++; walk(d.id, lv + 1); }); }; walk(u.id, 1); return c; },
+  /** Cây tuyến dưới 3 cấp: mỗi nút hiện cấp F1/F2/F3, hạng, luỹ kế, bán tháng này. */
+  downlineTree: function(u) {
+    const tree = Store.downlineTree(u.id, 3).filter(n => n.user.type === 'agent');
+    if (!tree.length) return UI.empty('users', 'Chưa có tuyến dưới', RULES.canRecruit(u.rank) ? 'Khách mua qua link của bạn và đăng ký thành viên sẽ xuất hiện ở đây.' : 'Lên hạng Silver để được tuyển thành viên.');
+    const node = (n, lv) => `<li><span class="tree-node"><span class="badge badge-${lv === 1 ? 'navy' : lv === 2 ? 'info' : 'neutral'} badge-plain">F${lv}</span><strong>${UI.esc(n.user.fullName)}</strong>${UI.badge('rank', n.user.rank)}<span class="text-sm text-muted">· luỹ kế ${n.user.cumulativeSales} · tháng này ${Store.salesThisMonth(n.user.id)} · <span class="mono">${RULES.maskPhone(n.user.phone)}</span></span>${n.user.status === 'locked' ? UI.badge('user', 'locked') : ''}</span>${n.children.filter(c => c.user.type === 'agent').length && lv < 3 ? `<ul class="tree">${n.children.filter(c => c.user.type === 'agent').map(c => node(c, lv + 1)).join('')}</ul>` : ''}</li>`;
+    return `<ul class="tree">${tree.map(n => node(n, 1)).join('')}</ul>`;
+  },
   f1Table: function(u) {
     const list = Store.downline(u.id).filter(x => x.type === 'agent');
     if (!list.length) return UI.empty('users', 'Chưa có tuyến dưới', RULES.canRecruit(u.rank) ? 'Khách mua qua link của bạn và đăng ký thành viên sẽ xuất hiện ở đây.' : 'Lên hạng Silver để được tuyển thành viên.');
