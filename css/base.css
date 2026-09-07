@@ -159,3 +159,7 @@ small, .text-xs { font-size: var(--fs-xs); }
 .form-grid { display: grid; grid-template-columns: 1fr; gap: var(--sp-4); }
 .form-grid .field + .field { margin-top: 0; }
 @media (min-width: 640px) { .form-grid-2 { grid-template-columns: 1fr 1fr; } }
+/* Trong lưới 2 cột: gợi ý (hint) xuống dưới ô nhập để các ô cùng hàng thẳng nhau */
+.form-grid .field .field-hint { order: 3; }
+.form-grid .field .field-error { order: 4; }
+.form-grid .field { align-self: start; }
