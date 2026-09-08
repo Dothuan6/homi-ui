@@ -265,6 +265,10 @@
 .brand-word .n365 { color: var(--teal-500); }
 .brand-invert { color: var(--white); }
 .brand-invert .n365 { color: var(--teal-300); }
+/* Logo ảnh: khung cao cố định, ảnh cao hơn và bị cắt đều trên/dưới để bỏ lề trắng của file gốc */
+.brand-logo { display: inline-flex; align-items: center; overflow: hidden; flex: none; }
+.brand-logo img { display: block; width: auto; }
+a.brand-logo, a > .brand-logo { text-decoration: none; }
 
 /* ---------- Demo navigator (chỉ dùng khi review) ---------- */
 .demo-fab { position: fixed; right: 16px; bottom: 16px; z-index: 1300; width: 48px; height: 48px; border-radius: 50%; background: var(--navy-900); color: var(--white); border: 2px solid var(--teal-500); box-shadow: var(--shadow-lg); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-family: var(--font-display); font-weight: 700; font-size: 13px; opacity: .85; }

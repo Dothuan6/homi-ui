@@ -90,6 +90,11 @@ const UI = {
     const teal = o.invert ? 'var(--teal-300)' : 'var(--teal-500)';
     const mark = `<svg width="${size}" height="${size}" viewBox="0 0 100 100" aria-hidden="true"><g fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 46 L50 13 L86 46 V85 A3 3 0 0 1 83 88 H17 A3 3 0 0 1 14 85 Z" stroke="${navy}" stroke-width="7"/><path d="M50 76 C40 67 32.5 60.5 32.5 54 C32.5 49 36.5 45 41.5 45 C45.3 45 48.6 47.2 50 50 C51.4 47.2 54.7 45 58.5 45 C63.5 45 67.5 49 67.5 54 C67.5 60.5 60 67 50 76 Z" stroke="${teal}" stroke-width="6"/></g></svg>`;
     if (o.markOnly) return mark;
+    // Nền sáng: dùng đúng file logo thương hiệu. Ảnh có lề trắng nên bọc trong khung cao đúng `size`
+    // rồi cắt bớt trên/dưới — logo nằm giữa ảnh nên cắt đều hai bên là vừa khít.
+    if (!o.invert && CONFIG.brand.logo) {
+      return `<span class="brand-logo" style="height:${size}px" aria-label="HOMI365"><img src="${CONFIG.brand.logo}" alt="HOMI365" style="height:${Math.round(size * 2.1)}px"></span>`;
+    }
     return `<span class="brand ${o.invert ? 'brand-invert' : ''}" aria-label="HOMI365">${mark}<span class="brand-word" style="font-size:${Math.round(size * .68)}px">HOMI<span class="n365">365</span></span></span>`;
   },
 
