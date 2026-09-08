@@ -38,7 +38,7 @@ const Seller = {
       tabHtml = TPL.render('seller/dashboard-tree', { countsText: counts.map((n, i) => 'F' + (i + 1) + ': ' + n).join(' · '), treeHtml: this.downlineTree(u) });
     }
     const html = TPL.render('seller/dashboard', {
-      u, tab, tabHtml,
+      u, tab, tabHtml, pending: Store.isPendingAgent(u), w,
       tabs: [{ id: 'stats', label: 'Thống kê', ico: 'chart' }, { id: 'commission', label: 'Hoa hồng', ico: 'cash' }, { id: 'tree', label: 'Tuyến', ico: 'users' }],
       treeCount: counts.reduce((a, b) => a + b, 0)
     });
@@ -121,7 +121,7 @@ const Seller = {
     const u = Store.currentAgent(); const w = Store.wallet(u.id); const cw = Store.canWithdraw(u.id); const wr = Store.rules().withdraw;
     if (q.get('withdraw') && cw.ok) this.state.wdStep = 'form';
     const html = TPL.render('seller/wallet', {
-      u, w, cw, wdStep: this.state.wdStep, wdTab: this.state.wdTab, wdCount: Store.withdrawalsOf(u.id).length,
+      u, w, cw, pending: Store.isPendingAgent(u), wdStep: this.state.wdStep, wdTab: this.state.wdTab, wdCount: Store.withdrawalsOf(u.id).length,
       maxPerMonth: CONFIG.withdraw.maxPerMonth, payoutNote: wr.payoutNote || CONFIG.withdraw.payoutNote,
       tabHtml: this.state.wdTab === 'ledger' ? this.ledger(u) : this.requests(u)
     });

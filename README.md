@@ -42,14 +42,14 @@ Hash router, thuần HTML/CSS/JS, dữ liệu lưu `localStorage` (khoá `homi36
 | Thành viên đăng nhập (`#login`) | `0908123456` / `Homi@123` (Lithium) · `0912345678` Gold · `0933222111` Silver · `0987654321` Copper |
 | Người mua đã mua, chưa đăng ký | `0901111222` (qua Lithium → đăng ký được) · `0902222333` (qua Copper → bị chặn) |
 | Hồ sơ đăng ký mẫu | `0913000888` chờ duyệt 1/2 · `0914000999` bị từ chối |
-| Admin (`#admin-login`) | `head` (Head Admin) · `admin` · `admin2` (Specialist) / `Homi@2026` |
+| Admin (`#admin-login`) | `head` (Trưởng bộ phận — lớp 1: xác nhận thanh toán) · `manager` (Ms Trinh — lớp 2: kích hoạt Agent) / `Homi@2026` |
 | SĐT mô phỏng lỗi SMS · SĐT admin bị từ chối ở `#login` | `0911111111` · `0900000000` |
 
 ## Luồng chính (spec mục 5)
 
 1. **Mua**: `#p/NVA3456` → `#buy` (họ tên · SĐT · email · địa chỉ) → OTP → `#payment` (cổng / VietQR, giữ đơn 15') → `#order-result`. Người giới thiệu ≥ Silver → "Đăng ký thành viên / Thoát ra"; Copper → chỉ "Đơn hàng thành công". Hoa hồng ghi nhận ngay (`#orders` chi tiết đơn: phân bổ Σ = 3.850.000đ).
-2. **Đăng ký**: `#order-result` → `#register` (autofill từ đơn) → T&C → OTP → Chờ duyệt (0/2). Hoặc `#login` → thông báo → `#register`.
-3. **Duyệt**: `admin` `#registrations` xác nhận → 1/2 → `admin2` xác nhận → Đã duyệt → kích hoạt Copper + email mock. `head` xác nhận 1 lần là đủ.
+2. **Đăng ký**: `#order-result` → `#register` (autofill từ đơn) → T&C → OTP → **vào thẳng `#dashboard`**. Tài khoản ở trạng thái *Chờ kích hoạt*: có link bán hàng, nhưng điểm = 0 và hoa hồng bị tạm giữ.
+3. **Kích hoạt — 2 người, 2 màn**: `head` bấm **Xác nhận thanh toán & cấp mã** ở `#orders` khi thấy tiền về bank (chọn mã kích hoạt, gửi email cho khách) → `manager` bấm **Kích hoạt Agent** ở `#registrations` → agent active, hoa hồng tạm giữ vào ví, email mock. Nút lớp 2 khoá tới khi đơn PAID, **và khoá với chính người đã làm lớp 1**.
 4. **Đăng nhập**: SĐT + mật khẩu → `#dashboard` (hạng, điểm, còn thiếu, 2 link, thống kê, hoa hồng 4 thẻ, bảng kê, F1). Quên mật khẩu → OTP → đặt lại.
 5. **Rút tiền**: `#wallet` → số tiền ≤ khả dụng → xác nhận TK → Chờ duyệt (0/2), giữ tiền; lần 2 trong tháng bị chặn. `#withdrawals`: 2 admin (hoặc head) → Đã duyệt → Đánh dấu đã chi trả. Từ chối → hoàn tiền + lý do.
 6. **Cuối tháng**: `#admin-dashboard` (head) "Chạy xét hạng" → giáng 1 bậc nếu 0 đơn trong tháng, thăng thẳng theo luỹ kế; lịch sử tại `#profile` & `#agents`.

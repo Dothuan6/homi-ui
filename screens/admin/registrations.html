@@ -1,9 +1,9 @@
 <!-- registrations · Duyệt đăng ký thành viên: bộ lọc + vùng bảng (bảng render động bằng d-09-table) -->
 <div class="card"><div class="card-body">
-  <div class="alert alert-info mb-4">{{{ icon('info', 18) }}}<div class="text-sm">Duyệt <strong>2 lớp</strong> (người thứ 2 phải khác người thứ 1; Head Admin tự chốt). Khi <strong>Đã duyệt</strong>: tạo tài khoản thành viên hạng Copper, sinh ref_code + link cá nhân, gửi email kích hoạt. Duyệt không ảnh hưởng đơn, tuyến và hoa hồng đã ghi.</div></div>
+  <div class="alert alert-info mb-4">{{{ icon('info', 18) }}}<div class="text-sm">Đây là <strong>lớp 2</strong>. Lớp 1 là Admin bấm <em>Xác nhận thanh toán</em> ở màn Đơn hàng — nút kích hoạt chỉ mở khi đơn đã thanh toán, và <strong>người đã làm lớp 1 không kích hoạt được hồ sơ đó</strong>. Tài khoản, ref_code và link cá nhân đã được cấp từ lúc nộp hồ sơ; kích hoạt là bước mở điểm và giải phóng hoa hồng đang tạm giữ.</div></div>
   <div class="table-toolbar">
     <div class="field field-search"><label class="field-label" for="rg-q">Tìm kiếm</label><input class="input" id="rg-q" placeholder="Họ tên, SĐT, email" value="{{ f.q }}" oninput="Admin.st.regs.q=this.value; Admin.st.regs.page=1; Admin.renderRegs()"></div>
-    <div class="field"><label class="field-label" for="rg-status">Trạng thái</label><select class="select" id="rg-status" onchange="Admin.st.regs.status=this.value; Admin.st.regs.page=1; Admin.renderRegs()"><option value="">Tất cả</option>{% each k in Object.keys(LABELS.approval) %}<option value="{{ k }}" {{ f.status === k ? 'selected' : '' }}>{{{ LABELS.approval[k].text }}}</option>{% endeach %}</select></div>
+    <div class="field"><label class="field-label" for="rg-status">Trạng thái</label><select class="select" id="rg-status" onchange="Admin.st.regs.status=this.value; Admin.st.regs.page=1; Admin.renderRegs()"><option value="">Tất cả</option>{% each k in ['PENDING_0', 'APPROVED', 'REJECTED'] %}<option value="{{ k }}" {{ f.status === k ? 'selected' : '' }}>{{{ LABELS.activation[k].text }}}</option>{% endeach %}</select></div>
   </div>
   <div id="rg-table">{{{ UI.skeletonTable(7, 5) }}}</div>
 </div></div>
@@ -12,7 +12,7 @@
 <!-- registrations · Drawer chi tiết hồ sơ đăng ký: r, ref, refRankLabel, o (đơn gốc), agent, mail, timeline (html), audit (html), canApprove · part = 'title' | 'body' | 'foot' -->
 {% if part === 'title' %}
 <h2>{{ r.fullName }}</h2>
-<div class="row-wrap mt-1">{{{ badge('approval', r.status, true) }}}<span class="mono text-sm text-muted">{{ r.id }}</span></div>
+<div class="row-wrap mt-1">{{{ badge('activation', r.status, true) }}}<span class="mono text-sm text-muted">{{ r.id }}</span></div>
 
 {% elif part === 'body' %}
 <div class="section">
@@ -57,7 +57,8 @@
 {% elif part === 'foot' %}
 {% if r.status.startsWith('PENDING') %}
 <button class="btn btn-danger-outline" onclick="Admin.regReject('{{ r.id }}')">Từ chối</button>
-<button class="btn btn-success" {{{ canApprove ? '' : 'disabled' }}} onclick="Admin.regApprove('{{ r.id }}')">Xác nhận</button>
+{% if cannotWhy %}<span class="text-sm text-muted">{{ cannotWhy }}</span>{% endif %}
+<button class="btn btn-success" {{{ canApprove ? '' : 'disabled' }}} onclick="Admin.regApprove('{{ r.id }}')">{{{ icon('check', 16) }}} Kích hoạt Agent</button>
 {% endif %}
 {% if agent %}<button class="btn btn-secondary" onclick="Admin.userDrawer('{{ agent.id }}')">Xem thành viên</button>{% endif %}
 {% endif %}
@@ -82,7 +83,7 @@
       <td>{{{ row.cell }}}</td>
       <td><div class="row-actions">
         {% if r.status.startsWith('PENDING') %}
-        <button class="btn btn-success btn-sm" {{{ row.cb.ok ? '' : 'disabled' }}} title="{{{ row.cb.why || '' }}}" onclick="Admin.regApprove('{{ r.id }}')">Xác nhận</button>
+        <button class="btn btn-success btn-sm" {{{ row.cb.ok ? '' : 'disabled' }}} title="{{ row.cb.message || '' }}" onclick="Admin.regApprove('{{ r.id }}')">Kích hoạt</button>
         <button class="btn btn-danger-outline btn-sm" onclick="Admin.regReject('{{ r.id }}')">Từ chối</button>
         {% endif %}
         <button class="btn btn-secondary btn-sm" onclick="Admin.regDrawer('{{ r.id }}')">Chi tiết</button>

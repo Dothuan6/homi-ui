@@ -86,7 +86,7 @@ const App = {
     const items = [
       { code: 'admin-dashboard', label: 'Tổng quan', ico: 'home', badge: 0 },
       { group: 'Vận hành' },
-      { code: 'registrations', label: 'Duyệt đăng ký thành viên', ico: 'user', badge: st.regPending },
+      { code: 'registrations', label: 'Kích hoạt thành viên', ico: 'user', badge: st.regPending },
       { code: 'withdrawals', label: 'Rút tiền & sổ hoa hồng', ico: 'cash', badge: st.withdrawPending + st.withdrawApproved },
       { code: 'orders', label: 'Đơn hàng & đối soát', ico: 'inbox', badge: st.awaiting },
       { code: 'agents', label: 'Thành viên', ico: 'users', badge: 0 },

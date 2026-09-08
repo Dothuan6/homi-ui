@@ -15,7 +15,8 @@ const Admin = {
   parts: function(name, data, keys) { const o = {}; (keys || ['title', 'body', 'foot']).forEach(part => { o[part] = TPL.render(name, Object.assign({}, data, { part })); }); return o; },
   approvalCell: function(e) {
     const approvals = (e.approvals || []).filter(a => a.action === 'APPROVE'); const rejection = (e.approvals || []).find(a => a.action === 'REJECT') || null;
-    const kind = e.status.startsWith('PENDING') || e.status === 'APPROVED' || e.status === 'REJECTED' ? (e.amount !== undefined ? 'withdrawal' : 'approval') : 'approval';
+    // Rút tiền vẫn đếm lượt 0/2; hồ sơ thành viên dùng nhãn 'Chờ kích hoạt' vì không còn đếm lượt.
+    const kind = e.amount !== undefined ? 'withdrawal' : 'activation';
     return TPL.render('partials/admin-approval-cell', { e, kind, approvals, rejection });
   },
   canApproveBtn: function(e) { const me = this.me(); if (!e.status.startsWith('PENDING')) return { ok: false }; if ((e.approvals || []).some(a => a.by === me.username && a.action === 'APPROVE')) return { ok: false, why: 'Bạn đã xác nhận' }; if (e.createdBy === me.username) return { ok: false, why: 'Người tạo hộ không tự duyệt' }; return { ok: true }; },
@@ -23,6 +24,7 @@ const Admin = {
     const rows = [{ at: e.createdAt, text: 'Tạo' + (e.createdBy && e.createdBy !== 'agent' ? ' (tạo hộ bởi ' + e.createdBy + ')' : ' bởi thành viên') }]
       .concat((e.approvals || []).map(a => ({ at: a.at, text: (a.action === 'APPROVE' ? 'Xác nhận' : 'Từ chối') + ' — ' + a.by + ' (' + (LABELS.role[a.role] ? LABELS.role[a.role].text : a.role) + ')' + (a.reason ? ': ' + a.reason : '') })))
       .concat(extra || []);
+    rows.sort((a, b) => (a.at || '') < (b.at || '') ? -1 : 1);
     return TPL.render('partials/admin-timeline', { rows });
   },
   auditList: function(entity, id) { return TPL.render('partials/admin-audit-list', { list: Store.auditOf(entity, id) }); },
@@ -122,7 +124,33 @@ const Admin = {
   },
   gotoOrders: function(p) { this.st.orders.page = p; this.renderOrders(); },
   exportOrders: function() { UI.exportCsv('don-hang.csv', ['Mã đơn', 'Ngày', 'Người mua', 'SĐT', 'Email', 'Người bán', 'Hạng lúc đơn', 'Phương thức', 'Số tiền', 'Thanh toán', 'Giao hàng', 'Mã KH'], this.filteredOrders().map(o => [o.id, UI.dt(o.createdAt), o.fullName, o.phone, o.email || '', o.refCode || '', o.referrerRankAtOrder || '', LABELS.method[o.method] || '', o.price, LABELS.orderStatus[o.status].text, RULES.shippingLabel(o.shipping), o.licenseCode || ''])); },
-  confirmReconcile: function(id) { const o = Store.order(id); UI.confirm({ title: 'Xác nhận đã nhận chuyển khoản', body: 'Đơn chuyển sang <strong>Đã thanh toán</strong>; hệ thống gắn mã kích hoạt và ghi nhận hoa hồng theo chuỗi tuyến ngay lập tức.', summary: [['Mã đơn', '<span class="mono">' + UI.esc(o.id) + '</span>'], ['Nội dung CK cần khớp', '<span class="mono">' + UI.esc(o.id) + '</span>'], ['Số tiền', UI.money(o.price)], ['Người mua', UI.esc(o.fullName) + ' · ' + UI.esc(o.phone)], ['Kho mã còn', Store.stockCount() + ' mã']], confirmText: 'Xác nhận đã nhận tiền', onConfirm: () => { const r = Store.confirmReconcile(id, this.me()); UI.toast(r.licenseCode ? 'Đã xác nhận. Mã ' + r.licenseCode + ' đã gắn cho đơn.' : 'Đã xác nhận. Kho hết mã — đơn chờ cấp mã.', r.licenseCode ? 'success' : 'warning'); App.reload(); } }); },
+  /** Lớp 1 — Admin Specialist (hoặc Head) xác nhận tiền đã về bank. Manager không làm bước này. */
+  canConfirmPayment: function() { return CONFIG.activation.confirmPaymentRoles.includes(this.me().role); },
+  confirmReconcile: function(id) {
+    if (!this.canConfirmPayment()) { UI.toast('Chỉ Admin Specialist hoặc Head Admin được xác nhận thanh toán.', 'error'); return; }
+    const o = Store.order(id);
+    const codes = Store.availableCodes(50);
+    if (!codes.length) { UI.toast('Kho hết mã sẵn sàng — nhập thêm mã ở màn Kho mã & thiết bị trước khi xác nhận.', 'error'); return; }
+    UI.modal({ title: 'Xác nhận thanh toán & cấp mã', size: 'lg', sticky: true,
+      body: TPL.render('admin/orders-confirm', { o, codes, stock: Store.stockCount(), proof: o.transferProof || null,
+        reg: Store.registrationByPhone(o.phone) || null, me: this.me() }),
+      foot: TPL.render('admin/orders-confirm-foot', { o }) });
+  },
+  /** Xác nhận sau khi admin đã chọn mã trong modal. */
+  confirmReconcileSubmit: function(id) {
+    const sel = document.getElementById('rc-code'); const code = sel ? sel.value : '';
+    const err = document.getElementById('rc-err');
+    if (!code) { if (err) err.textContent = 'Chọn một mã kích hoạt để gán cho đơn.'; return; }
+    const btn = document.getElementById('rc-submit'); UI.setLoading(btn, true);
+    setTimeout(() => {
+      const r = Store.confirmReconcile(id, this.me(), { code, activate: true });
+      UI.closeModal();
+      UI.toast(r.licenseCode ? 'Đã xác nhận. Mã ' + r.licenseCode + ' đã kích hoạt và gửi email cho khách.' : 'Đã xác nhận nhưng chưa gán được mã.', r.licenseCode ? 'success' : 'warning');
+      App.reload();
+    }, 500);
+  },
+  confirmReconcileLegacy: function(id) { const o = Store.order(id); UI.confirm({ title: 'Xác nhận đã nhận chuyển khoản', body: 'Đơn chuyển sang <strong>Đã thanh toán</strong>; hệ thống gắn mã kích hoạt và ghi nhận hoa hồng theo chuỗi tuyến ngay lập tức.', summary: [['Mã đơn', '<span class="mono">' + UI.esc(o.id) + '</span>'], ['Nội dung CK cần khớp', '<span class="mono">' + UI.esc(o.id) + '</span>'], ['Số tiền', UI.money(o.price)], ['Người mua', UI.esc(o.fullName) + ' · ' + UI.esc(o.phone)], ['Kho mã còn', Store.stockCount() + ' mã']], confirmText: 'Xác nhận đã nhận tiền', onConfirm: () => { const r = Store.confirmReconcile(id, this.me()); UI.toast(r.licenseCode ? 'Đã xác nhận. Mã ' + r.licenseCode + ' đã gắn cho đơn.' : 'Đã xác nhận. Kho hết mã — đơn chờ cấp mã.', r.licenseCode ? 'success' : 'warning'); App.reload(); } });
+  },
   rejectReconcile: function(id) { const o = Store.order(id); UI.confirm({ title: 'Từ chối đối soát', body: `Đơn <span class="mono">${UI.esc(o.id)}</span> của ${UI.esc(o.fullName)} chuyển sang <strong>Bị từ chối</strong>.`, reason: 'Lý do từ chối', confirmText: 'Từ chối', tone: 'danger', onConfirm: (reason) => { Store.rejectReconcile(id, reason, this.me()); UI.toast('Đã từ chối đơn ' + id + '.', 'warning'); App.reload(); } }); },
   commissionAllocation: function(o) {
     const cms = Store.commissionsOfOrder(o.id);
@@ -185,11 +213,26 @@ const Admin = {
   gotoCodes: function(p) { this.st.codes.page = p; this.renderCodes(); },
   exportCodes: function() { UI.exportCsv('kho-ma.csv', ['Mã SP', 'Serial', 'Mã kích hoạt', 'Trạng thái', 'Lô', 'Đơn', 'Thành viên bán', 'Nhập kho', 'Gắn đơn', 'Kích hoạt', 'Thiết bị'], this.filteredCodes().map(c => [c.deviceSku, c.deviceSerial || '', c.code, LABELS.license[c.status].text, c.batch, c.orderId || '', c.agentId && Store.user(c.agentId) ? Store.user(c.agentId).fullName : '', UI.dt(c.stockedAt), UI.dt(c.assignedAt), UI.dt(c.activatedAt), c.device ? c.device.name : ''])); },
   codeDrawer: function(code) { const c = Store.codeInfo(code); const o = c.orderId ? Store.order(c.orderId) : null; const a = c.agentId ? Store.user(c.agentId) : null; UI.drawer(this.parts('admin/inventory-drawer', { c, o, a, stepIdx: ['IN_STOCK', 'ASSIGNED', 'ACTIVATED'].indexOf(c.status) })); },
-  generateModal: function() { UI.modal(Object.assign({ title: 'Sinh mã hàng loạt', sticky: true }, this.parts('admin/inventory-modal-generate', {}, ['body', 'foot']))); },
-  generate: function() { const n = Number(UI.val('gen-n')); const sku = UI.val('gen-sku').toUpperCase(); UI.setError('gen-n', ''); if (!(n >= 1 && n <= 5000)) { UI.setError('gen-n', 'Nhập số từ 1 đến 5000.'); return; } const b = Store.generateCodes(n, sku); UI.closeModal(); UI.toast('Đã sinh ' + n + ' mã, lô ' + b + '.'); App.reload(); },
+  /** Thêm / sửa một mã kích hoạt theo serial máy. Mã do nhà sản xuất cấp, không sinh tự động. */
+  codeForm: function(code) {
+    const c = code ? Store.codeInfo(code) : null;
+    UI.modal(Object.assign({ title: c ? 'Sửa mã kích hoạt' : 'Thêm mã kích hoạt', sticky: true }, this.parts('admin/inventory-modal-code', { c }, ['body', 'foot'])));
+  },
+  saveCode: function(oldCode) {
+    const row = { code: UI.val('cd-code'), deviceSerial: UI.val('cd-serial'), deviceSku: UI.val('cd-sku') };
+    const err = document.getElementById('cd-err'); if (err) err.textContent = '';
+    const r = oldCode ? Store.updateCode(oldCode, row, this.me()) : Store.addCode(row, this.me());
+    if (!r.ok) { if (err) err.textContent = r.message; return; }
+    UI.closeModal(); UI.toast(oldCode ? 'Đã cập nhật mã.' : 'Đã thêm mã ' + r.code.code + ' cho serial ' + r.code.deviceSerial + '.');
+    App.reload();
+  },
+  removeCode: function(code) {
+    UI.confirm({ title: 'Gỡ mã khỏi kho?', body: 'Mã <span class="mono">' + UI.esc(code) + '</span> sẽ bị xoá khỏi danh sách kho. Chỉ dùng khi nhập nhầm.', reason: 'Lý do gỡ', confirmText: 'Gỡ khỏi kho', tone: 'danger',
+      onConfirm: (reason) => { const r = Store.removeCode(code, this.me(), reason); if (!r.ok) { UI.toast(r.message, 'error'); return; } UI.closeDrawer(); UI.toast('Đã gỡ mã ' + code + '.', 'warning'); App.reload(); } });
+  },
   importModal: function() { UI.modal(Object.assign({ title: 'Nhập mã từ file', sticky: true }, this.parts('admin/inventory-modal-import', {}, ['body', 'foot']))); },
   readImportFile: function(input) { const f = input.files[0]; if (!f) return; const r = new FileReader(); r.onload = () => { document.getElementById('imp-text').value = String(r.result); }; r.readAsText(f); },
-  importCodes: function() { const rows = UI.val('imp-text').split(/\n+/).map(l => l.trim()).filter(Boolean).map(l => { const [code, serial] = l.split(/[;,\t]/).map(x => (x || '').trim().toUpperCase()); return { code, deviceSerial: serial }; }); UI.setError('imp-text', ''); const bad = rows.filter(r => !/^[A-Z0-9]{4}(-[A-Z0-9]{4}){3}$/.test(r.code)); if (!rows.length) { UI.setError('imp-text', 'Chưa có mã nào.'); return; } if (bad.length) { UI.setError('imp-text', bad.length + ' mã sai định dạng, ví dụ: ' + bad[0].code); return; } const r = Store.importCodes(rows, UI.val('imp-sku').toUpperCase()); UI.closeModal(); UI.toast(`Đã nhập ${r.added} mã (bỏ qua ${r.skipped} trùng), lô ${r.batch}.`); App.reload(); },
+  importCodes: function() { const rows = UI.val('imp-text').split(/\n+/).map(l => l.trim()).filter(Boolean).map(l => { const [code, serial] = l.split(/[;,\t]/).map(x => (x || '').trim().toUpperCase()); return { code, deviceSerial: serial }; }); UI.setError('imp-text', ''); const bad = rows.filter(r => !/^[A-Z0-9]{4}(-[A-Z0-9]{4}){3}$/.test(r.code)); if (!rows.length) { UI.setError('imp-text', 'Chưa có mã nào.'); return; } if (bad.length) { UI.setError('imp-text', bad.length + ' mã sai định dạng, ví dụ: ' + bad[0].code); return; } const noSerial = rows.filter(r => !r.deviceSerial); if (noSerial.length) { UI.setError('imp-text', noSerial.length + ' dòng thiếu serial máy. Mỗi dòng phải là: mã kích hoạt;serial'); return; } const r = Store.importCodes(rows, UI.val('imp-sku').toUpperCase(), this.me()); UI.closeModal(); UI.toast(r.skipped ? `Đã nhập ${r.added} mã, lô ${r.batch}. Bỏ qua ${r.skipped}: ${r.skippedList.slice(0, 3).join(', ')}${r.skipped > 3 ? '…' : ''}` : `Đã nhập ${r.added} mã, lô ${r.batch}.`, r.skipped ? 'warning' : 'success'); App.reload(); },
 
   // =====================================================================
   // ranks · Hạng & quy tắc chương trình
@@ -199,7 +242,7 @@ const Admin = {
     const html = TPL.render('admin/ranks', { r, head: this.isHead(), tcNext: (parseFloat(r.tc.version) + 0.1).toFixed(1), history: r.history || [] });
     return App.adminShell('ranks', 'Hạng & quy tắc chương trình', html);
   },
-  saveRules: function(e) { e.preventDefault(); if (!this.isHead()) return; const patch = { rankRules: { minSalesPerMonth: Number(UI.val('rl-min')) || 1, demoteSteps: Number(UI.val('rl-steps')) || 1, demoteResetsCumulative: document.getElementById('rl-reset').checked }, withdraw: { maxPerMonth: Number(UI.val('rl-maxwd')) || 1, payoutNote: UI.val('rl-payout') } }; Store.saveRankRules(patch, this.me(), UI.val('rl-note') || 'Cập nhật quy tắc chương trình'); UI.toast('Đã lưu quy tắc.'); App.reload(); },
+  saveRules: function(e) { e.preventDefault(); if (!this.isHead()) return; const patch = { rankRules: { minSalesPerMonth: Number(UI.val('rl-min')) || 1, demoteSteps: Number(UI.val('rl-steps')) || 1, demoteCumulative: UI.val('rl-demote-cum') || 'rank-floor' }, withdraw: { maxPerMonth: Number(UI.val('rl-maxwd')) || 1, payoutNote: UI.val('rl-payout') } }; Store.saveRankRules(patch, this.me(), UI.val('rl-note') || 'Cập nhật quy tắc chương trình'); UI.toast('Đã lưu quy tắc.'); App.reload(); },
   saveTc: function(e) { e.preventDefault(); if (!this.isHead()) return; const v = UI.val('tc-ver'), t = UI.val('tc-text'); if (!v || t.length < 20) { UI.toast('Nhập phiên bản và nội dung.', 'warning'); return; } Store.saveTc(t, v, this.me()); UI.toast('Đã lưu T&C v' + v + '.'); App.reload(); },
 
   // =====================================================================
@@ -224,15 +267,20 @@ const Admin = {
   wdDrawer: function(id) { const w = Store.withdrawal(id); const u = Store.user(w.sellerId); const wal = Store.wallet(u.id); UI.drawer(this.parts('admin/withdrawals-drawer', { w, u, wal, timeline: this.timeline(w, w.status === 'PAID' ? [{ at: w.paidAt, text: 'Đã chi trả bởi ' + w.paidBy }] : []), audit: this.auditList('withdrawal', id), canApprove: this.canApproveBtn(w).ok })); },
   wdExportBank: function() { const list = Store.withdrawals().filter(w => w.status === 'APPROVED'); if (!list.length) { UI.toast('Không có yêu cầu nào đã duyệt chờ chi trả.', 'warning'); return; } UI.exportCsv('chi-tra-rut-tien-' + Store.nowIso().slice(0, 10) + '.csv', ['STT', 'Thành viên', 'Ngân hàng', 'Số TK', 'Chủ TK', 'Số tiền', 'Nội dung'], list.map((w, i) => [i + 1, Store.user(w.sellerId).fullName, w.bank.bankName, w.bank.accountNo, w.bank.owner, w.amount, 'HOMI365 HH ' + w.id])); },
   exportWd: function() { UI.exportCsv('rut-tien.csv', ['Mã', 'Ngày', 'Thành viên', 'SĐT', 'Số tiền', 'Ngân hàng', 'Số TK', 'Trạng thái', 'Xác nhận', 'Lý do'], this.filteredWd().map(w => [w.id, UI.dt(w.createdAt), Store.user(w.sellerId).fullName, Store.user(w.sellerId).phone, w.amount, w.bank.bankName, w.bank.accountNo, LABELS.withdrawal[w.status].text, (w.approvals || []).map(a => a.by + ':' + a.action).join(' '), (w.approvals.find(a => a.action === 'REJECT') || {}).reason || ''])); },
+  /** Sổ hoa hồng theo ô tìm kiếm — dùng chung cho bảng và nút Xuất CSV (export phải theo bộ lọc). */
+  filteredCm: function() {
+    const q = this.st.d07.cmQ.toLowerCase();
+    return Store.commissions().filter(c => !q || c.orderId.toLowerCase().includes(q) || (c.beneficiaryId !== 'COMPANY' && Store.user(c.beneficiaryId) && Store.user(c.beneficiaryId).fullName.toLowerCase().includes(q)) || (c.beneficiaryId === 'COMPANY' && 'công ty'.includes(q))).sort((a, b) => a.createdAt < b.createdAt ? 1 : -1);
+  },
   renderLedgerTab: function() {
-    const el = document.getElementById('d07-body'); if (!el) return; const s = this.st.d07; const q = s.cmQ.toLowerCase();
-    const list = Store.commissions().filter(c => !q || c.orderId.toLowerCase().includes(q) || (c.beneficiaryId !== 'COMPANY' && Store.user(c.beneficiaryId) && Store.user(c.beneficiaryId).fullName.toLowerCase().includes(q)) || (c.beneficiaryId === 'COMPANY' && 'công ty'.includes(q))).sort((a, b) => a.createdAt < b.createdAt ? 1 : -1);
+    const el = document.getElementById('d07-body'); if (!el) return; const s = this.st.d07;
+    const list = this.filteredCm();
     const pg = UI.paginate(list, s.cmPage, 15); const total = list.filter(c => c.status === 'RECORDED').reduce((t, c) => t + c.amount, 0); const company = list.filter(c => c.beneficiaryId === 'COMPANY' && c.status === 'RECORDED').reduce((t, c) => t + c.amount, 0);
     const rows = pg.rows.map(c => ({ c, who: c.beneficiaryId === 'COMPANY' ? '' : Store.user(c.beneficiaryId).fullName }));
     el.innerHTML = TPL.render('admin/withdrawals-ledger', { s, rows, pg, total, company });
   },
   gotoCm: function(p) { this.st.d07.cmPage = p; this.renderLedgerTab(); },
-  exportCm: function() { UI.exportCsv('so-hoa-hong.csv', ['Mã', 'Ngày', 'Đơn', 'Người thụ hưởng', 'Cấp', 'Depth', 'Hạng lúc tính', 'Số tiền', 'Trạng thái'], Store.commissions().map(c => [c.id, UI.dt(c.createdAt), c.orderId, c.beneficiaryId === 'COMPANY' ? 'HOMI365' : Store.user(c.beneficiaryId).fullName, LABELS.commissionKind[c.kind].text, c.depth, RULES.rank(c.rankAtCalc).label, c.amount, LABELS.commission[c.status].text])); },
+  exportCm: function() { UI.exportCsv('so-hoa-hong.csv', ['Mã', 'Ngày', 'Đơn', 'Người thụ hưởng', 'Cấp', 'Depth', 'Hạng lúc tính', 'Số tiền', 'Trạng thái'], this.filteredCm().map(c => [c.id, UI.dt(c.createdAt), c.orderId, c.beneficiaryId === 'COMPANY' ? 'HOMI365' : Store.user(c.beneficiaryId).fullName, LABELS.commissionKind[c.kind].text, c.depth, RULES.rank(c.rankAtCalc).label, c.amount, LABELS.commission[c.status].text])); },
 
   // =====================================================================
   // exceptions · Cấp phát ngoại lệ (ẩn khi rules.onePackagePerPhone=false)
@@ -245,20 +293,57 @@ const Admin = {
   D09: function() {
     const html = TPL.render('admin/registrations', { f: this.st.regs });
     App.after(() => UI.withLoading('rg-table', UI.skeletonTable(7, 5), () => this.renderRegs()));
-    return App.adminShell('registrations', 'Duyệt đăng ký thành viên', html);
+    return App.adminShell('registrations', 'Kích hoạt thành viên', html);
   },
   filteredRegs: function() { const f = this.st.regs; const q = f.q.toLowerCase(); return Store.registrations().filter(r => (!f.status || r.status === f.status) && (!q || r.fullName.toLowerCase().includes(q) || r.phone.includes(q) || r.email.toLowerCase().includes(q))).sort((a, b) => a.createdAt < b.createdAt ? 1 : -1); },
   renderRegs: function() {
     const el = document.getElementById('rg-table'); if (!el) return; const list = this.filteredRegs(); const pg = UI.paginate(list, this.st.regs.page);
-    const rows = pg.rows.map(r => { const ref = r.referrerId ? Store.user(r.referrerId) : null; return { r, ref, refRankLabel: ref ? RULES.rank(r.referrerRankAtSubmit || ref.rank).label : '', cb: this.canApproveBtn(r), cell: this.approvalCell(r) }; });
+    const rows = pg.rows.map(r => { const ref = r.referrerId ? Store.user(r.referrerId) : null; return { r, ref, refRankLabel: ref ? RULES.rank(r.referrerRankAtSubmit || ref.rank).label : '', cb: Store.canActivateAgent(r, this.me()), cell: this.approvalCell(r) }; });
     el.innerHTML = TPL.render('admin/registrations-table', { rows, pg });
   },
   gotoRegs: function(p) { this.st.regs.page = p; this.renderRegs(); },
-  regApprove: function(id) { const r = Store.registration(id); const me = this.me(); UI.confirm({ title: 'Xác nhận hồ sơ đăng ký', body: me.role === 'HEAD' ? 'Head Admin xác nhận → <strong>Đã duyệt</strong>: kích hoạt thành viên ngay.' : (r.status === 'PENDING_0' ? 'Xác nhận lớp 1. Cần một admin khác xác nhận lớp 2 để kích hoạt.' : 'Xác nhận lớp 2 → <strong>Đã duyệt</strong>: kích hoạt thành viên ngay.'), summary: [['Họ tên', UI.esc(r.fullName)], ['SĐT', '<span class="mono">' + UI.esc(r.phone) + '</span>'], ['Email', UI.esc(r.email)], ['Người giới thiệu', r.referrerId ? UI.esc(Store.user(r.referrerId).fullName) : '—']], confirmText: 'Xác nhận', onConfirm: () => { const res = Store.approveRegistration(id, me); if (!res.ok) { UI.toast(res.message, 'error'); return; } if (res.status === 'APPROVED') { UI.toast('Đã duyệt — kích hoạt thành viên ' + res.agent.fullName + '.'); this.renderRegs(); this.regDrawer(id); } else { UI.toast('Đã xác nhận lớp 1 (1/2).'); this.renderRegs(); } } }); },
-  regReject: function(id) { const r = Store.registration(id); UI.confirm({ title: 'Từ chối hồ sơ', body: `Hồ sơ của <strong>${UI.esc(r.fullName)}</strong> chuyển sang Từ chối. Người đăng ký thấy lý do khi đăng nhập và ${CONFIG.rules.rejectedCanResubmit ? 'có thể nộp lại' : 'không thể nộp lại'}.`, reason: 'Lý do từ chối', confirmText: 'Từ chối', tone: 'danger', onConfirm: (reason) => { Store.rejectRegistration(id, this.me(), reason); UI.toast('Đã từ chối ' + id + '.', 'warning'); this.renderRegs(); } }); },
+  /** Lớp 2 — Manager (hoặc Head) kích hoạt agent, chỉ khi đơn đã được Admin xác nhận thanh toán. */
+  canActivate: function(r) { return Store.canActivateAgent(r, this.me()); },
+  regApprove: function(id) {
+    const r = Store.registration(id); const me = this.me();
+    const can = Store.canActivateAgent(r, me);
+    if (!can.ok) { UI.toast(can.message, 'error'); return; }
+    const o = r.orderId ? Store.order(r.orderId) : null;
+    const frozen = r.agentId ? Store.wallet(r.agentId) : null;
+    UI.confirm({ title: 'Kích hoạt Agent',
+      body: 'Tài khoản chuyển sang <strong>Đang hoạt động</strong>: bắt đầu được ghi nhận điểm, và hoa hồng đang tạm giữ sẽ vào ví ngay.',
+      summary: [
+        ['Họ tên', UI.esc(r.fullName)],
+        ['SĐT', '<span class="mono">' + UI.esc(r.phone) + '</span>'],
+        ['Đơn hàng', o ? '<span class="mono">' + UI.esc(o.id) + '</span> · ' + UI.label('order', o.status) : '—'],
+        ['Người giới thiệu', r.referrerId ? UI.esc(Store.user(r.referrerId).fullName) : '—'],
+        ['Hoa hồng tạm giữ', frozen && frozen.frozen ? UI.money(frozen.frozen) + ' (' + frozen.frozenCount + ' khoản)' : '—']
+      ],
+      confirmText: 'Kích hoạt Agent',
+      onConfirm: () => {
+        const res = Store.approveRegistration(id, me);
+        if (!res.ok) { UI.toast(res.message, 'error'); return; }
+        UI.toast('Đã kích hoạt thành viên ' + res.agent.fullName + '.');
+        this.renderRegs(); this.regDrawer(id);
+      } });
+  },
+  regReject: function(id) {
+    const r = Store.registration(id);
+    if (!CONFIG.activation.activateRoles.includes(this.me().role)) { UI.toast('Chỉ Manager hoặc Head Admin được từ chối hồ sơ thành viên.', 'error'); return; }
+    UI.confirm({ title: 'Từ chối hồ sơ', body: `Hồ sơ của <strong>${UI.esc(r.fullName)}</strong> chuyển sang Từ chối. Người đăng ký thấy lý do khi đăng nhập và ${CONFIG.rules.rejectedCanResubmit ? 'có thể nộp lại' : 'không thể nộp lại'}.`, reason: 'Lý do từ chối', confirmText: 'Từ chối', tone: 'danger', onConfirm: (reason) => { const res = Store.rejectRegistration(id, this.me(), reason); if (!res.ok) { UI.toast(res.message, 'error'); return; } UI.toast('Đã từ chối ' + id + '.', 'warning'); this.renderRegs(); } });
+  },
   regDrawer: function(id) {
     const r = Store.registration(id); const ref = r.referrerId ? Store.user(r.referrerId) : null; const o = Store.order(r.orderId) || null; const agent = r.agentId ? Store.user(r.agentId) : null; const mail = agent ? (Store.emails().find(e => e.to === agent.email) || null) : null;
-    UI.drawer(this.parts('admin/registrations-drawer', { r, ref, o, agent, mail, refRankLabel: ref ? RULES.rank(r.referrerRankAtSubmit || ref.rank).label : '', timeline: this.timeline(r), audit: this.auditList('registration', id), canApprove: this.canApproveBtn(r).ok }));
+    const can = Store.canActivateAgent(r, this.me());
+    // Lớp 1 nằm ở màn Đơn hàng nên phải kéo mốc thời gian của đơn vào timeline hồ sơ,
+    // nếu không log duyệt sẽ thiếu bước "Admin xác nhận thanh toán" (lỗi kỹ thuật #8).
+    const extra = [];
+    if (o) {
+      if (o.transferClaimedAt) extra.push({ at: o.transferClaimedAt, text: 'Người mua gửi biên lai đơn ' + o.id + (o.transferProof ? ' (' + o.transferProof.name + ')' : '') });
+      if (o.paidAt) extra.push({ at: o.paidAt, text: 'Lớp 1 — ' + (o.reconciledBy || 'hệ thống') + ' xác nhận thanh toán đơn ' + o.id + (o.licenseCode ? ' · cấp mã ' + o.licenseCode : '') });
+      if (o.status === 'REJECTED' && o.reconciledAt) extra.push({ at: o.reconciledAt, text: 'Đơn ' + o.id + ' bị từ chối đối soát: ' + (o.rejectReason || '') });
+    }
+    UI.drawer(this.parts('admin/registrations-drawer', { r, ref, o, agent, mail, refRankLabel: ref ? RULES.rank(r.referrerRankAtSubmit || ref.rank).label : '', timeline: this.timeline(r, extra), audit: this.auditList('registration', id), canApprove: can.ok, cannotWhy: can.ok ? '' : can.message }));
   },
 
   // =====================================================================

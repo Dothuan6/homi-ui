@@ -143,6 +143,16 @@ const SEED = (function () {
     { fullName: 'Phạm Văn Dũng', phone: '0914000999', email: 'dung.pham@example.com', address: '2 Hùng Vương, Huế', sellerId: 'U001', d: 12 }
   ];
   const regOrders = regBuyers.map(b => named(b, b.sellerId, b.d));
+  /**
+   * Tài khoản CHỜ KÍCH HOẠT (7.2.7): nộp hồ sơ là có tài khoản ngay — đăng nhập được,
+   * có link bán hàng, nhưng điểm = 0 và hoa hồng bị treo tới khi Manager kích hoạt.
+   */
+  const pendingAgent = (o) => {
+    const u = Object.assign({ type: 'agent', status: 'pending', password: PW, rank: 'COPPER', rankSince: null,
+      activatedAt: null, cumulativeSales: 0, rankHistory: [], tcConsent: { version: CONFIG.tc.version, at: o.createdAt } }, o);
+    u.purchaseAlias = RULES.purchaseAlias(u.fullName, u.phone);
+    users.push(u); return u;
+  };
   // Gói của chính các thành viên (mua trước khi thành thành viên)
   users.filter(u => u.type === 'agent').forEach((u, i) => { const o = addOrder(mkOrder(u.referrerId || 'U001', new Date(new Date(u.createdAt).getTime() - 2 * 86400000).toISOString(), { fullName: u.fullName, phone: u.phone, email: u.email, address: u.address, sellerId: u.referrerId, refCode: u.referrerId ? userById(u.referrerId).refCode : null })); o.paidAt = new Date(new Date(o.createdAt).getTime() + 4 * 60000).toISOString(); finalizePaid(o, { activated: true, shipping: 'DELIVERED' }); });
   // Đơn chờ đối soát + callback muộn
@@ -153,12 +163,21 @@ const SEED = (function () {
   // cumulativeSales = luỹ kế trước cửa sổ seed + số đơn PAID đã bán trong seed
   users.filter(u => u.type === 'agent').forEach(u => { u.cumulativeSales = Math.max(u.cumTarget || 0, orders.filter(o => o.sellerId === u.id && o.status === 'PAID').length); delete u.cumTarget; });
 
-  // ----- Đăng ký thành viên: PENDING_0 · PENDING_1 · REJECTED -----
+  // ----- Hồ sơ thành viên: Chờ kích hoạt (2 tình huống) · Đã từ chối -----
+  // RG001 đơn chưa đối soát → nút "Kích hoạt Agent" khoá. RG002 đơn đã PAID do 'head' xác nhận
+  // → chỉ 'manager' kích hoạt được, 'head' bị chặn vì đã làm lớp 1 (ràng buộc tách người).
   const registrations = [
     { id: 'RG001', phone: regBuyers[0].phone, email: regBuyers[0].email, fullName: regBuyers[0].fullName, orderId: regOrders[0].id, referrerId: 'U004', referrerRankAtSubmit: 'SILVER', bank: bank('Vietcombank', '0071000123456', 'NGUYEN THI LAN ANH'), password: PW, tcVersion: '1.0', tcAt: daysAgo(3, 9), status: 'PENDING_0', approvals: [], createdAt: daysAgo(3, 9), decidedAt: null, agentId: null, createdBy: 'agent' },
-    { id: 'RG002', phone: regBuyers[1].phone, email: regBuyers[1].email, fullName: regBuyers[1].fullName, orderId: regOrders[1].id, referrerId: 'U002', referrerRankAtSubmit: 'GOLD', bank: bank('ACB', '123456789', 'LE THI CAM'), password: PW, tcVersion: '1.0', tcAt: daysAgo(6, 14), status: 'PENDING_1', approvals: [{ by: 'admin', role: 'SPECIALIST', action: 'APPROVE', at: daysAgo(5, 10) }], createdAt: daysAgo(6, 14), decidedAt: null, agentId: null, createdBy: 'agent' },
-    { id: 'RG003', phone: regBuyers[2].phone, email: regBuyers[2].email, fullName: regBuyers[2].fullName, orderId: regOrders[2].id, referrerId: 'U001', referrerRankAtSubmit: 'LITHIUM', bank: bank('BIDV', '21510000111', 'PHAM DUNG'), password: PW, tcVersion: '1.0', tcAt: daysAgo(11, 9), status: 'REJECTED', approvals: [{ by: 'admin2', role: 'SPECIALIST', action: 'REJECT', at: daysAgo(10, 15), reason: 'Tên chủ tài khoản không khớp họ tên đăng ký' }], createdAt: daysAgo(11, 9), decidedAt: daysAgo(10, 15), agentId: null, createdBy: 'agent' }
+    { id: 'RG002', phone: regBuyers[1].phone, email: regBuyers[1].email, fullName: regBuyers[1].fullName, orderId: regOrders[1].id, referrerId: 'U002', referrerRankAtSubmit: 'GOLD', bank: bank('ACB', '123456789', 'LE THI CAM'), password: PW, tcVersion: '1.0', tcAt: daysAgo(6, 14), status: 'PENDING_0', approvals: [], createdAt: daysAgo(6, 14), decidedAt: null, agentId: null, createdBy: 'agent' },
+    { id: 'RG003', phone: regBuyers[2].phone, email: regBuyers[2].email, fullName: regBuyers[2].fullName, orderId: regOrders[2].id, referrerId: 'U001', referrerRankAtSubmit: 'LITHIUM', bank: bank('BIDV', '21510000111', 'PHAM DUNG'), password: PW, tcVersion: '1.0', tcAt: daysAgo(11, 9), status: 'REJECTED', approvals: [{ by: 'manager', role: 'MANAGER', action: 'REJECT', at: daysAgo(10, 15), reason: 'Tên chủ tài khoản không khớp họ tên đăng ký' }], createdAt: daysAgo(11, 9), decidedAt: daysAgo(10, 15), agentId: null, createdBy: 'agent' }
   ];
+  // Hai hồ sơ đang chờ đã có sẵn tài khoản chờ kích hoạt → đăng nhập được ngay bằng mật khẩu mẫu.
+  [['RG001', 'U004', 'LA9M3T'], ['RG002', 'U002', 'CA5B8K']].forEach(([regId, refId, refCode]) => {
+    const r = registrations.find(x => x.id === regId);
+    const u = pendingAgent({ id: 'U' + String(120 + registrations.indexOf(r)).padStart(3, '0'), fullName: r.fullName, phone: r.phone, email: r.email,
+      address: (regBuyers.find(b => b.phone === r.phone) || {}).address || '', refCode, referrerId: refId, bank: r.bank, createdAt: r.createdAt, registrationId: r.id });
+    r.agentId = u.id;
+  });
 
   // ----- Rút tiền: PENDING_0 · PENDING_1 · APPROVED · PAID · REJECTED (U002 đã có yêu cầu tháng này) -----
   const w = (id, sellerId, amount, status, createdAt, extra) => Object.assign({ id, sellerId, amount, bank: { ...userById(sellerId).bank }, status, createdAt, createdBy: 'agent', approvals: [], auditLog: [] }, extra || {});
@@ -195,10 +214,16 @@ const SEED = (function () {
 const Store = {
   KEY: 'homi365_proto_v3',
   state: null,
-  load: function() { try { const raw = localStorage.getItem(this.KEY); if (raw) { this.state = JSON.parse(raw); if (this.state && this.state.version === 3) return; } } catch (e) {} this.reset(true); },
+  /**
+   * DATA_VERSION: tăng số này mỗi khi cấu trúc dữ liệu mẫu đổi (thêm trường, thêm trạng thái…).
+   * Dữ liệu cũ trong localStorage sẽ tự động được nạp lại, người dùng không phải bấm "Nạp lại dữ liệu mẫu".
+   * v4 (08/09): tài khoản agent 'pending', hoa hồng PENDING_ACTIVATION, biên lai chuyển khoản, vai MANAGER.
+   */
+  DATA_VERSION: 4,
+  load: function() { try { const raw = localStorage.getItem(this.KEY); if (raw) { this.state = JSON.parse(raw); if (this.state && this.state.version === this.DATA_VERSION) return; } } catch (e) {} this.reset(true); },
   save: function() { try { localStorage.setItem(this.KEY, JSON.stringify(this.state)); } catch (e) {} },
   reset: function(silent) {
-    this.state = JSON.parse(JSON.stringify({ version: 3, data: SEED,
+    this.state = JSON.parse(JSON.stringify({ version: this.DATA_VERSION, data: SEED,
       session: { ref: null, refAt: null, refSellerId: null, entry: null, orderId: null, verifiedPhone: null, buyerDraft: null, regDraft: null, agent: null, admin: null, adminFails: 0, adminLockUntil: null, otp: {} },
       seq: { cm: SEED.commissions.length, wd: SEED.withdrawals.length, rg: SEED.registrations.length, user: 200, batch: 3, cv: 1 } }));
     this.save(); if (!silent) window.location.reload();
@@ -256,13 +281,21 @@ const Store = {
   wallet: function(id) {
     const cms = this.commissionsOf(id); const wds = this.withdrawalsOf(id);
     const recorded = cms.filter(c => c.status === 'RECORDED').reduce((s, c) => s + c.amount, 0);
+    // Hoa hồng của đơn bán khi tài khoản chưa được kích hoạt: treo lại, chưa tính vào ví và chưa ra điểm.
+    const frozen = cms.filter(c => c.status === 'PENDING_ACTIVATION').reduce((s, c) => s + c.amount, 0);
     const held = wds.filter(w => ['PENDING_0', 'PENDING_1', 'APPROVED'].includes(w.status)).reduce((s, w) => s + w.amount, 0);
     const withdrawn = wds.filter(w => w.status === 'PAID').reduce((s, w) => s + w.amount, 0);
-    return { recorded, held, withdrawn, available: recorded - held - withdrawn, points: RULES.pointsOf(recorded), pending: held };
+    return { recorded, frozen, frozenCount: cms.filter(c => c.status === 'PENDING_ACTIVATION').length, held, withdrawn, available: recorded - held - withdrawn, points: RULES.pointsOf(recorded), pending: held };
   },
   ledger: function(id) {
     const rows = [];
-    this.commissionsOf(id).forEach(c => { rows.push({ at: c.createdAt, type: 'COMMISSION_RECORDED', amount: c.amount, ref: c.orderId, effect: +c.amount }); if (c.status === 'CANCELLED') rows.push({ at: c.cancelledAt || c.createdAt, type: 'COMMISSION_CANCELLED', amount: c.amount, ref: c.orderId, effect: -c.amount }); });
+    this.commissionsOf(id).forEach(c => {
+      // Hoa hồng đang treo chờ kích hoạt: hiện trong sổ nhưng chưa cộng vào số dư.
+      if (c.status === 'PENDING_ACTIVATION') { rows.push({ at: c.createdAt, type: 'COMMISSION_FROZEN', amount: c.amount, ref: c.orderId, effect: 0 }); return; }
+      if (c.releasedAt) { rows.push({ at: c.createdAt, type: 'COMMISSION_FROZEN', amount: c.amount, ref: c.orderId, effect: 0 }); rows.push({ at: c.releasedAt, type: 'COMMISSION_RELEASED', amount: c.amount, ref: c.orderId, effect: +c.amount }); }
+      else rows.push({ at: c.createdAt, type: 'COMMISSION_RECORDED', amount: c.amount, ref: c.orderId, effect: +c.amount });
+      if (c.status === 'CANCELLED') rows.push({ at: c.cancelledAt || c.createdAt, type: 'COMMISSION_CANCELLED', amount: c.amount, ref: c.orderId, effect: -c.amount });
+    });
     this.withdrawalsOf(id).forEach(w => { rows.push({ at: w.createdAt, type: 'WITHDRAW_HOLD', amount: w.amount, ref: w.id, effect: -w.amount }); if (w.status === 'PAID') rows.push({ at: w.paidAt, type: 'WITHDRAW_PAID', amount: w.amount, ref: w.id, effect: 0 }); if (w.status === 'REJECTED') rows.push({ at: w.decidedAt || w.createdAt, type: 'WITHDRAW_REJECTED', amount: w.amount, ref: w.id, effect: +w.amount }); });
     rows.sort((a, b) => a.at < b.at ? -1 : 1); let bal = 0; rows.forEach(r => { bal += r.effect; r.balance = bal; }); return rows.reverse();
   },
@@ -292,12 +325,15 @@ const Store = {
     const key = String(codeOrAlias || '').toUpperCase();
     const a = this.sellerByRef(key) || this.agentByAlias(key);
     if (!a || a.type !== 'agent') return { ok: false, reason: 'invalid' };
-    if (a.status !== 'active') return { ok: false, reason: 'locked' };
+    // 'pending' vẫn bán được — link sống, hoa hồng treo tới khi kích hoạt (7.2.7). Chỉ 'locked' mới chặn.
+    this.logClick(a.id);
+    if (a.status !== 'active' && a.status !== 'pending') { this.save(); return { ok: false, reason: 'locked' }; }
     const s = this.s(); s.ref = a.refCode; s.refAt = this.nowIso(); s.refSellerId = a.id; s.entry = key === a.purchaseAlias ? 'alias' : 'ref';
-    const today = this.nowIso().slice(0, 10); const arr = this.d().clicks[a.id] || (this.d().clicks[a.id] = []); const row = arr.find(c => c.date === today); if (row) row.clicks += 1; else arr.push({ date: today, clicks: 1 });
     this.save(); return { ok: true, agent: a };
   },
   refSeller: function() { const s = this.s(); if (!s.ref || !s.refAt) return null; if (Date.now() - new Date(s.refAt).getTime() > CONFIG.session.refDays * 86400000) return null; return this.sellerByRef(s.ref); },
+  /** Ghi click cả khi link hỏng/khoá để đối soát tracking (A0: "ghi click" không phụ thuộc kết quả). */
+  logClick: function(agentId) { const today = this.nowIso().slice(0, 10); const arr = this.d().clicks[agentId] || (this.d().clicks[agentId] = []); const row = arr.find(c => c.date === today); if (row) row.clicks += 1; else arr.push({ date: today, clicks: 1 }); },
   otpState: function(phone) { const o = this.s().otp; return o[phone] || (o[phone] = { sends: [], wrong: 0, lockUntil: null }); },
   otpCanSend: function(phone) { const st = this.otpState(phone); const now = Date.now(); if (st.lockUntil && new Date(st.lockUntil).getTime() > now) return { ok: false, minutes: Math.ceil((new Date(st.lockUntil).getTime() - now) / 60000) }; st.sends = st.sends.filter(t => now - new Date(t).getTime() < CONFIG.otp.windowMinutes * 60000); if (st.sends.length >= CONFIG.otp.maxSendsPerWindow) { st.lockUntil = new Date(now + CONFIG.otp.lockMinutes * 60000).toISOString(); this.save(); return { ok: false, minutes: CONFIG.otp.lockMinutes }; } return { ok: true }; },
   otpSend: function(phone) { const st = this.otpState(phone); st.sends.push(this.nowIso()); st.wrong = 0; st.sentAt = this.nowIso(); this.save(); return st.sends.length; },
@@ -322,16 +358,28 @@ const Store = {
   markPaid: function(id, method, extra) {
     const o = this.order(id); if (!o) return null; if (o.status === 'PAID') return o;
     const late = o.status === 'EXPIRED';
+    const pickCode = extra && extra.pickCode; if (extra) delete extra.pickCode;
     Object.assign(o, { status: 'PAID', method: method || o.method, paidAt: this.nowIso(), shipping: this.pkg(o.packageId) && this.pkg(o.packageId).hasShipping ? 'PENDING' : 'NONE' }, extra || {});
     if (late) o.flags.lateCallback = true;
-    this.issueLicense(o); this.createCommissions(o);
+    this.issueLicense(o, pickCode); this.createCommissions(o);
     let u = this.userByPhone(o.phone);
     if (!u) { u = { id: 'U' + String(++this.state.seq.user).padStart(3, '0'), type: 'buyer', fullName: o.fullName, phone: o.phone, email: o.email || '', address: o.address, refCode: null, referrerId: o.sellerId, status: 'active', createdAt: this.nowIso(), rank: null, bank: null, password: null, cumulativeSales: 0, rankHistory: [] }; this.d().users.push(u); this.addLog(u.id, 'Mua gói ' + o.packageId + ' qua link ' + (o.refCode || '—') + ' (đơn ' + o.id + ')'); }
     else this.addLog(u.id, 'Thanh toán đơn ' + o.id);
     const seller = o.sellerId ? this.user(o.sellerId) : null; if (seller && seller.type === 'agent' && seller.status === 'active') seller.cumulativeSales = (seller.cumulativeSales || 0) + 1;
     this.save(); return o;
   },
-  issueLicense: function(o) { const c = this.d().codes.find(x => x.status === 'IN_STOCK'); if (!c) { o.licenseCode = null; o.licensePending = true; return null; } c.status = 'ASSIGNED'; c.orderId = o.id; c.agentId = o.sellerId; c.assignedAt = this.nowIso(); o.licenseCode = c.code; o.licensePending = false; return c.code; },
+  /** Mã sẵn sàng gán đơn — admin chọn từ danh sách này khi xác nhận thanh toán (7.8.2). */
+  availableCodes: function(limit) { const list = this.d().codes.filter(c => c.status === 'IN_STOCK'); return limit ? list.slice(0, limit) : list; },
+  /**
+   * Gán mã kích hoạt cho đơn. pick = mã admin chọn; bỏ trống thì lấy mã sẵn sàng đầu tiên.
+   * Chỉ nhận mã đang IN_STOCK nên hai đơn không thể trùng mã.
+   */
+  issueLicense: function(o, pick) {
+    const c = pick ? this.d().codes.find(x => x.code === pick && x.status === 'IN_STOCK') : this.d().codes.find(x => x.status === 'IN_STOCK');
+    if (!c) { o.licenseCode = null; o.licensePending = true; return null; }
+    c.status = 'ASSIGNED'; c.orderId = o.id; c.agentId = o.sellerId; c.assignedAt = this.nowIso();
+    o.licenseCode = c.code; o.licensePending = false; return c.code;
+  },
   /** Engine hoa hồng chênh lệch cấp bậc (spec 3.3). Σ = mức Lithium. */
   createCommissions: function(o) {
     if (!o.sellerId) return;
@@ -339,12 +387,22 @@ const Store = {
     const push = (c) => this.d().commissions.push(Object.assign({ id: 'CM' + String(++this.state.seq.cm).padStart(4, '0'), orderId: o.id, status: 'RECORDED', createdAt: o.paidAt || this.nowIso() }, c));
     for (const a of this.uplineChain(o.sellerId, 99)) {
       const diff = (rates[a.rank] || 0) - paid;
-      if (diff > 0) { push({ beneficiaryId: a.id, kind: depth === 0 ? 'SELF' : 'DIFF', depth, rankAtCalc: a.rank, amount: diff }); paid = rates[a.rank]; }
+      // Người hưởng chưa được kích hoạt → treo hoa hồng, giải phóng khi admin kích hoạt (7.2.7).
+      if (diff > 0) { push({ beneficiaryId: a.id, kind: depth === 0 ? 'SELF' : 'DIFF', depth, rankAtCalc: a.rank, amount: diff, status: this.isPendingAgent(a) ? 'PENDING_ACTIVATION' : 'RECORDED' }); paid = rates[a.rank]; }
       depth++; if (paid >= top) break;
     }
     if (paid < top) push({ beneficiaryId: 'COMPANY', kind: 'COMPANY', depth, rankAtCalc: RULES.topRank().id, amount: top - paid });
   },
-  confirmReconcile: function(id, admin) { const o = this.markPaid(id, 'bank', { reconciledAt: this.nowIso(), reconciledBy: admin ? admin.username : 'admin' }); return o; },
+  /**
+   * Admin xác nhận thanh toán: chọn sẵn mã kích hoạt (opts.code) và kích hoạt luôn mã phần mềm
+   * (opts.activate) → gửi email mã cho khách. Quyết định 08/09.
+   */
+  confirmReconcile: function(id, admin, opts) {
+    const op = opts || {};
+    const o = this.markPaid(id, 'bank', { reconciledAt: this.nowIso(), reconciledBy: admin ? admin.username : 'admin', pickCode: op.code || null });
+    if (o && o.licenseCode && op.activate !== false) this.activateCode(o.licenseCode, op.device, admin);
+    return o;
+  },
   rejectReconcile: function(id, reason, admin) { return this.setOrder(id, { status: 'REJECTED', rejectReason: reason, reconciledAt: this.nowIso(), reconciledBy: admin ? admin.username : 'admin' }); },
   updateShipping: function(id, step) { const o = this.setOrder(id, { shipping: step }); if (o) { o.shippingLog = o.shippingLog || []; o.shippingLog.push({ step, at: this.nowIso(), by: 'admin' }); this.save(); } return o; },
   clearLateFlag: function(id) { const o = this.order(id); if (o) { o.flags.lateChecked = true; this.save(); } },
@@ -363,7 +421,9 @@ const Store = {
     this.addLog(u.id, 'Đăng nhập bằng SĐT + mật khẩu' + (remember ? ' (ghi nhớ 30 ngày)' : '')); this.save(); return { ok: true, user: u };
   },
   loginAgentById: function(userId, remember) { this.s().agent = { userId, remember: !!remember, at: this.nowIso(), expiresAt: new Date(Date.now() + (remember ? CONFIG.session.rememberDays * 86400000 : CONFIG.session.agentHours * 3600000)).toISOString() }; this.save(); },
-  currentAgent: function() { const s = this.s().agent; if (!s) return null; if (new Date(s.expiresAt).getTime() < Date.now()) return null; const u = this.user(s.userId); return u && u.type === 'agent' && u.status === 'active' ? u : null; },
+  /** 'pending' = đã đăng ký, vào được dashboard nhưng chưa được kích hoạt nên chưa có điểm (7.2.7). */
+  currentAgent: function() { const s = this.s().agent; if (!s) return null; if (new Date(s.expiresAt).getTime() < Date.now()) return null; const u = this.user(s.userId); return u && u.type === 'agent' && (u.status === 'active' || u.status === 'pending') ? u : null; },
+  isPendingAgent: function(u) { return !!u && u.type === 'agent' && u.status === 'pending'; },
   currentSeller: function() { return this.currentAgent(); },
   logoutAgent: function() { this.s().agent = null; this.save(); },
   expireAgentSession: function() { const s = this.s().agent; if (s) { s.expiresAt = new Date(Date.now() - 1000).toISOString(); this.save(); } },
@@ -381,7 +441,11 @@ const Store = {
     const reg = this.registrationByPhone(phone);
     if (reg && (reg.status === 'PENDING_0' || reg.status === 'PENDING_1')) return { ok: false, reason: 'pending', registration: reg };
     if (reg && reg.status === 'REJECTED' && !CONFIG.rules.rejectedCanResubmit) return { ok: false, reason: 'rejected_final', registration: reg };
-    const order = this.ordersByPhone(phone).filter(o => o.status === 'PAID').sort((a, b) => a.paidAt < b.paidAt ? 1 : -1)[0];
+    // Đơn đủ điều kiện mời đăng ký. registerBeforeReconcile = true: khách chuyển khoản và gửi biên lai
+    // xong là mời ngay, không đợi admin đối soát (7.2.1). Tắt cờ thì quay lại chỉ tính đơn đã PAID.
+    const okStatus = CONFIG.rules.registerBeforeReconcile ? ['PAID', 'AWAITING_RECONCILE'] : ['PAID'];
+    const at = o => o.paidAt || o.transferClaimedAt || o.createdAt;
+    const order = this.ordersByPhone(phone).filter(o => okStatus.includes(o.status)).sort((a, b) => at(a) < at(b) ? 1 : -1)[0];
     if (!order) return { ok: false, reason: 'no_order' };
     const referrer = order.sellerId ? this.user(order.sellerId) : null;
     if (!referrer || !RULES.canRecruit(referrer.rank)) return { ok: false, reason: 'referrer_copper', order, referrer };
@@ -393,7 +457,31 @@ const Store = {
     if (this.registrations().some(r => r.email.toLowerCase() === data.email.toLowerCase() && (r.status === 'PENDING_0' || r.status === 'PENDING_1'))) return { ok: false, message: 'Email đang có hồ sơ chờ duyệt.' };
     const order = this.order(data.orderId); const referrer = order && order.sellerId ? this.user(order.sellerId) : null;
     const reg = { id: 'RG' + String(++this.state.seq.rg).padStart(3, '0'), phone: data.phone, email: data.email, fullName: data.fullName, orderId: data.orderId, referrerId: referrer ? referrer.id : null, referrerRankAtSubmit: referrer ? referrer.rank : null, bank: data.bank, password: data.password, tcVersion: CONFIG.tc.version, tcAt: this.nowIso(), status: 'PENDING_0', approvals: [], createdAt: this.nowIso(), decidedAt: null, agentId: null, createdBy: 'agent' };
-    this.d().registrations.unshift(reg); this.s().regDraft = null; this.audit(data.phone, 'CUSTOMER', 'registration', reg.id, '', 'PENDING_0', 'Nộp hồ sơ đăng ký thành viên'); this.save(); return { ok: true, registration: reg };
+    this.d().registrations.unshift(reg); this.s().regDraft = null;
+    // Tạo tài khoản agent NGAY, trạng thái 'pending': vào được dashboard, có link bán hàng,
+    // nhưng mọi hoa hồng bị treo cho tới khi admin kích hoạt (7.2.7).
+    const agent = this.createPendingAgent(reg, order, referrer);
+    reg.agentId = agent.id;
+    this.audit(data.phone, 'CUSTOMER', 'registration', reg.id, '', 'PENDING_0', 'Nộp hồ sơ đăng ký thành viên — tạo tài khoản chờ kích hoạt');
+    this.save(); return { ok: true, registration: reg, agent: agent };
+  },
+  /** Tài khoản agent chưa kích hoạt — có đủ link và mật khẩu, chưa có điểm. */
+  createPendingAgent: function(reg, order, referrer) {
+    let u = this.userByPhone(reg.phone);
+    if (!u) { u = { id: 'U' + String(++this.state.seq.user).padStart(3, '0'), phone: reg.phone, createdAt: this.nowIso(), cumulativeSales: 0, rankHistory: [] }; this.d().users.push(u); }
+    Object.assign(u, {
+      type: 'agent', status: 'pending', fullName: reg.fullName, email: reg.email,
+      address: u.address || (order ? order.address : ''),
+      refCode: u.refCode || this.genRefCode(),
+      purchaseAlias: u.purchaseAlias || this.genPurchaseAlias(reg.fullName, reg.phone),
+      referrerId: referrer ? referrer.id : (order ? order.sellerId : (u.referrerId || null)),
+      rank: 'COPPER', rankSince: null, bank: reg.bank, password: reg.password,
+      tcConsent: { version: reg.tcVersion || CONFIG.tc.version, at: reg.tcAt || this.nowIso() },
+      activatedAt: null, registrationId: reg.id, cumulativeSales: 0, rankHistory: []
+    });
+    this.d().clicks[u.id] = this.d().clicks[u.id] || [];
+    this.addLog(u.id, 'Nộp hồ sơ thành viên — tài khoản chờ kích hoạt');
+    return u;
   },
   /** Máy trạng thái duyệt 2 lớp (spec 3.7). */
   applyApproval: function(entity, entityType, admin, action, reason) {
@@ -407,21 +495,75 @@ const Store = {
     if (entity.status === 'APPROVED') entity.decidedAt = this.nowIso();
     this.audit(admin.username, admin.role, entityType, entity.id, from, entity.status, 'Xác nhận lớp ' + n); this.save(); return { ok: true, status: entity.status };
   },
-  approveRegistration: function(id, admin) { const r = this.registration(id); if (!r || r.status === 'APPROVED' || r.status === 'REJECTED') return { ok: false, message: 'Hồ sơ đã được xử lý.' }; const res = this.applyApproval(r, 'registration', admin, 'APPROVE'); if (res.ok && res.status === 'APPROVED') res.agent = this.activateAgent(r); return res; },
-  rejectRegistration: function(id, admin, reason) { const r = this.registration(id); if (!r) return { ok: false }; return this.applyApproval(r, 'registration', admin, 'REJECT', reason); },
+  /**
+   * Kích hoạt agent — lớp 2 của quy trình, do Manager (hoặc Head) bấm.
+   * Lớp 1 là Admin Specialist "Xác nhận thanh toán" ở #orders; vì vậy đơn phải PAID trước.
+   * Không dùng applyApproval (duyệt 2 lớp) nữa: một lần bấm đúng vai là kích hoạt.
+   */
+  canActivateAgent: function(reg, admin) {
+    if (!reg) return { ok: false, message: 'Không tìm thấy hồ sơ.' };
+    if (reg.status === 'APPROVED') return { ok: false, message: 'Hồ sơ đã được kích hoạt.' };
+    if (reg.status === 'REJECTED') return { ok: false, message: 'Hồ sơ đã bị từ chối.' };
+    if (!admin || !CONFIG.activation.activateRoles.includes(admin.role)) return { ok: false, message: 'Chỉ Manager hoặc Head Admin được kích hoạt thành viên.' };
+    const o = reg.orderId ? this.order(reg.orderId) : null;
+    if (CONFIG.activation.requirePaidOrder) {
+      if (!o) return { ok: false, message: 'Hồ sơ không gắn với đơn hàng nào.' };
+      if (o.status !== 'PAID') return { ok: false, message: 'Chờ Admin xác nhận thanh toán đơn ' + o.id + ' trước khi kích hoạt.', order: o };
+    }
+    // Lỗi kỹ thuật #1: người đã xác nhận thanh toán (lớp 1) không được kích hoạt agent (lớp 2).
+    if (CONFIG.activation.distinctApprovers && o && o.reconciledBy && o.reconciledBy === admin.username) {
+      return { ok: false, message: 'Bạn đã xác nhận thanh toán đơn ' + o.id + ' (lớp 1). Lớp 2 phải do người khác kích hoạt.', order: o };
+    }
+    return { ok: true };
+  },
+  approveRegistration: function(id, admin) {
+    const r = this.registration(id);
+    const can = this.canActivateAgent(r, admin);
+    if (!can.ok) return { ok: false, message: can.message };
+    const from = r.status;
+    r.approvals = r.approvals || [];
+    r.approvals.push({ by: admin.username, role: admin.role, action: 'APPROVE', at: this.nowIso() });
+    r.status = 'APPROVED'; r.decidedAt = this.nowIso();
+    this.audit(admin.username, admin.role, 'registration', r.id, from, 'APPROVED', 'Kích hoạt tài khoản thành viên');
+    const agent = this.activateAgent(r, { by: admin.username });
+    this.save();
+    return { ok: true, status: 'APPROVED', agent: agent };
+  },
+  /** Từ chối hồ sơ cũng thuộc lớp 2 — chỉ vai được kích hoạt mới được từ chối. */
+  rejectRegistration: function(id, admin, reason) {
+    const r = this.registration(id); if (!r) return { ok: false, message: 'Không tìm thấy hồ sơ.' };
+    if (!admin || !CONFIG.activation.activateRoles.includes(admin.role)) return { ok: false, message: 'Chỉ Manager hoặc Head Admin được từ chối hồ sơ thành viên.' };
+    return this.applyApproval(r, 'registration', admin, 'REJECT', reason);
+  },
   activateAgent: function(reg, opts) {
     const o = opts || {}; const order = reg.orderId ? this.order(reg.orderId) : null;
     let u = this.userByPhone(reg.phone);
+    // Tài khoản tự đăng ký đã tồn tại ở trạng thái 'pending' → không sinh dữ liệu demo, dashboard phải sạch.
+    const wasPending = this.isPendingAgent(u);
     if (!u) { u = { id: 'U' + String(++this.state.seq.user).padStart(3, '0'), phone: reg.phone, createdAt: this.nowIso(), status: 'active', cumulativeSales: 0, rankHistory: [] }; this.d().users.push(u); }
     const rank = o.rank || 'COPPER';
-    Object.assign(u, { type: 'agent', fullName: reg.fullName, email: reg.email, address: u.address || (order ? order.address : ''), refCode: this.genRefCode(), purchaseAlias: this.genPurchaseAlias(reg.fullName, reg.phone), referrerId: o.referrerId !== undefined ? o.referrerId : (order ? order.sellerId : (u.referrerId || null)), rank, rankSince: this.nowIso(), bank: reg.bank, password: reg.password, tcConsent: { version: reg.tcVersion || CONFIG.tc.version, at: reg.tcAt || this.nowIso() }, activatedAt: this.nowIso(), registrationId: reg.id || null, status: 'active' });
+    Object.assign(u, { type: 'agent', fullName: reg.fullName, email: reg.email, address: u.address || (order ? order.address : ''), refCode: u.refCode || this.genRefCode(), purchaseAlias: u.purchaseAlias || this.genPurchaseAlias(reg.fullName, reg.phone), referrerId: o.referrerId !== undefined ? o.referrerId : (order ? order.sellerId : (u.referrerId || null)), rank, rankSince: this.nowIso(), bank: reg.bank, password: reg.password, tcConsent: { version: reg.tcVersion || CONFIG.tc.version, at: reg.tcAt || this.nowIso() }, activatedAt: this.nowIso(), registrationId: reg.id || null, status: 'active' });
     u.rankHistory = [{ at: this.nowIso(), from: null, to: rank, event: 'INIT', by: o.by || 'system', reason: o.reason || 'Kích hoạt thành viên sau duyệt hồ sơ' }];
     if (reg.id) reg.agentId = u.id;
     this.d().clicks[u.id] = this.d().clicks[u.id] || [];
-    this.addLog(u.id, 'Kích hoạt tài khoản thành viên (hạng ' + RULES.rank(rank).label + ')');
-    this.d().emails.unshift({ to: u.email, from: CONFIG.email.from, at: this.nowIso(), subject: 'HOMI365 · Tài khoản thành viên đã được kích hoạt', body: `Chào ${u.fullName},\n\nTài khoản thành viên HOMI365 của bạn đã được duyệt.\n• Link giới thiệu: ${RULES.referralUrl(u.refCode)}\n• Link mua hàng cá nhân: ${RULES.publicPurchaseUrl(u.purchaseAlias)}\n• Cổng thành viên: ${CONFIG.brand.baseUrl}/#login\nĐăng nhập bằng số điện thoại ${u.phone} và mật khẩu bạn đã đặt.` });
-    if (CONFIG.demo.seedNewAgent && !o.noSeed) this.seedDemoActivity(u);
+    // Giải phóng hoa hồng đã treo trong lúc chờ kích hoạt, và tính lại luỹ kế đơn đã bán.
+    const released = this.releaseFrozenCommissions(u.id, o.by || 'system');
+    this.addLog(u.id, 'Kích hoạt tài khoản thành viên (hạng ' + RULES.rank(rank).label + ')' + (released.count ? ' — giải phóng ' + released.count + ' khoản hoa hồng treo' : ''));
+    this.d().emails.unshift({ to: u.email, from: CONFIG.email.from, at: this.nowIso(), subject: 'HOMI365 · Tài khoản thành viên đã được kích hoạt', body: `Chào ${u.fullName},\n\nTài khoản thành viên HOMI365 của bạn đã được kích hoạt.\n• Link bán hàng của bạn: ${RULES.publicPurchaseUrl(u.purchaseAlias)}\n• Mã giới thiệu (ref_code): ${u.refCode}\n• Cổng thành viên: ${CONFIG.brand.baseUrl}/#login\nGửi link bán hàng cho khách — mọi đơn mua qua link đều được tính cho bạn. Đăng nhập bằng số điện thoại ${u.phone} và mật khẩu bạn đã đặt.` });
+    if (CONFIG.demo.seedNewAgent && !o.noSeed && !wasPending) this.seedDemoActivity(u);
     this.save(); return u;
+  },
+
+  /** Chuyển hoa hồng treo → ghi nhận, và đếm lại cumulativeSales từ các đơn đã PAID. */
+  releaseFrozenCommissions: function(userId, by) {
+    const frozen = this.d().commissions.filter(c => c.beneficiaryId === userId && c.status === 'PENDING_ACTIVATION');
+    frozen.forEach(c => { c.status = 'RECORDED'; c.releasedAt = this.nowIso(); c.releasedBy = by || 'system'; });
+    // Cộng dồn, không ghi đè: lũy kế mang từ trước (Head chỉ định hạng, dữ liệu chuyển đổi) phải được giữ.
+    const u = this.user(userId);
+    if (u) u.cumulativeSales = Math.max(u.cumulativeSales || 0, this.orders().filter(o => o.sellerId === userId && o.status === 'PAID').length);
+    const amount = frozen.reduce((s, c) => s + c.amount, 0);
+    if (frozen.length) this.addLog(userId, 'Giải phóng ' + frozen.length + ' khoản hoa hồng treo (' + amount.toLocaleString('vi-VN') + 'đ) sau khi kích hoạt');
+    return { count: frozen.length, amount };
   },
 
   /** Chỉ dùng cho demo: thành viên vừa kích hoạt được sinh sẵn click + 3 đơn để dashboard không trống. */
@@ -441,6 +583,8 @@ const Store = {
   // ---------- Rút tiền (7.6) ----------
   canWithdraw: function(agentId, amount) {
     const w = this.wallet(agentId);
+    // Chưa kích hoạt thì không rút, kể cả khi còn số dư cũ (F6 chốt chặn V0).
+    if (this.isPendingAgent(this.user(agentId))) return { ok: false, reason: 'pending_activation', message: 'Tài khoản đang chờ kích hoạt nên chưa rút được. Hoa hồng vẫn được tạm giữ và vào ví ngay khi kích hoạt.' };
     // 1 lần/tháng: mọi yêu cầu tạo trong tháng (trừ yêu cầu bị từ chối) đều tính — kể cả đã chi trả
     const monthCount = this.withdrawalsOf(agentId).filter(x => x.status !== 'REJECTED' && RULES.inSameMonth(x.createdAt));
     const limit = (this.rules().withdraw && this.rules().withdraw.maxPerMonth) || CONFIG.withdraw.maxPerMonth;
@@ -464,7 +608,19 @@ const Store = {
     const rr = this.rules().rankRules; const promoted = [], demoted = [];
     this.agents().filter(u => u.status === 'active').forEach(u => {
       const sold = this.salesThisMonth(u.id);
-      if (sold < rr.minSalesPerMonth) { if (u.rank !== 'COPPER') { const to = CONFIG.ranks[Math.max(0, RULES.rankIndex(u.rank) - (rr.demoteSteps || 1))].id; u.rankHistory.push({ at: this.nowIso(), from: u.rank, to, event: 'DEMOTE', by: admin ? admin.username : 'job', reason: `Bán ${sold} gói trong tháng (< ${rr.minSalesPerMonth})` }); demoted.push({ user: u, from: u.rank, to }); u.rank = to; u.rankSince = this.nowIso(); if (rr.demoteResetsCumulative) u.cumulativeSales = 0; } }
+      if (sold < rr.minSalesPerMonth) {
+        if (u.rank !== 'COPPER') {
+          const toRank = CONFIG.ranks[Math.max(0, RULES.rankIndex(u.rank) - (rr.demoteSteps || 1))];
+          const to = toRank.id;
+          // Luỹ kế lùi về sàn hạng mới: Gold(18) rớt Silver → 10, muốn lại Gold phải bán thêm 8 gói.
+          const mode = rr.demoteCumulative || 'rank-floor';
+          const before = u.cumulativeSales || 0;
+          const after = mode === 'zero' ? 0 : mode === 'keep' ? before : Math.min(before, toRank.threshold);
+          u.rankHistory.push({ at: this.nowIso(), from: u.rank, to, event: 'DEMOTE', by: admin ? admin.username : 'job', reason: `Bán ${sold} gói trong tháng (< ${rr.minSalesPerMonth})` + (after !== before ? ` · luỹ kế ${before} → ${after} gói` : '') });
+          demoted.push({ user: u, from: u.rank, to, cumFrom: before, cumTo: after });
+          u.rank = to; u.rankSince = this.nowIso(); u.cumulativeSales = after;
+        }
+      }
       else { const target = RULES.rankByCumulativeSales(u.cumulativeSales || 0); if (RULES.rankIndex(target.id) > RULES.rankIndex(u.rank)) { u.rankHistory.push({ at: this.nowIso(), from: u.rank, to: target.id, event: 'PROMOTE', by: admin ? admin.username : 'job', reason: `Luỹ kế ${u.cumulativeSales} gói ≥ ngưỡng ${target.threshold}` }); promoted.push({ user: u, from: u.rank, to: target.id }); u.rank = target.id; u.rankSince = this.nowIso(); } }
     });
     this.audit(admin ? admin.username : 'job', admin ? admin.role : 'JOB', 'rank', 'month-end', '', '', `Job xét hạng: ${promoted.length} thăng hạng, ${demoted.length} giáng hạng`); this.save(); return { promoted, demoted };
@@ -493,9 +649,83 @@ const Store = {
   saveTc: function(text, version, admin) { const r = this.rules(); r.tc = { version, text, updatedAt: this.nowIso().slice(0, 10) }; r.history.unshift({ at: this.nowIso(), by: admin.username, note: 'Cập nhật T&C phiên bản ' + version }); this.audit(admin.username, admin.role, 'rules', 'tc', '', version, 'T&C'); this.save(); },
 
   // ---------- Kho (7.8) ----------
+  /**
+   * Mã kích hoạt gắn với SERIAL của từng máy, do nhà sản xuất cấp — KHÔNG sinh ngẫu nhiên
+   * (quyết định 08/09). Ba đường nhập kho: thêm tay từng máy, nhập file theo lô, và sửa lại
+   * bản ghi khi nhập sai. generateCodes chỉ còn dùng để dựng dữ liệu mẫu.
+   */
+  addCode: function(row, admin) {
+    const code = String(row.code || '').trim().toUpperCase();
+    const serial = String(row.deviceSerial || '').trim().toUpperCase();
+    if (!code) return { ok: false, field: 'code', message: 'Nhập mã kích hoạt in trên máy.' };
+    if (!serial) return { ok: false, field: 'serial', message: 'Nhập số serial của máy.' };
+    if (this.codeInfo(code)) return { ok: false, field: 'code', message: 'Mã ' + code + ' đã có trong kho.' };
+    if (this.d().codes.some(c => c.deviceSerial === serial)) return { ok: false, field: 'serial', message: 'Serial ' + serial + ' đã có trong kho.' };
+    const c = { code, deviceSku: (row.deviceSku || CONFIG.stock.deviceSku).toUpperCase(), deviceSerial: serial,
+      status: 'IN_STOCK', orderId: null, agentId: null, batch: row.batch || 'MAN', stockedAt: this.nowIso(),
+      assignedAt: null, activatedAt: null, device: null };
+    this.d().codes.push(c);
+    this.audit(admin ? admin.username : 'system', admin ? admin.role : 'SYSTEM', 'code', code, '', 'IN_STOCK', 'Nhập kho thủ công · serial ' + serial);
+    this.save(); return { ok: true, code: c };
+  },
+  /** Sửa mã/serial khi nhập sai — chỉ cho phép khi mã CHƯA gán đơn. */
+  updateCode: function(oldCode, row, admin) {
+    const c = this.codeInfo(oldCode); if (!c) return { ok: false, message: 'Không tìm thấy mã.' };
+    if (c.status !== 'IN_STOCK') return { ok: false, message: 'Mã đã gắn đơn hoặc đã kích hoạt nên không sửa được. Nếu sai, hãy gỡ khỏi kho và nhập bản ghi mới.' };
+    const code = String(row.code || '').trim().toUpperCase();
+    const serial = String(row.deviceSerial || '').trim().toUpperCase();
+    if (!code || !serial) return { ok: false, message: 'Mã kích hoạt và serial đều bắt buộc.' };
+    if (code !== c.code && this.codeInfo(code)) return { ok: false, message: 'Mã ' + code + ' đã có trong kho.' };
+    if (serial !== c.deviceSerial && this.d().codes.some(x => x.deviceSerial === serial)) return { ok: false, message: 'Serial ' + serial + ' đã có trong kho.' };
+    const from = c.code + ' / ' + c.deviceSerial;
+    c.code = code; c.deviceSerial = serial; if (row.deviceSku) c.deviceSku = row.deviceSku.toUpperCase();
+    this.audit(admin ? admin.username : 'system', admin ? admin.role : 'SYSTEM', 'code', code, from, code + ' / ' + serial, 'Sửa mã kích hoạt / serial');
+    this.save(); return { ok: true, code: c };
+  },
+  removeCode: function(code, admin, reason) {
+    const c = this.codeInfo(code); if (!c) return { ok: false, message: 'Không tìm thấy mã.' };
+    if (c.status !== 'IN_STOCK') return { ok: false, message: 'Chỉ gỡ được mã đang Sẵn hàng.' };
+    this.d().codes = this.d().codes.filter(x => x.code !== code);
+    this.audit(admin ? admin.username : 'system', admin ? admin.role : 'SYSTEM', 'code', code, 'IN_STOCK', 'REMOVED', reason || 'Gỡ khỏi kho');
+    this.save(); return { ok: true };
+  },
+  /** CHỈ dùng dựng dữ liệu mẫu — mã thật phải nhập theo serial từng máy. */
   generateCodes: function(n, sku) { const CH = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; const g = (k) => Array.from({ length: k }, () => CH[Math.floor(Math.random() * CH.length)]).join(''); const batch = 'B' + String(++this.state.seq.batch).padStart(3, '0'); const start = this.d().codes.length; for (let i = 0; i < n; i++) this.d().codes.push({ code: `${CONFIG.stock.codePrefix}-${g(4)}-${g(4)}-${g(4)}`, deviceSku: sku || CONFIG.stock.deviceSku, deviceSerial: `${sku || CONFIG.stock.deviceSku}-${String(start + i + 1).padStart(6, '0')}`, status: 'IN_STOCK', orderId: null, agentId: null, batch, stockedAt: this.nowIso(), assignedAt: null, activatedAt: null, device: null }); this.save(); return batch; },
-  importCodes: function(list, sku) { const batch = 'IMP' + String(++this.state.seq.batch).padStart(3, '0'); let added = 0; list.forEach(row => { if (row.code && !this.codeInfo(row.code)) { this.d().codes.push({ code: row.code, deviceSku: row.deviceSku || sku || CONFIG.stock.deviceSku, deviceSerial: row.deviceSerial || '', status: 'IN_STOCK', orderId: null, agentId: null, batch, stockedAt: this.nowIso(), assignedAt: null, activatedAt: null, device: null }); added++; } }); this.save(); return { batch, added, skipped: list.length - added }; },
-  activateCode: function(code, device) { const c = this.codeInfo(code); if (!c || c.status !== 'ASSIGNED') return false; c.status = 'ACTIVATED'; c.activatedAt = this.nowIso(); c.device = { name: (device && device.name) || 'Thiết bị mô phỏng', deviceId: (device && device.deviceId) || 'DEV-' + Math.random().toString(36).slice(2, 10).toUpperCase(), boundAt: c.activatedAt }; this.save(); return true; },
+  /** Nhập lô theo file nhà sản xuất. Bỏ qua dòng thiếu serial hoặc trùng mã/serial (mã đi theo serial). */
+  importCodes: function(list, sku, admin) {
+    const batch = 'IMP' + String(++this.state.seq.batch).padStart(3, '0');
+    let added = 0; const skipped = [];
+    list.forEach(row => {
+      const code = String(row.code || '').trim().toUpperCase();
+      const serial = String(row.deviceSerial || '').trim().toUpperCase();
+      if (!code) return;
+      if (!serial) { skipped.push(code + ' (thiếu serial)'); return; }
+      if (this.codeInfo(code)) { skipped.push(code + ' (mã đã có)'); return; }
+      if (this.d().codes.some(c => c.deviceSerial === serial)) { skipped.push(code + ' (serial ' + serial + ' đã có)'); return; }
+      this.d().codes.push({ code, deviceSku: (row.deviceSku || sku || CONFIG.stock.deviceSku).toUpperCase(), deviceSerial: serial, status: 'IN_STOCK', orderId: null, agentId: null, batch, stockedAt: this.nowIso(), assignedAt: null, activatedAt: null, device: null });
+      added++;
+    });
+    if (added) this.audit(admin ? admin.username : 'system', admin ? admin.role : 'SYSTEM', 'code', batch, '', 'IN_STOCK', 'Nhập kho ' + added + ' mã theo file');
+    this.save(); return { batch, added, skipped: skipped.length, skippedList: skipped };
+  },
+  activateCode: function(code, device, admin) {
+    const c = this.codeInfo(code); if (!c || c.status !== 'ASSIGNED') return false;
+    c.status = 'ACTIVATED'; c.activatedAt = this.nowIso();
+    c.activatedBy = admin ? admin.username : 'app';
+    c.device = { name: (device && device.name) || 'Thiết bị mô phỏng', deviceId: (device && device.deviceId) || 'DEV-' + Math.random().toString(36).slice(2, 10).toUpperCase(), boundAt: c.activatedAt };
+    if (c.orderId) this.emailLicense(this.order(c.orderId), c);
+    this.save(); return true;
+  },
+  /** Email mã kích hoạt gửi khách hàng ngay khi mã được kích hoạt (7.8.x, quyết định 08/09). */
+  emailLicense: function(o, c) {
+    if (!o || !o.email) return null;
+    const pkg = this.pkg(o.packageId);
+    const mail = { to: o.email, from: CONFIG.email.from, at: this.nowIso(),
+      subject: 'HOMI365 · Mã kích hoạt gói ' + (pkg ? pkg.name : o.packageId),
+      body: `Chào ${o.fullName},\n\nĐơn hàng ${o.id} đã được xác nhận thanh toán và mã kích hoạt của bạn đã sẵn sàng.\n• Mã kích hoạt: ${c.code}\n• Thiết bị: ${c.deviceSerial || '—'}\n• Gói: ${pkg ? pkg.fullName || pkg.name : o.packageId}\n\nNhập mã này trong ứng dụng HOMI365 trên điện thoại để bắt đầu sử dụng. Mã chỉ dùng được trên 1 thiết bị.\n\nCần hỗ trợ: ${CONFIG.brand.supportHotline}` };
+    this.d().emails.unshift(mail);
+    return mail;
+  },
   fulfilPendingLicenses: function() { let n = 0; this.orders().filter(o => o.status === 'PAID' && !o.licenseCode).forEach(o => { if (this.issueLicense(o)) n++; }); this.save(); return n; },
 
   // ---------- Admin (7.4, 7.9) ----------

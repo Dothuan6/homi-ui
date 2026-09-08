@@ -49,7 +49,7 @@
       
         
         <a href="registrations.html" class="is-active">
-          <svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg><span>Duyệt đăng ký thành viên</span>
+          <svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg><span>Kích hoạt thành viên</span>
           <span class="nav-badge">2</span>
         </a>
         
@@ -119,16 +119,16 @@
     <div class="admin-topbar">
       <div class="row">
         <button class="btn btn-icon btn-secondary admin-menu-btn" aria-label="Mở menu"><svg class="ico " width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
-        <div><div class="crumb">registrations</div><h1>Duyệt đăng ký thành viên</h1></div>
+        <div><div class="crumb">registrations</div><h1>Kích hoạt thành viên</h1></div>
       </div>
       <div class="row"></div>
     </div>
     <main class="admin-main"><!-- registrations · Duyệt đăng ký thành viên: bộ lọc + vùng bảng (bảng render động bằng d-09-table) -->
 <div class="card"><div class="card-body">
-  <div class="alert alert-info mb-4"><svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg><div class="text-sm">Duyệt <strong>2 lớp</strong> (người thứ 2 phải khác người thứ 1; Head Admin tự chốt). Khi <strong>Đã duyệt</strong>: tạo tài khoản thành viên hạng Copper, sinh ref_code + link cá nhân, gửi email kích hoạt. Duyệt không ảnh hưởng đơn, tuyến và hoa hồng đã ghi.</div></div>
+  <div class="alert alert-info mb-4"><svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 8h.01M11 12h1v4h1"/></svg><div class="text-sm">Đây là <strong>lớp 2</strong>. Lớp 1 là Admin bấm <em>Xác nhận thanh toán</em> ở màn Đơn hàng — nút kích hoạt chỉ mở khi đơn đã thanh toán, và <strong>người đã làm lớp 1 không kích hoạt được hồ sơ đó</strong>. Tài khoản, ref_code và link cá nhân đã được cấp từ lúc nộp hồ sơ; kích hoạt là bước mở điểm và giải phóng hoa hồng đang tạm giữ.</div></div>
   <div class="table-toolbar">
     <div class="field field-search"><label class="field-label" for="rg-q">Tìm kiếm</label><input class="input" id="rg-q" placeholder="Họ tên, SĐT, email" value=""></div>
-    <div class="field"><label class="field-label" for="rg-status">Trạng thái</label><select class="select" id="rg-status"><option value="">Tất cả</option><option value="PENDING_0" >Chờ duyệt (0/2)</option><option value="PENDING_1" >Chờ duyệt (1/2)</option><option value="APPROVED" >Đã duyệt</option><option value="REJECTED" >Từ chối</option></select></div>
+    <div class="field"><label class="field-label" for="rg-status">Trạng thái</label><select class="select" id="rg-status"><option value="">Tất cả</option><option value="PENDING_0" >Chờ kích hoạt</option><option value="APPROVED" >Đã kích hoạt</option><option value="REJECTED" >Đã từ chối</option></select></div>
   </div>
   <div id="rg-table"><div class="table-wrap" aria-busy="true"><span class="sr-only">Đang tải dữ liệu…</span><table class="table"><tbody><tr><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td></tr><tr><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td></tr><tr><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td></tr><tr><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td></tr><tr><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td></tr></tbody></table></div></div>
 </div></div>

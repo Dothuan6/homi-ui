@@ -47,10 +47,10 @@
         <!-- Người mua -->
         <div class="card"><div class="card-body">
           <div class="row mb-2"><span class="result-icon is-info" style="width:44px;height:44px;margin:0"><svg class="ico " width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2 20a7 7 0 0114 0M16 4a3.5 3.5 0 010 7M22 20a7 7 0 00-6-6.9"/></svg></span><h2 style="font-size:var(--fs-lg)">Người mua</h2></div>
-          <p class="text-sm text-muted">Vào bằng link giới thiệu hoặc link mua hàng cá nhân của thành viên. Họ tên · SĐT · email · địa chỉ → OTP → thanh toán → kết quả.</p>
+          <p class="text-sm text-muted">Vào bằng link bán hàng của thành viên. Họ tên · SĐT · email · địa chỉ → OTP → thanh toán → kết quả.</p>
           <dl class="dl dl-stack mt-3">
-            <dt>Link giới thiệu (ref_code)</dt><dd><span class="mono">https://homi-dev-ui.netlify.app/#r/AN7K2Q</span></dd>
-            <dt>Link mua hàng cá nhân (alias)</dt><dd><span class="mono">https://homi-dev-ui.netlify.app/#p/NVA3456</span></dd>
+            <dt>Link bán hàng (alias)</dt><dd><span class="mono">https://homi-dev-ui.netlify.app/#p/NVA3456</span></dd>
+            <dt>Dạng mã giới thiệu (ref_code)</dt><dd><span class="mono">https://homi-dev-ui.netlify.app/#r/AN7K2Q</span> — vẫn nhận, dùng khi nhập mã tay</dd>
             <dt>SĐT gây lỗi gửi SMS</dt><dd><span class="mono">0911111111</span></dd>
           </dl>
           <div class="actions">
@@ -66,12 +66,12 @@
           <dl class="dl dl-stack mt-3">
             <dt>Đã mua qua Lithium — đăng ký được</dt><dd><span class="mono">0901111222</span> · Lâm Thị Kim</dd>
             <dt>Đã mua qua Copper — bị chặn</dt><dd><span class="mono">0902222333</span> · Trần Văn Bảo</dd>
-            <dt>Hồ sơ đang chờ duyệt (1/2)</dt><dd><span class="mono">0913000888</span></dd>
+            <dt>Tài khoản chờ kích hoạt</dt><dd><span class="mono">0913000888</span> / <span class="mono">Homi@123</span> — vào dashboard được, điểm 0, hoa hồng tạm giữ</dd>
             <dt>Hồ sơ bị từ chối</dt><dd><span class="mono">0914000999</span></dd>
           </dl>
           <div class="actions">
             <a class="btn btn-primary btn-lg btn-block" href="register.html"><svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg> Đăng ký thành viên</a>
-            <a class="btn btn-secondary btn-block" href="order-lookup.html">Tra cứu đơn hàng (mã đơn mẫu <span class="mono">HM260829003</span>)</a>
+            <a class="btn btn-secondary btn-block" href="order-lookup.html">Tra cứu đơn hàng (mã đơn mẫu <span class="mono">HM260830003</span>)</a>
           </div>
         </div></div>
 
@@ -90,10 +90,10 @@
         <!-- Quản trị -->
         <div class="card"><div class="card-body">
           <div class="row mb-2"><span class="result-icon is-info" style="width:44px;height:44px;margin:0"><svg class="ico " width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span><h2 style="font-size:var(--fs-lg)">Quản trị</h2></div>
-          <p class="text-sm text-muted">2 vai trò: Admin Specialist (duyệt lớp 1/2) và Head Admin (tự chốt, quản lý tài khoản admin, chỉ định hạng, tạo thành viên gốc, chạy job xét hạng).</p>
+          <p class="text-sm text-muted">Kích hoạt thành viên đi qua 2 người: lớp 1 xác nhận tiền về bank, lớp 2 kích hoạt Agent. Cùng một hồ sơ, một người chỉ được làm một lớp.</p>
           <dl class="dl dl-stack mt-3">
-            <dt>Head Admin</dt><dd><span class="mono">head</span> / <span class="mono">Homi@2026</span></dd>
-            <dt>Admin Specialist</dt><dd><span class="mono">admin</span> · <span class="mono">admin2</span> / <span class="mono">Homi@2026</span></dd>
+            <dt>Lớp 1 · Trưởng bộ phận</dt><dd><span class="mono">head</span> / <span class="mono">Homi@2026</span> — xác nhận thanh toán, cấp mã; kèm quyền chỉ-Head (tài khoản admin, chỉ định hạng, tạo thành viên gốc, chạy job xét hạng)</dd>
+            <dt>Lớp 2 · Ms Trinh</dt><dd><span class="mono">manager</span> / <span class="mono">Homi@2026</span> — kích hoạt Agent</dd>
             <dt>Việc đang chờ</dt><dd>2 đăng ký · 2 rút tiền · 3 đối soát</dd>
           </dl>
           <div class="actions"><a class="btn btn-primary btn-lg btn-block" href="admin-login.html"><svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Đăng nhập quản trị</a></div>

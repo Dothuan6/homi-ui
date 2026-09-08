@@ -6,7 +6,7 @@
 <button class="btn btn-primary" onclick="Admin.packageForm()">{{{ icon('plus', 16) }}} Thêm gói</button>
 {% elif screen === 'inventory' %}
 <button class="btn btn-secondary" onclick="Admin.importModal()">{{{ icon('upload', 16) }}} Nhập file</button>
-<button class="btn btn-primary" onclick="Admin.generateModal()">{{{ icon('plus', 16) }}} Sinh hàng loạt</button>
+<button class="btn btn-primary" onclick="Admin.codeForm()">{{{ icon('plus', 16) }}} Thêm mã theo serial</button>
 {% elif screen === 'admin-users' %}
 <button class="btn btn-primary" onclick="Admin.adminForm()">{{{ icon('plus', 16) }}} Thêm tài khoản</button>
 {% endif %}
@@ -168,10 +168,10 @@
 <div class="row">
   <span class="result-icon is-info" style="width:44px;height:44px;margin:0">{{{ icon('gift', 22) }}}</span>
   <div class="grow"><h2 style="font-size:var(--fs-lg)">Trở thành thành viên HOMI365</h2>
-    <p class="text-sm text-muted">Được {{ ref ? ref.fullName : 'người giới thiệu' }} (hạng {{ refRankLabel }}) mời tham gia. Đăng ký hồ sơ để nhận link bán hàng cá nhân và hoa hồng theo hạng; hồ sơ được duyệt trong 1–2 ngày làm việc.</p></div>
+    <p class="text-sm text-muted">Được {{ ref ? ref.fullName : 'người giới thiệu' }} (hạng {{ refRankLabel }}) mời tham gia. Đăng ký hồ sơ để nhận link bán hàng cá nhân ngay; điểm và hoa hồng được mở khi bộ phận vận hành kích hoạt tài khoản.</p></div>
 </div>
 <div class="actions actions-row">
-  <button class="btn btn-secondary btn-lg" onclick="Buyer.a03Later('{{ order.id }}', true)">Thoát ra</button>
+  {% if order.status === 'PAID' %}<button class="btn btn-secondary btn-lg" onclick="Buyer.a03Later('{{ order.id }}', true)">Thoát ra</button>{% endif %}
   <a class="btn btn-primary btn-lg" href="#register?order={{ order.id }}">{{{ icon('user', 18) }}} Đăng ký thành viên</a>
 </div>
 {% elif el.reason === 'agent' %}
@@ -183,9 +183,9 @@
 {% elif el.reason === 'pending' %}
 <div class="row">
   <span class="result-icon is-info" style="width:44px;height:44px;margin:0">{{{ icon('clock', 22) }}}</span>
-  <div class="grow"><h2 style="font-size:var(--fs-lg)">Hồ sơ thành viên đang chờ duyệt</h2><p class="text-sm text-muted">Trạng thái: {{ label('approval', el.registration.status) }}. Chúng tôi sẽ gửi email khi hồ sơ được duyệt.</p></div>
+  <div class="grow"><h2 style="font-size:var(--fs-lg)">Tài khoản thành viên đang chờ kích hoạt</h2><p class="text-sm text-muted">Trạng thái: {{ label('activation', el.registration.status) }}. Bạn đã đăng nhập và bán hàng được; điểm cùng hoa hồng mở khi tài khoản được kích hoạt.</p></div>
 </div>
-<div class="actions"><a class="btn btn-secondary btn-lg btn-block" href="#register?state=pending&phone={{ order.phone }}">Xem trạng thái hồ sơ</a></div>
+<div class="actions"><a class="btn btn-secondary btn-lg btn-block" href="#dashboard">Vào trang quản lý</a></div>
 {% else %}
 <div class="row">
   <span class="result-icon is-info" style="width:44px;height:44px;margin:0">{{{ icon('check-circle', 22) }}}</span>

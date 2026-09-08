@@ -268,11 +268,17 @@ const Buyer = {
     const ref = order.sellerId ? Store.user(order.sellerId) : null;
     return TPL.render('partials/reg-cta', { el, ref, order, refRankLabel: ref ? RULES.rank(ref.rank).label : '' });
   },
-  /** Popup mời đăng ký thành viên — hiện 1 lần/đơn ngay khi vào order-result PAID (LP-6). */
+  /**
+   * Popup mời đăng ký thành viên (LP-6, 7.2.1).
+   * Hiện 1 lần cho MỖI CHẶNG của đơn, không phải 1 lần cho cả đơn: khách gửi biên lai thấy một lần
+   * ở bước chờ đối soát, và thấy lại một lần khi đơn được xác nhận thanh toán. Khách đã đăng ký thì
+   * registrationEligibility trả reason 'agent' nên không bị mời lại.
+   */
   regPrompt: function(order) {
     const el = Store.registrationEligibility(order.phone); if (!el.ok) return;
-    const shown = Store.s().regPromptShown || []; if (shown.includes(order.id)) return;
-    shown.push(order.id); Store.s().regPromptShown = shown; Store.save();
+    const key = order.id + '·' + order.status;
+    const shown = Store.s().regPromptShown || []; if (shown.includes(key)) return;
+    shown.push(key); Store.s().regPromptShown = shown; Store.save();
     const ref = el.referrer;
     UI.modal({ title: 'Trở thành thành viên HOMI365?', sticky: true,
       body: TPL.render('buyer/order-result-reg-prompt', { ref, rankLabel: RULES.rank(ref.rank).label, order }),
@@ -310,7 +316,9 @@ const Buyer = {
         if (o.status !== 'AWAITING_RECONCILE') { App.clearTimer('poll'); UI.toast(o.status === 'PAID' ? 'Đã xác nhận chuyển khoản!' : 'Đơn bị từ chối đối soát.', o.status === 'PAID' ? 'success' : 'error'); App.reload(); }
       }, CONFIG.order.reconcilePollSeconds * 1000);
     });
-    return TPL.render('buyer/order-result-awaiting', { order, info: this.orderInfoBlock(order, { shipping: false }) });
+    // Người giới thiệu Copper → không mời đăng ký (LP-3/#50): không dựng thẻ mời, tránh card rỗng.
+    const el = Store.registrationEligibility(order.phone);
+    return TPL.render('buyer/order-result-awaiting', { order, info: this.orderInfoBlock(order, { shipping: false }), cta: el.ok ? this.regCta(order) : '' });
   },
   /** (e) Admin từ chối */
   a03Rejected: function(order) { return TPL.render('buyer/order-result-rejected', { order, info: this.orderInfoBlock(order, { shipping: false }) }); },
@@ -380,7 +388,7 @@ const Buyer = {
       if (r.reason === 'wrong') { show('error', 'x-circle', null, 'Số điện thoại hoặc mật khẩu không đúng. <a href="#login?view=forgot">Quên mật khẩu?</a>'); return; }
       // Chưa là thành viên: kiểm tra đơn / hồ sơ đăng ký
       const el = Store.registrationEligibility(phone);
-      if (el.reason === 'pending') { show('info', 'clock', 'Hồ sơ thành viên đang ' + UI.label('approval', el.registration.status).toLowerCase(), 'Bạn sẽ nhận email khi hồ sơ được duyệt. <a href="#register?state=pending&phone=' + UI.esc(phone) + '">Xem trạng thái</a>'); return; }
+      if (el.reason === 'pending') { show('info', 'clock', 'Tài khoản đang chờ kích hoạt', 'Hồ sơ đã nhận. Dùng đúng mật khẩu đã đặt lúc đăng ký để vào trang quản lý — bán hàng được ngay, điểm và hoa hồng mở khi tài khoản được kích hoạt.'); return; }
       if (el.ok && el.rejected) { show('warning', 'warning', 'Hồ sơ trước đã bị từ chối', UI.esc((el.rejected.approvals.find(a => a.action === 'REJECT') || {}).reason || '') + '. <a href="#register?phone=' + UI.esc(phone) + '">Nộp lại hồ sơ</a>'); return; }
       if (el.ok) { show('info', 'user', 'Số này đã mua gói nhưng chưa đăng ký thành viên', '<a href="#register?phone=' + UI.esc(phone) + '">Đăng ký thành viên ngay</a> — thông tin được điền sẵn từ đơn hàng.'); return; }
       if (el.reason === 'referrer_copper') { show('warning', 'warning', 'Chưa đủ điều kiện đăng ký thành viên', 'Người giới thiệu của bạn (hạng Copper) chưa được quyền tuyển thành viên. Vui lòng liên hệ người giới thiệu hoặc hỗ trợ.'); return; }
@@ -403,7 +411,7 @@ const Buyer = {
     const state = q.get('state') || ''; const orderId = q.get('order'); const qp = q.get('phone');
     let phone = qp ? RULES.normalizePhone(qp) : (orderId && Store.order(orderId) ? Store.order(orderId).phone : (Store.s().verifiedPhone || ''));
     if (state === 'pending' && !phone) phone = '0913000888'; if (state === 'rejected' && !phone) phone = '0914000999';
-    const intro = { title: 'Đăng ký thành viên', desc: 'Hồ sơ gồm thông tin cá nhân, tài khoản nhận hoa hồng, mật khẩu và chấp nhận điều khoản. Sau khi duyệt 2 lớp, bạn nhận email kích hoạt kèm link bán hàng cá nhân.', steps: ['Kiểm tra điều kiện: đã mua gói, người giới thiệu từ hạng Silver.', 'Điền hồ sơ, chấp nhận T&C, xác thực OTP.', 'Chờ admin duyệt (0/2 → 1/2 → Đã duyệt) và nhận email.'] };
+    const intro = { title: 'Đăng ký thành viên', desc: 'Hồ sơ gồm thông tin cá nhân, tài khoản nhận hoa hồng, mật khẩu và chấp nhận điều khoản. Nộp xong bạn vào ngay trang quản lý và nhận link bán hàng cá nhân.', steps: ['Kiểm tra điều kiện: đã mua gói, người giới thiệu từ hạng Silver.', 'Điền hồ sơ, chấp nhận T&C, xác thực OTP.', 'Vào trang quản lý ngay — bán được luôn; điểm và hoa hồng mở khi bộ phận vận hành kích hoạt tài khoản.'] };
     let body;
     if (!phone) body = this.a06Check();
     else {
@@ -459,7 +467,10 @@ const Buyer = {
     const p = this._regPending; const el = Store.registrationEligibility(phone); if (!p || !el.ok) { App.reload(); return; }
     const r = Store.submitRegistration({ phone, fullName: p.fullName, email: p.email, bank: p.bank, password: p.password, orderId: el.order.id });
     if (!r.ok) { UI.toast(r.message, 'error'); App.reload(); return; } this._regPending = null;
-    this.setCardHead('#a06-col .card-head', 'Đăng ký đã gửi', 'Bước 3/3');
-    document.getElementById('a06-body').innerHTML = TPL.render('buyer/register-done', { regId: r.registration.id, email: p.email, phone, alias: RULES.publicPurchaseUrl(Store.genPurchaseAlias(p.fullName, phone)) });
+    // Vào thẳng dashboard, không chờ admin duyệt (7.2.7). Tài khoản ở trạng thái chờ kích hoạt:
+    // có link bán hàng nhưng mọi hoa hồng bị treo cho tới khi admin kích hoạt.
+    Store.loginAgentById(r.agent.id, true);
+    UI.toast('Đăng ký thành công. Tài khoản đang chờ kích hoạt.', 'success');
+    App.navigate('dashboard');
   }
 };

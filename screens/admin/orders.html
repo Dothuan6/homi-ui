@@ -127,8 +127,9 @@
 
 {% elif part === 'foot' %}
 {% if o.status === 'AWAITING_RECONCILE' %}
-<button class="btn btn-danger-outline" onclick="Admin.rejectReconcile('{{ o.id }}')">Từ chối</button>
-<button class="btn btn-success" onclick="Admin.confirmReconcile('{{ o.id }}')">{{{ icon('check', 16) }}} Xác nhận đã nhận tiền</button>
+{% if !Admin.canConfirmPayment() %}<span class="text-sm text-muted">Chỉ Admin Specialist hoặc Head Admin được xác nhận thanh toán.</span>{% endif %}
+<button class="btn btn-danger-outline" {{{ Admin.canConfirmPayment() ? '' : 'disabled' }}} onclick="Admin.rejectReconcile('{{ o.id }}')">Từ chối</button>
+<button class="btn btn-success" {{{ Admin.canConfirmPayment() ? '' : 'disabled' }}} onclick="Admin.confirmReconcile('{{ o.id }}')">{{{ icon('check', 16) }}} Xác nhận thanh toán & cấp mã</button>
 {% endif %}
 {% if o.flags && o.flags.lateCallback && !o.flags.lateChecked %}
 <button class="btn btn-secondary" onclick="Store.clearLateFlag('{{ o.id }}'); UI.toast('Đã đánh dấu kiểm tra.'); App.reload()">{{{ icon('check', 16) }}} Đã kiểm tra</button>
@@ -137,6 +138,46 @@
 <button class="btn btn-danger-outline" onclick="Admin.refundOrder('{{ o.id }}')">Hoàn tiền & huỷ hoa hồng</button>
 {% endif %}
 {% endif %}
+{% endblock %}
+
+{% block admin/orders-confirm %}
+<!-- Xác nhận thanh toán: admin chọn mã kích hoạt từ danh sách mã SẴN SÀNG nên không thể trùng mã -->
+<p>Đơn chuyển sang <strong>Đã thanh toán</strong>, hệ thống ghi nhận hoa hồng theo chuỗi tuyến ngay. Mã bạn chọn sẽ được <strong>kích hoạt luôn</strong> và gửi email cho khách.</p>
+
+<div class="modal-summary"><dl>
+  <dt>Mã đơn · nội dung CK</dt><dd><span class="mono">{{ o.id }}</span></dd>
+  <dt>Số tiền</dt><dd>{{{ money(o.price) }}}</dd>
+  <dt>Người mua</dt><dd>{{ o.fullName }} · <span class="mono">{{ o.phone }}</span></dd>
+  <dt>Email nhận mã</dt><dd>{{ o.email || '— chưa có email —' }}</dd>
+</dl></div>
+
+{% if proof %}
+<div class="alert alert-info mt-3" style="text-align:left">{{{ icon('file', 20) }}}<div>Biên lai khách gửi: <strong>{{ proof.name }}</strong> · {{ proof.size }}</div></div>
+{% endif %}
+
+<div class="field mt-4">
+  <label class="field-label" for="rc-code">Mã kích hoạt &amp; thiết bị<span class="req">*</span></label>
+  <select id="rc-code" class="select">
+    <option value="">— Chọn mã sẵn sàng —</option>
+    {% each c in codes %}
+    <option value="{{ c.code }}">{{ c.code }}{% if c.deviceSerial %} · serial {{ c.deviceSerial }}{% endif %}</option>
+    {% endeach %}
+  </select>
+  <p class="field-hint">Danh sách chỉ gồm mã đang <strong>Sẵn hàng</strong> ({{ stock }} mã) — chọn xong mã chuyển sang Đã kích hoạt nên không đơn nào gán trùng.</p>
+  <div class="field-error" id="rc-err"></div>
+</div>
+
+{% if reg && reg.status !== 'APPROVED' && reg.status !== 'REJECTED' %}
+<div class="alert alert-warning mt-3" style="text-align:left">{{{ icon('shield', 20) }}}<div>
+  Người mua này đã nộp hồ sơ thành viên ({{ reg.id }}). Xác nhận thanh toán là <strong>lớp 1</strong> — sau bước này
+  <strong>{{ me.username }} sẽ không kích hoạt được Agent đó</strong>, lớp 2 phải do người khác thực hiện tại màn Kích hoạt thành viên.
+</div></div>
+{% endif %}
+{% endblock %}
+
+{% block admin/orders-confirm-foot %}
+<button class="btn btn-secondary btn-lg" onclick="UI.closeModal()">Huỷ</button>
+<button class="btn btn-success btn-lg" id="rc-submit" onclick="Admin.confirmReconcileSubmit('{{ o.id }}')">{{{ icon('check', 18) }}} Xác nhận & kích hoạt mã</button>
 {% endblock %}
 
 {% block admin/orders-table %}
@@ -161,7 +202,7 @@
       <td>{{{ o.status === 'PAID' ? badge('license', row.c ? row.c.status : 'PENDING') : '—' }}}</td>
       <td><div class="row-actions">
         {% if o.status === 'AWAITING_RECONCILE' %}
-        <button class="btn btn-success btn-sm" onclick="Admin.confirmReconcile('{{ o.id }}')">Xác nhận</button>
+        <button class="btn btn-success btn-sm" {{{ Admin.canConfirmPayment() ? '' : 'disabled' }}} title="{{ Admin.canConfirmPayment() ? '' : 'Chỉ Admin Specialist hoặc Head Admin' }}" onclick="Admin.confirmReconcile('{{ o.id }}')">Xác nhận</button>
         <button class="btn btn-danger-outline btn-sm" onclick="Admin.rejectReconcile('{{ o.id }}')">Từ chối</button>
         {% endif %}
         <button class="btn btn-secondary btn-sm" onclick="Admin.orderDrawer('{{ o.id }}')">Chi tiết</button>

@@ -25,11 +25,17 @@ const CONFIG = {
   otp: { length: 6, ttlSeconds: 300, maxWrong: 3, resendSeconds: 60, maxSendsPerWindow: 5, windowMinutes: 30, lockMinutes: 30, mockCode: '123456' },
 
   /** Giữ đơn / QR (LP-4/5) */
-  order: { holdSeconds: 900, warnSeconds: 60, reconcilePollSeconds: 10, idPrefix: 'HM' },
+  /** proofMaxMb: giới hạn ảnh biên lai khách đính kèm khi báo đã chuyển khoản (7.1.4). */
+  order: { holdSeconds: 900, warnSeconds: 60, reconcilePollSeconds: 10, idPrefix: 'HM', proofMaxMb: 5 },
 
   session: { refDays: 7, agentHours: 24, rememberDays: 30 },
 
   /** Hạng thành viên — threshold = TỔNG gói bán luỹ kế để ĐẠT hạng. Sheet: 10, +8, +6, +4, +2 [cần xác nhận] */
+  /**
+   * threshold = tổng gói bán LUỸ KẾ để đạt hạng đó (cộng dồn qua các tháng, không reset khi giáng).
+   * Đọc theo bước: Copper +10 → Silver · Silver +8 → Gold · Gold +6 → Diamond
+   *                Diamond +4 → Titanium · Titanium +2 → Lithium
+   */
   ranks: [
     { id: 'COPPER',   label: 'Copper',   threshold: 0,  canRecruit: false, tone: 'neutral' },
     { id: 'SILVER',   label: 'Silver',   threshold: 10, canRecruit: true,  tone: 'info' },
@@ -38,28 +44,63 @@ const CONFIG = {
     { id: 'TITANIUM', label: 'Titanium', threshold: 28, canRecruit: true,  tone: 'navy' },
     { id: 'LITHIUM',  label: 'Lithium',  threshold: 30, canRecruit: true,  tone: 'success' }
   ],
-  /** Quy tắc hạng: bán < 1 gói/tháng → giáng 1 bậc (không dưới Copper). Giáng KHÔNG reset luỹ kế [cần xác nhận] */
-  rankRules: { minSalesPerMonth: 1, demoteSteps: 1, demoteResetsCumulative: false, jobTime: '0h ngày cuối tháng' },
+  /**
+   * Quy tắc hạng: bán < 1 gói/tháng → giáng 1 bậc (không dưới Copper).
+   * demoteCumulative — luỹ kế xử lý thế nào khi bị giáng (chốt 08/09):
+   *   'rank-floor' → lùi về đúng ngưỡng của hạng mới. Gold(18) rớt Silver → còn 10,
+   *                  muốn trở lại Gold phải bán thêm 8 gói. ĐANG DÙNG.
+   *   'keep'       → giữ nguyên luỹ kế, bán 1 gói là thăng lại ngay.
+   *   'zero'       → xoá trắng, phải làm lại từ Copper.
+   * Ngoài lúc giáng, luỹ kế luôn cộng dồn qua các tháng.
+   */
+  rankRules: { minSalesPerMonth: 1, demoteSteps: 1, demoteCumulative: 'rank-floor', jobTime: '0h ngày cuối tháng' },
   /** Điểm = hoa hồng đã ghi nhận, 1 điểm = 1 VNĐ [cần xác nhận: ×10? redeem?] */
   points: { perVnd: 1 },
   /** Rút tiền: 1 lần/tháng, không ngưỡng tối thiểu, không holding, chi trả tay đầu tháng sau */
   withdraw: { maxPerMonth: 1, payoutNote: 'Chi trả đầu tháng kế tiếp', minAmount: 0, holdingDays: 0, requireOtp: false },
-  /** Duyệt 2 lớp (đăng ký thành viên & rút tiền) */
+  /**
+   * Duyệt 2 lớp cho RÚT TIỀN (2 admin, hoặc Head một lần).
+   * Kích hoạt agent KHÔNG dùng cơ chế này — xem activation bên dưới.
+   */
   approval: { requiredConfirms: 2, headCanFinalizeAlone: true, sameUserTwice: false, creatorCannotApprove: true },
+
+  /**
+   * Kích hoạt thành viên tách làm 2 người, 2 màn:
+   *   Lớp 1 — Admin Specialist bấm "Xác nhận thanh toán" ở #orders khi thấy tiền về bank.
+   *   Lớp 2 — Manager bấm "Kích hoạt Agent" ở #registrations (double check).
+   * Head Admin làm được cả hai lớp.
+   */
+  activation: {
+    confirmPaymentRoles: ['SPECIALIST', 'HEAD'],
+    activateRoles: ['MANAGER', 'HEAD'],
+    requirePaidOrder: true,
+    /**
+     * Bảng lỗi kỹ thuật #1 (Mức 1): một admin không được tự xác nhận cả 2 lượt cho cùng một yêu cầu.
+     * Head Admin làm được cả hai VAI, nhưng trên cùng một hồ sơ chỉ được làm MỘT lớp —
+     * ai đã xác nhận thanh toán đơn thì không kích hoạt được agent của chính đơn đó.
+     */
+    distinctApprovers: true
+  },
 
   admin: {
     maxLoginFail: 5, lockMinutes: 15, pageSize: 10,
-    roles: { SPECIALIST: 'Admin Specialist', HEAD: 'Head Admin' },
-    /** Tài khoản demo khởi tạo (bản thật: Head Admin cấp tại admin-users) */
+    roles: { SPECIALIST: 'Admin Specialist', MANAGER: 'Manager', HEAD: 'Head Admin' },
+    /**
+     * Tài khoản demo khởi tạo — chỉ 2 người, đủ chạy trọn quy trình 2 lớp:
+     *   head    → lớp 1 "Xác nhận thanh toán" (vai HEAD nằm trong confirmPaymentRoles)
+     *   manager → lớp 2 "Kích hoạt Agent"
+     * Head giữ thêm các quyền chỉ-Head (tài khoản admin, tạo agent gốc, chạy job xét hạng).
+     * Vai SPECIALIST vẫn tồn tại trong hệ thống; bản thật Head cấp thêm tại màn Tài khoản admin.
+     */
     accounts: [
-      { username: 'head',   password: 'Homi@2026', role: 'HEAD',       fullName: 'Trưởng bộ phận' },
-      { username: 'admin',  password: 'Homi@2026', role: 'SPECIALIST', fullName: 'Chuyên viên 1' },
-      { username: 'admin2', password: 'Homi@2026', role: 'SPECIALIST', fullName: 'Chuyên viên 2' }
+      { username: 'head',    password: 'Homi@2026', role: 'HEAD',    fullName: 'Trưởng bộ phận' },
+      { username: 'manager', password: 'Homi@2026', role: 'MANAGER', fullName: 'Ms Trinh' }
     ]
   },
 
   /** Quy tắc tuỳ chọn ngoài requirement — mặc định TẮT [cần xác nhận] */
-  rules: { onePackagePerPhone: false, rejectedCanResubmit: true, copperLinkBuyerCanRegisterLater: true },
+  /** registerBeforeReconcile: mời đăng ký thành viên ngay khi khách gửi biên lai, không đợi admin đối soát. */
+  rules: { onePackagePerPhone: false, rejectedCanResubmit: true, copperLinkBuyerCanRegisterLater: true, registerBeforeReconcile: true },
 
   /** Điều khoản & điều kiện (7.2.6) */
   tc: {
@@ -139,6 +180,13 @@ const LABELS = {
     ACTIVATED: { text: 'Đã kích hoạt',      tone: 'success' },
     PENDING:   { text: 'Chờ cấp',           tone: 'warning' }
   },
+  /** Kích hoạt thành viên KHÔNG còn đếm lượt 0/2 — Admin xác nhận thanh toán rồi Manager kích hoạt. */
+  activation: {
+    PENDING_0: { text: 'Chờ kích hoạt', tone: 'warning' },
+    PENDING_1: { text: 'Chờ kích hoạt', tone: 'warning' },
+    APPROVED:  { text: 'Đã kích hoạt',  tone: 'success' },
+    REJECTED:  { text: 'Đã từ chối',    tone: 'error' }
+  },
   approval: {
     PENDING_0: { text: 'Chờ duyệt (0/2)', tone: 'warning' },
     PENDING_1: { text: 'Chờ duyệt (1/2)', tone: 'info' },
@@ -154,6 +202,7 @@ const LABELS = {
   },
   commission: {
     RECORDED:  { text: 'Đã ghi nhận', tone: 'success' },
+    PENDING_ACTIVATION: { text: 'Tạm giữ · chờ kích hoạt', tone: 'warning' },
     CANCELLED: { text: 'Đã huỷ',      tone: 'error' }
   },
   commissionKind: {
@@ -165,13 +214,14 @@ const LABELS = {
     INIT: { text: 'Khởi tạo', tone: 'neutral' }, PROMOTE: { text: 'Thăng hạng', tone: 'success' },
     DEMOTE: { text: 'Giáng hạng', tone: 'error' }, ASSIGN: { text: 'Chỉ định', tone: 'navy' }
   },
-  user: { active: { text: 'Đang hoạt động', tone: 'success' }, locked: { text: 'Đã khoá', tone: 'error' } },
+  user: { active: { text: 'Đang hoạt động', tone: 'success' }, pending: { text: 'Chờ kích hoạt', tone: 'warning' }, locked: { text: 'Đã khoá', tone: 'error' } },
   userType: { buyer: { text: 'Người mua (chưa TV)', tone: 'neutral' }, agent: { text: 'Thành viên', tone: 'navy' } },
   adminStatus: { active: { text: 'Đang hoạt động', tone: 'success' }, disabled: { text: 'Vô hiệu', tone: 'error' } },
-  role: { HEAD: { text: 'Head Admin', tone: 'navy' }, SPECIALIST: { text: 'Admin Specialist', tone: 'info' } },
+  role: { HEAD: { text: 'Head Admin', tone: 'navy' }, MANAGER: { text: 'Manager', tone: 'warning' }, SPECIALIST: { text: 'Admin Specialist', tone: 'info' } },
   method: { gateway: 'Cổng online', bank: 'Chuyển khoản VietQR', exception: 'Cấp ngoại lệ' },
   ledger: {
     COMMISSION_RECORDED: 'Hoa hồng ghi nhận', COMMISSION_CANCELLED: 'Huỷ hoa hồng (đơn hoàn tiền)',
+    COMMISSION_FROZEN: 'Hoa hồng tạm giữ (chờ kích hoạt tài khoản)', COMMISSION_RELEASED: 'Giải phóng hoa hồng sau kích hoạt',
     WITHDRAW_HOLD: 'Tạo yêu cầu rút tiền', WITHDRAW_PAID: 'Đã chi trả rút tiền', WITHDRAW_REJECTED: 'Hoàn lại (rút tiền bị từ chối)'
   }
 };

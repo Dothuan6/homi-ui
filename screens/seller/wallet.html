@@ -2,6 +2,12 @@
      data: u, w, cw, wdStep, wdTab, wdCount, maxPerMonth, payoutNote, tabHtml -->
 <div class="stack-lg">
   <div class="page-title"><div><h1>Ví & rút tiền</h1><p>Hoa hồng ghi nhận ngay khi đơn thanh toán · rút tối đa {{ maxPerMonth }} lần/tháng</p></div></div>
+  {% if pending %}
+  <div class="alert alert-warning" style="text-align:left">{{{ icon('clock', 22) }}}<div>
+    <span class="alert-title">Chưa rút được — tài khoản đang chờ kích hoạt</span>
+    {% if w.frozenCount %}{{ w.frozenCount }} khoản hoa hồng đang tạm giữ, tổng <strong>{{{ money(w.frozen) }}}</strong>. Số tiền này vào ví ngay khi bộ phận vận hành kích hoạt tài khoản của bạn.{% else %}Hoa hồng từ các đơn bán trong lúc chờ sẽ được tạm giữ và cộng vào ví ngay khi tài khoản được kích hoạt.{% endif %}
+  </div></div>
+  {% endif %}
   <div class="grid-2 grid-2-wide">
     <div class="wallet-hero">
       <div class="label">Số dư khả dụng</div>

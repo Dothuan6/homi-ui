@@ -17,6 +17,7 @@
       <button class="btn btn-outline btn-lg" onclick="App.reload()">{{{ icon('refresh', 18) }}} Kiểm tra ngay</button>
     </div>
   </div></div>
+  {% if cta %}<div class="card card-tint"><div class="card-body">{{{ cta }}}</div></div>{% endif %}
   <div class="demo-hint">Mô phỏng: admin xác nhận/từ chối tại <a href="#orders" target="_blank">orders</a> (mở tab mới) — trang này sẽ tự chuyển.
     <button class="btn-link" onclick="Store.confirmReconcile('{{ order.id }}'); App.reload()">Giả lập admin xác nhận</button> ·
     <button class="btn-link" onclick="Store.rejectReconcile('{{ order.id }}', 'Không tìm thấy giao dịch khớp'); App.reload()">Giả lập từ chối</button>

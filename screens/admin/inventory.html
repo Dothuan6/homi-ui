@@ -51,28 +51,36 @@
 
 {% elif part === 'foot' %}
 {% if c.status === 'ASSIGNED' %}
-<button class="btn btn-primary" onclick="Store.activateCode('{{ c.code }}', { name: 'Samsung Galaxy A54 (mô phỏng)' }); UI.toast('Đã mô phỏng kích hoạt từ app.'); Admin.renderCodes(); Admin.codeDrawer('{{ c.code }}')">{{{ icon('device', 16) }}} Mô phỏng kích hoạt từ app</button>
+<button class="btn btn-primary" onclick="Store.activateCode('{{ c.code }}', { name: 'Samsung Galaxy A54 (mô phỏng)' }, Admin.me()); UI.toast('Đã kích hoạt mã và gửi email cho khách.'); Admin.renderCodes(); Admin.codeDrawer('{{ c.code }}')">{{{ icon('device', 16) }}} Kích hoạt mã &amp; gửi email</button>
+{% endif %}
+{% if c.status === 'IN_STOCK' %}
+<button class="btn btn-danger-outline" onclick="Admin.removeCode('{{ c.code }}')">Gỡ khỏi kho</button>
+<button class="btn btn-secondary" onclick="Admin.codeForm('{{ c.code }}')">{{{ icon('settings', 16) }}} Sửa mã / serial</button>
 {% endif %}
 {% if o %}<button class="btn btn-secondary" onclick="Admin.orderDrawer('{{ o.id }}')">Xem đơn</button>{% endif %}
 {% endif %}
 {% endblock %}
 
-{% block admin/inventory-modal-generate %}
-<!-- inventory · Modal sinh mã hàng loạt · part = 'body' | 'foot' -->
+{% block admin/inventory-modal-code %}
+<!-- Thêm / sửa một mã kích hoạt. Mã đi theo serial của từng máy, do nhà sản xuất cấp. -->
 {% if part === 'body' %}
-{{{ UI.field({ id: 'gen-n', label: 'Số lượng', required: true, mono: true, value: 100, attrs: 'inputmode="numeric"' }) }}}
-<div class="mt-4">{{{ UI.field({ id: 'gen-sku', label: 'Mã sản phẩm thiết bị', required: true, mono: true, value: CONFIG.stock.deviceSku }) }}}</div>
-<p class="text-caption mt-2">Serial sinh tự động dạng {{{ CONFIG.stock.deviceSku }}}-000001; mã kích hoạt {{{ CONFIG.stock.codePrefix }}}-XXXX-XXXX-XXXX không trùng.</p>
+<div class="alert alert-info" style="text-align:left">{{{ icon('info', 20) }}}<div>Mã kích hoạt <strong>đi theo serial của từng máy</strong> — nhập đúng mã in trên máy hoặc trên phiếu nhà sản xuất, không tự đặt.</div></div>
+<div class="mt-4">{{{ UI.field({ id: 'cd-serial', label: 'Serial máy', required: true, mono: true, value: c ? c.deviceSerial : '', placeholder: 'HW01-000123' }) }}}</div>
+<div class="mt-4">{{{ UI.field({ id: 'cd-code', label: 'Mã kích hoạt', required: true, mono: true, value: c ? c.code : '', placeholder: CONFIG.stock.codePrefix + '-XXXX-XXXX-XXXX' }) }}}</div>
+<div class="mt-4">{{{ UI.field({ id: 'cd-sku', label: 'Mã sản phẩm (SKU)', mono: true, value: c ? c.deviceSku : CONFIG.stock.deviceSku }) }}}</div>
+<div class="field-error mt-2" id="cd-err"></div>
 {% elif part === 'foot' %}
 <button class="btn btn-secondary" onclick="UI.closeModal()">Huỷ</button>
-<button class="btn btn-primary" onclick="Admin.generate()">Sinh mã</button>
+<button class="btn btn-primary" onclick="Admin.saveCode({{{ c ? "'" + c.code + "'" : 'null' }}})">{{{ icon('check', 16) }}} Lưu</button>
 {% endif %}
 {% endblock %}
+
 
 {% block admin/inventory-modal-import %}
 <!-- inventory · Modal nhập mã từ file / dán danh sách · part = 'body' | 'foot' -->
 {% if part === 'body' %}
-<div class="dropzone" onclick="document.getElementById('imp-file').click()">{{{ icon('upload', 28) }}}<div class="mt-2">Chọn file .csv (mỗi dòng: mã kích hoạt;serial thiết bị)</div><input type="file" id="imp-file" accept=".csv,.txt" hidden onchange="Admin.readImportFile(this)"></div>
+<div class="alert alert-info" style="text-align:left">{{{ icon('info', 20) }}}<div>Dùng đúng file nhà sản xuất giao. Mỗi máy một dòng, <strong>serial bắt buộc</strong> — dòng thiếu serial hoặc trùng mã/serial sẽ bị bỏ qua.</div></div>
+<div class="dropzone mt-3" onclick="document.getElementById('imp-file').click()">{{{ icon('upload', 28) }}}<div class="mt-2">Chọn file .csv (mỗi dòng: mã kích hoạt;serial máy)</div><input type="file" id="imp-file" accept=".csv,.txt" hidden onchange="Admin.readImportFile(this)"></div>
 <div class="mt-4">{{{ UI.field({ id: 'imp-sku', label: 'Mã sản phẩm thiết bị', mono: true, value: CONFIG.stock.deviceSku }) }}}</div>
 <div class="mt-4">{{{ UI.field({ id: 'imp-text', label: 'Hoặc dán danh sách', type: 'textarea', rows: 5, placeholder: 'HOMI-AB12-CD34-EF56;HW01-001301\nHOMI-…' }) }}}</div>
 {% elif part === 'foot' %}

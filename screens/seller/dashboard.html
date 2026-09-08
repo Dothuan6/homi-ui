@@ -3,9 +3,19 @@
   <div class="page-title">
     <div>
       <h1>Xin chào, {{ u.fullName }}</h1>
-      <p class="row-wrap">{{{ badge('rank', u.rank, true) }}}<span>Mã giới thiệu <span class="mono text-strong">{{ u.refCode }}</span> · thành viên từ {{ date(u.activatedAt || u.createdAt) }}</span></p>
+      <p class="row-wrap">{{{ badge('rank', u.rank, true) }}}<span>Mã giới thiệu <span class="mono text-strong">{{ u.refCode }}</span> · {% if pending %}nộp hồ sơ {{ date(u.createdAt) }}{% else %}thành viên từ {{ date(u.activatedAt || u.createdAt) }}{% endif %}</span></p>
     </div>
   </div>
+
+  {% if pending %}
+  <!-- Chờ kích hoạt: bán được nhưng chưa ghi điểm — hoa hồng treo tới khi admin kích hoạt (7.2.7) -->
+  <div class="alert alert-warning" style="text-align:left">{{{ icon('clock', 22) }}}<div>
+    <span class="alert-title">Tài khoản đang chờ kích hoạt</span>
+    Hồ sơ của bạn đã nhận và đang được bộ phận vận hành duyệt (thường trong 24 giờ làm việc). Bạn dùng được link bán hàng ngay, nhưng
+    <strong>điểm và hoa hồng chỉ được ghi nhận sau khi tài khoản được kích hoạt</strong>.
+    {% if w.frozenCount %}<br>Hiện có <strong>{{ w.frozenCount }}</strong> khoản hoa hồng đang tạm giữ, tổng <strong>{{{ money(w.frozen) }}}</strong> — sẽ vào ví ngay khi kích hoạt.{% endif %}
+  </div></div>
+  {% endif %}
   <div class="c01-tabs">
     <div class="tabs" role="tablist">
       {% each t in tabs %}
@@ -99,18 +109,20 @@
       </div>
       <div class="card-body stack">
         <div>
-          <div class="field-label mb-2">Link giới thiệu (ref_code)</div>
+          <div class="field-label mb-2">Link bán hàng của bạn · <span class="mono">{{ publicAliasUrl }}</span></div>
           <div class="ref-url">
-            <input class="input" readonly value="{{ refUrl }}" aria-label="Link giới thiệu" onclick="this.select()">
-            <button class="btn btn-primary" onclick="UI.copy('{{ refUrl }}', 'Đã sao chép link giới thiệu.')">{{{ icon('copy', 18) }}} Sao chép</button>
+            <input class="input" readonly value="{{ aliasUrl }}" aria-label="Link bán hàng cá nhân" onclick="this.select()">
+            <button class="btn btn-primary" onclick="UI.copy('{{ aliasUrl }}', 'Đã sao chép link bán hàng.')">{{{ icon('copy', 18) }}} Sao chép</button>
           </div>
+          <p class="text-caption mt-2">Gửi link này cho khách. Mọi đơn mua qua link đều được tính cho bạn{% if canRecruit %} và người mua vào tuyến dưới của bạn{% endif %}.</p>
         </div>
         <div>
-          <div class="field-label mb-2">Link mua hàng cá nhân · <span class="mono">{{ publicAliasUrl }}</span></div>
-          <div class="ref-url">
-            <input class="input" readonly value="{{ aliasUrl }}" aria-label="Link mua hàng cá nhân" onclick="this.select()">
-            <button class="btn btn-secondary" onclick="UI.copy('{{ aliasUrl }}', 'Đã sao chép link mua hàng cá nhân.')">{{{ icon('copy', 18) }}} Sao chép</button>
+          <div class="field-label mb-2">Mã giới thiệu (ref_code)</div>
+          <div class="row-wrap">
+            <span class="mono text-strong" style="font-size:var(--fs-lg);letter-spacing:.08em">{{ u.refCode }}</span>
+            <button class="btn btn-ghost btn-sm" onclick="UI.copy('{{ u.refCode }}', 'Đã sao chép mã giới thiệu.')">{{{ icon('copy', 16) }}} Sao chép mã</button>
           </div>
+          <p class="text-caption mt-2">Dùng khi cần đọc mã qua điện thoại hoặc điền vào biểu mẫu — không phải link để gửi khách.</p>
         </div>
         <div class="share-row">
           <button class="btn btn-secondary share-btn" onclick="Seller.shareZalo('{{ aliasUrl }}')"><span class="share-mark share-zalo">Z</span> Zalo</button>
@@ -119,7 +131,7 @@
         </div>
         <div class="ref-qr ref-qr-inline">
           {{{ UI.qrSvg(aliasUrl, 150) }}}
-          <div class="qr-label">QR link mua hàng cá nhân</div>
+          <div class="qr-label">QR link bán hàng</div>
           <button class="btn btn-ghost btn-sm mt-1" onclick="Seller.downloadQr('{{ u.purchaseAlias }}')">{{{ icon('download', 16) }}} Tải QR</button>
         </div>
       </div>
@@ -131,7 +143,7 @@
           <div class="row-between"><h2 style="font-size:var(--fs-lg)">Hạng & điểm</h2>{{{ badge('rank', u.rank, true) }}}</div>
           <div class="stat-grid mt-3" style="grid-template-columns:1fr 1fr">
             <div><div class="stat-label">Điểm tích luỹ</div><div class="stat-value">{{ num(w.points) }}</div><div class="stat-sub">1 điểm = 1đ hoa hồng</div></div>
-            <div><div class="stat-label">Gói bán luỹ kế</div><div class="stat-value">{{ num(u.cumulativeSales) }}</div><div class="stat-sub">{% if nx %}Còn thiếu {{ need }} gói lên {{ nx.label }}{% else %}Hạng cao nhất{% endif %}</div></div>
+            <div><div class="stat-label">Gói bán luỹ kế</div><div class="stat-value">{{ num(u.cumulativeSales) }}</div><div class="stat-sub">{% if nx %}Còn thiếu {{ need }} gói lên {{ nx.label }} · cộng dồn qua các tháng{% else %}Hạng cao nhất{% endif %}</div></div>
           </div>
           {% if nx %}
           <div class="progress mt-3"><span style="width:{{ pct }}%"></span></div>

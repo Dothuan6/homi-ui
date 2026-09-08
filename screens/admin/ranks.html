@@ -2,17 +2,24 @@
 <div class="split-2 split-2-eq">
   <div class="stack">
     <div class="card">
-      <div class="card-head"><h2>Bảng hạng thành viên</h2><span class="text-sm text-muted">Ngưỡng = tổng gói bán luỹ kế [cần xác nhận]</span></div>
+      <div class="card-head"><h2>Bảng hạng thành viên</h2><span class="text-sm text-muted">Ngưỡng = tổng gói bán luỹ kế, cộng dồn qua các tháng</span></div>
       <div class="card-body">
         <div class="table-wrap"><table class="table" style="min-width:0">
-          <thead><tr><th>Hạng</th><th class="num">Ngưỡng luỹ kế</th><th class="num">Bước</th><th>Quyền tuyển thành viên</th></tr></thead>
+          <thead><tr><th>Hạng</th><th class="num">Bán thêm</th><th>Lên hạng</th><th class="num">Luỹ kế đạt</th><th>Quyền tuyển thành viên</th></tr></thead>
           <tbody>
           {% each k, i in CONFIG.ranks %}
-            <tr><td>{{{ badge('rank', k.id) }}}</td><td class="num mono">{{{ k.threshold }}} gói</td><td class="num mono">{% if i %}+{{{ k.threshold - CONFIG.ranks[i - 1].threshold }}}{% else %}—{% endif %}</td><td>{% if k.canRecruit %}<span class="badge badge-success">Được tuyển</span>{% else %}<span class="badge badge-neutral">Chỉ bán</span>{% endif %}</td></tr>
+          {% set nx = CONFIG.ranks[i + 1] %}
+            <tr>
+              <td>{{{ badge('rank', k.id) }}}</td>
+              <td class="num mono">{% if nx %}{{{ nx.threshold - k.threshold }}} gói{% else %}—{% endif %}</td>
+              <td>{% if nx %}{{{ badge('rank', nx.id) }}}{% else %}<span class="text-sm text-muted">Hạng cao nhất</span>{% endif %}</td>
+              <td class="num mono">{% if nx %}{{{ nx.threshold }}}{% else %}{{{ k.threshold }}}{% endif %} gói</td>
+              <td>{% if k.canRecruit %}<span class="badge badge-success">Được tuyển</span>{% else %}<span class="badge badge-neutral">Chỉ bán</span>{% endif %}</td>
+            </tr>
           {% endeach %}
           </tbody>
         </table></div>
-        <p class="text-caption mt-2">Ngưỡng hạng cấu hình tại <span class="mono">CONFIG.ranks</span> (chờ khách chốt 10/18/24/28/30).</p>
+        <p class="text-caption mt-2">Đọc theo dòng: Copper bán thêm 10 gói lên Silver, Silver bán thêm 8 lên Gold, Gold 6 lên Diamond, Diamond 4 lên Titanium, Titanium 2 lên Lithium. Luỹ kế không reset khi giáng hạng, nên số gói của các tháng cộng dồn với nhau. Cấu hình tại <span class="mono">CONFIG.ranks</span>.</p>
       </div>
     </div>
 
@@ -27,7 +34,12 @@
             {{{ UI.field({ id: 'rl-points', label: 'Tỷ lệ điểm (điểm / 1đ hoa hồng)', mono: true, value: CONFIG.points.perVnd, attrs: 'readonly' }) }}}
             <div style="grid-column:1/-1">{{{ UI.field({ id: 'rl-payout', label: 'Ghi chú thời điểm chi trả', value: r.withdraw.payoutNote, attrs: head ? '' : 'readonly' }) }}}</div>
           </div>
-          <div class="check mt-3"><input type="checkbox" id="rl-reset" {{{ r.rankRules.demoteResetsCumulative ? 'checked' : '' }}} {{{ head ? '' : 'disabled' }}}> Giáng hạng reset luỹ kế [cần xác nhận]</div>
+          <div class="mt-3">{{{ UI.field({ id: 'rl-demote-cum', label: 'Luỹ kế khi bị giáng hạng', type: 'select', value: r.rankRules.demoteCumulative || 'rank-floor', attrs: head ? '' : 'disabled', options: [
+            { value: 'rank-floor', label: 'Lùi về ngưỡng hạng mới (Gold rớt Silver → còn 10 gói)' },
+            { value: 'keep', label: 'Giữ nguyên luỹ kế' },
+            { value: 'zero', label: 'Xoá trắng về 0' }
+          ] }) }}}</div>
+          <p class="field-hint">Chốt 08/09: <strong>lùi về ngưỡng hạng mới</strong>. Một tháng không bán gói nào, Gold rớt xuống Silver và luỹ kế còn 10 — muốn trở lại Gold phải bán thêm 8 gói. Ngoài lúc giáng, số gói vẫn cộng dồn qua các tháng.</p>
           {% if head %}
           <div class="mt-4">{{{ UI.field({ id: 'rl-note', label: 'Ghi chú thay đổi', placeholder: 'Lý do…' }) }}}</div>
           <div class="actions"><button class="btn btn-primary">Lưu quy tắc</button></div>

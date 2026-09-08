@@ -67,7 +67,7 @@
   <h3>Giáng hạng</h3>
   <ul class="stack-sm" style="padding-left:18px">
     {% each p in r.demoted %}
-    <li>{{ p.user.fullName }}: {{{ RULES.rank(p.from).label }}} → <strong>{{{ RULES.rank(p.to).label }}}</strong></li>
+    <li>{{ p.user.fullName }}: {{{ RULES.rank(p.from).label }}} → <strong>{{{ RULES.rank(p.to).label }}}</strong>{% if p.cumTo !== p.cumFrom %} · luỹ kế {{{ p.cumFrom }}} → {{{ p.cumTo }}} gói, cần bán thêm {{{ RULES.salesToNextRank(p.cumTo, p.to) }}} để lấy lại {{{ RULES.rank(p.from).label }}}{% endif %}</li>
     {% endeach %}
   </ul>
   {% endif %}
