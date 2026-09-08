@@ -1,0 +1,269 @@
+{% block common/403 %}
+<div class="error-page">
+  <div class="card error-card">
+    <div class="card-body stack">
+      <div class="result-icon is-error" style="margin:0 auto">{{{ icon('ban', 36) }}}</div>
+      <div class="error-code">403 · FORBIDDEN</div>
+      {% if spec %}
+      <h1>Chỉ Head Admin mới truy cập được mục này</h1>
+      <p class="text-muted">Quản lý tài khoản admin (admin-users) thuộc quyền Head Admin. Tài khoản Admin Specialist của bạn không có quyền này.</p>
+      <div class="actions actions-row"><a class="btn btn-primary btn-lg" href="#admin-dashboard">Về tổng quan quản trị</a></div>
+      {% else %}
+      <h1>Bạn không có quyền truy cập khu vực quản trị</h1>
+      <p class="text-muted">Phiên hiện tại là phiên thành viên. Khu vực quản trị yêu cầu tài khoản quản trị viên đăng nhập bằng tên đăng nhập và mật khẩu.</p>
+      <div class="actions actions-row">
+        <a class="btn btn-secondary btn-lg" href="#dashboard">Về Dashboard thành viên</a>
+        <a class="btn btn-primary btn-lg" href="#admin-login">Đăng nhập quản trị</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block common/demo-nav %}
+<div class="row-between"><strong>Demo navigator</strong><button class="modal-close" aria-label="Đóng" onclick="App.toggleDemoNav()">{{{ icon('x', 18) }}}</button></div>
+{% each g in groups %}
+<h4>{{ g.title }}</h4>
+{% each it in g.items %}<a class="demo-link" href="#{{ it.hash }}" onclick="App.toggleDemoNav()"><code>#{{ it.hash.split('?')[0] }}</code>{{ it.label }}</a>{% endeach %}
+{% endeach %}
+<h4>Tiện ích</h4>
+<a class="demo-link" href="javascript:void(0)" onclick="Store.loginAgentById('U001'); App.toggleDemoNav(); App.navigate('dashboard')">Đăng nhập nhanh thành viên An</a>
+<a class="demo-link" href="javascript:void(0)" onclick="Store.adminLogin('head','Homi@2026'); App.toggleDemoNav(); App.navigate('admin-dashboard')">Đăng nhập nhanh Head Admin</a>
+<a class="demo-link" href="javascript:void(0)" onclick="Store.expireAgentSession(); App.toggleDemoNav(); App.navigate('dashboard')">Giả lập hết phiên</a>
+<a class="demo-link" href="javascript:void(0)" onclick="Store.otpResetAll(); UI.toast('Đã gỡ mọi khoá OTP.')">Gỡ khoá OTP</a>
+<a class="demo-link text-error" href="javascript:void(0)" onclick="if (confirm('Nạp lại toàn bộ dữ liệu mẫu?')) Store.reset()">Nạp lại dữ liệu mẫu</a>
+{% endblock %}
+
+{% block common/home %}
+<div class="buyer">
+  <header class="buyer-header">
+    <div class="buyer-header-inner">{{{ UI.logo({ size: 34 }) }}}<span class="text-sm text-muted">Prototype v2 · spec v3 · 05/09/2026</span></div>
+  </header>
+
+  <main class="buyer-main">
+    <div class="stack-lg">
+      <div class="text-center">
+        <h1>Prototype giao diện HOMI365 · Medigo</h1>
+        <p class="text-muted mt-2">Bản mô phỏng luồng mua hàng, đăng ký &amp; dashboard thành viên và quản trị (CHANGE SPEC v3). Dữ liệu mẫu lưu trên trình duyệt của bạn. Mã OTP dùng chung: <strong class="mono">{{ CONFIG.otp.mockCode }}</strong>.</p>
+      </div>
+
+      <div class="grid-2">
+        <!-- Người mua -->
+        <div class="card"><div class="card-body">
+          <div class="row mb-2"><span class="result-icon is-info" style="width:44px;height:44px;margin:0">{{{ icon('users', 22) }}}</span><h2 style="font-size:var(--fs-lg)">Người mua</h2></div>
+          <p class="text-sm text-muted">Vào bằng link giới thiệu hoặc link mua hàng cá nhân của thành viên. Họ tên · SĐT · email · địa chỉ → OTP → thanh toán → kết quả.</p>
+          <dl class="dl dl-stack mt-3">
+            <dt>Link giới thiệu (ref_code)</dt><dd><span class="mono">{{ RULES.referralUrl(an.refCode) }}</span></dd>
+            <dt>Link mua hàng cá nhân (alias)</dt><dd><span class="mono">{{ RULES.purchaseUrl(an.purchaseAlias) }}</span></dd>
+            <dt>SĐT gây lỗi gửi SMS</dt><dd><span class="mono">{{ CONFIG.demo.smsErrorPhone }}</span></dd>
+          </dl>
+          <div class="actions">
+            <a class="btn btn-primary btn-lg btn-block" href="{{ RULES.referralHash(an.refCode) }}">{{{ icon('external', 18) }}} Mở link giới thiệu mẫu</a>
+            <a class="btn btn-secondary btn-block" href="{{ RULES.purchaseHash(an.purchaseAlias) }}">Mở link mua hàng cá nhân {{ an.purchaseAlias }}</a>
+          </div>
+        </div></div>
+
+        <!-- Đăng ký thành viên -->
+        <div class="card"><div class="card-body">
+          <div class="row mb-2"><span class="result-icon is-info" style="width:44px;height:44px;margin:0">{{{ icon('user', 22) }}}</span><h2 style="font-size:var(--fs-lg)">Đăng ký thành viên</h2></div>
+          <p class="text-sm text-muted">Sau khi mua, người mua đăng ký thành viên (hồ sơ + T&amp;C + OTP) và chờ admin duyệt 2 lớp. Chỉ người giới thiệu từ hạng Silver mới được tuyển.</p>
+          <dl class="dl dl-stack mt-3">
+            <dt>Đã mua qua Lithium — đăng ký được</dt><dd><span class="mono">{{ kim.phone }}</span> · {{ kim.fullName }}</dd>
+            <dt>Đã mua qua Copper — bị chặn</dt><dd><span class="mono">{{ bao.phone }}</span> · {{ bao.fullName }}</dd>
+            <dt>Hồ sơ đang chờ duyệt (1/2)</dt><dd><span class="mono">0913000888</span></dd>
+            <dt>Hồ sơ bị từ chối</dt><dd><span class="mono">0914000999</span></dd>
+          </dl>
+          <div class="actions">
+            <a class="btn btn-primary btn-lg btn-block" href="#register">{{{ icon('user', 18) }}} Đăng ký thành viên</a>
+            <a class="btn btn-secondary btn-block" href="#order-lookup">Tra cứu đơn hàng (mã đơn mẫu <span class="mono">{{ paidOrderId }}</span>)</a>
+          </div>
+        </div></div>
+
+        <!-- Thành viên -->
+        <div class="card"><div class="card-body">
+          <div class="row mb-2"><span class="result-icon is-info" style="width:44px;height:44px;margin:0">{{{ icon('key', 22) }}}</span><h2 style="font-size:var(--fs-lg)">Thành viên</h2></div>
+          <p class="text-sm text-muted">Đăng nhập bằng SĐT + mật khẩu (quên mật khẩu qua OTP). Dashboard: hạng &amp; điểm, 2 link, thống kê, hoa hồng chênh lệch, F1, ví &amp; rút tiền 1 lần/tháng.</p>
+          <dl class="dl dl-stack mt-3">
+            <dt>Thành viên Lithium</dt><dd><span class="mono">{{ an.phone }}</span> / <span class="mono">{{ CONFIG.demo.agentPassword }}</span> · {{ an.fullName }}</dd>
+            <dt>Gold · Silver · Copper</dt><dd><span class="mono">0912345678</span> · <span class="mono">0933222111</span> · <span class="mono">0987654321</span> (cùng mật khẩu)</dd>
+            <dt>Bị khoá</dt><dd><span class="mono">0977000111</span></dd>
+          </dl>
+          <div class="actions"><a class="btn btn-primary btn-lg btn-block" href="#login">{{{ icon('key', 18) }}} Đăng nhập thành viên</a></div>
+        </div></div>
+
+        <!-- Quản trị -->
+        <div class="card"><div class="card-body">
+          <div class="row mb-2"><span class="result-icon is-info" style="width:44px;height:44px;margin:0">{{{ icon('shield', 22) }}}</span><h2 style="font-size:var(--fs-lg)">Quản trị</h2></div>
+          <p class="text-sm text-muted">2 vai trò: Admin Specialist (duyệt lớp 1/2) và Head Admin (tự chốt, quản lý tài khoản admin, chỉ định hạng, tạo thành viên gốc, chạy job xét hạng).</p>
+          <dl class="dl dl-stack mt-3">
+            <dt>Head Admin</dt><dd><span class="mono">head</span> / <span class="mono">Homi@2026</span></dd>
+            <dt>Admin Specialist</dt><dd><span class="mono">admin</span> · <span class="mono">admin2</span> / <span class="mono">Homi@2026</span></dd>
+            <dt>Việc đang chờ</dt><dd>{{ pending.regs }} đăng ký · {{ pending.wds }} rút tiền · {{ pending.awaiting }} đối soát</dd>
+          </dl>
+          <div class="actions"><a class="btn btn-primary btn-lg btn-block" href="#admin-login">{{{ icon('shield', 18) }}} Đăng nhập quản trị</a></div>
+        </div></div>
+      </div>
+
+      <div class="alert alert-neutral">{{{ icon('info', 18) }}}<div class="text-sm">Muốn xem lại từ đầu với dữ liệu gốc: <button class="btn-link" onclick="if (confirm('Nạp lại toàn bộ dữ liệu mẫu? Mọi thao tác đã làm sẽ mất.')) Store.reset()">nạp lại dữ liệu mẫu</button>. Bộ thành phần giao diện: <a href="./styleguide.html">styleguide</a>.</div></div>
+    </div>
+  </main>
+
+  <footer class="buyer-footer">{{ CONFIG.brand.company }}</footer>
+</div>
+{% endblock %}
+
+{% block common/policy %}
+<div class="policy">
+  <nav class="policy-crumb" aria-label="Breadcrumb"><a href="#home">Trang chủ</a><span>/</span><span>{{ p.title }}</span></nav>
+  <div class="policy-grid">
+    <article class="policy-body">
+      <h1>{{ p.title }}</h1>
+      {% if p.intro %}<p class="policy-intro">{{ p.intro }}</p>{% endif %}
+
+      {% each sec, i in p.sections %}
+      <section class="policy-section" id="sec-{{ i + 1 }}">
+        <h2>{{ sec.h }}</h2>
+        {% each it in sec.items %}
+          {% if typeof it === 'string' %}
+          <p>{{ it }}</p>
+          {% elif it.list %}
+          <ul class="policy-list">{% each t in it.list %}<li>{{ t }}</li>{% endeach %}</ul>
+          {% elif it.steps %}
+          <ol class="policy-steps">{% each t, k in it.steps %}<li><strong>Bước {{ k + 1 }}:</strong> {{ t }}</li>{% endeach %}</ol>
+          {% endif %}
+        {% endeach %}
+      </section>
+      {% endeach %}
+
+      <p class="text-caption mt-6">Cập nhật 09/2026 · {{ CONFIG.brand.company }} · Hỗ trợ {{ CONFIG.brand.supportHotline }}</p>
+    </article>
+
+    <aside class="policy-side">
+      <div class="policy-menu">
+        <div class="policy-menu-title">Danh mục chính sách</div>
+        {% each x in POLICIES %}
+        <a href="#policy?s={{ x.id }}" class="{% if x.id === p.id %}is-active{% endif %}" {% if x.id === p.id %}aria-current="page"{% endif %}>{{ x.title }}</a>
+        {% endeach %}
+      </div>
+    </aside>
+  </div>
+</div>
+{% endblock %}
+
+{% block common/shell-admin %}
+<div class="admin">
+  <aside class="admin-sidebar" id="admin-sidebar">
+    <div class="admin-sidebar-brand">{{{ UI.logo({ size: 30, invert: true }) }}}<span class="sub">Quản trị HOMI365</span></div>
+    <nav class="admin-nav" aria-label="Menu quản trị">
+      {% each it in items %}
+        {% if it.group %}
+        <div class="admin-nav-group">{{ it.group }}</div>
+        {% else %}
+        <a href="#{{ it.code }}" class="{% if active === it.code %}is-active{% endif %}">
+          {{{ icon(it.ico, 18) }}}<span>{{ it.label }}</span>
+          {% if it.badge %}<span class="nav-badge">{{ it.badge }}</span>{% else %}<span class="nav-code">{{ it.code }}</span>{% endif %}
+        </a>
+        {% endif %}
+      {% endeach %}
+    </nav>
+    <div class="admin-sidebar-foot">
+      <div class="who">{{ me.fullName || me.username }}</div>
+      <div class="role">{{ roleLabel }} · {{ me.username }}</div>
+      <button class="btn btn-sm btn-secondary" onclick="App.logoutAdmin()">{{{ icon('logout', 16) }}} Đăng xuất</button>
+    </div>
+  </aside>
+
+  <div class="admin-content">
+    <div class="admin-topbar">
+      <div class="row">
+        <button class="btn btn-icon btn-secondary admin-menu-btn" aria-label="Mở menu" onclick="document.getElementById('admin-sidebar').classList.toggle('is-open')">{{{ icon('menu', 20) }}}</button>
+        <div><div class="crumb">{{ active }}</div><h1>{{{ title }}}</h1></div>
+      </div>
+      <div class="row">{{{ actions }}}</div>
+    </div>
+    <main class="admin-main">{{{ content }}}</main>
+  </div>
+</div>
+{% endblock %}
+
+{% block common/shell-buyer %}
+<div class="buyer">
+  <header class="buyer-header">
+    <div class="buyer-header-inner">
+      <a href="#home" class="brand" aria-label="HOMI365 — trang giới thiệu">{{{ UI.logo({ size: 34 }) }}}</a>
+      <nav class="buyer-nav" aria-label="Điều hướng">
+        <a href="#order-lookup" class="{% if cur === 'order-lookup' %}is-active{% endif %}">{{{ icon('search', 18) }}}<span>Tra cứu đơn hàng</span></a>
+        <a href="#login" class="{% if cur === 'login' %}is-active{% endif %}">{{{ icon('key', 18) }}}<span>Đăng nhập thành viên</span></a>
+      </nav>
+    </div>
+  </header>
+
+  {% if showRef && seller %}
+  <div class="ref-bar">Người giới thiệu: <strong>{{ seller.fullName }}</strong> · mã <span class="mono">{{ seller.refCode }}</span></div>
+  {% endif %}
+
+  <main class="buyer-main {% if narrow %}buyer-main-narrow{% endif %}" id="buyer-main">{{{ content }}}</main>
+
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      <div>
+        {{{ UI.logo({ size: 28 }) }}}
+        <p class="mt-2">{{ CONFIG.brand.company }}</p>
+        <p>Hỗ trợ <strong>{{ CONFIG.brand.supportHotline }}</strong> · {{ CONFIG.brand.supportHours }}</p>
+      </div>
+      <div>
+        <div class="footer-title">Khách hàng</div>
+        <a href="#order-lookup">Tra cứu đơn hàng</a>
+        <a href="#login">Đăng nhập thành viên</a>
+        <a href="#register">Đăng ký thành viên</a>
+        <a href="#home">Trang giới thiệu prototype</a>
+      </div>
+      <div>
+        <div class="footer-title">Chính sách</div>
+        {% each p in POLICIES %}<a href="#policy?s={{ p.id }}">{{ p.title }}</a>{% endeach %}
+      </div>
+      <div>
+        <div class="footer-title">Quản trị</div>
+        <a href="#admin-login">Đăng nhập quản trị</a>
+        <a href="./styleguide.html">Bộ thành phần giao diện</a>
+      </div>
+    </div>
+  </footer>
+</div>
+{% endblock %}
+
+{% block common/shell-seller %}
+<div class="seller">
+  <header class="seller-header">
+    <div class="seller-header-inner">
+      <a href="#dashboard" class="brand" aria-label="HOMI365">{{{ UI.logo({ size: 34 }) }}}</a>
+      <nav class="seller-nav-top" aria-label="Điều hướng thành viên">
+        {% each n in nav %}<a href="#{{ n.code }}" class="{% if active === n.code %}is-active{% endif %}">{{{ icon(n.ico, 22) }}}<span>{{ n.label }}</span></a>{% endeach %}
+      </nav>
+      <div class="seller-user">
+        <button class="seller-user-btn" id="seller-user-btn" aria-haspopup="true" aria-expanded="false" onclick="App.toggleSellerMenu()">
+          <span class="avatar" aria-hidden="true">{{ RULES.initials(u.fullName) }}</span>
+          <span class="seller-user-name">{{ u.fullName }}</span>
+          {{{ badge('rank', u.rank) }}}{{{ icon('chevron-down', 16) }}}
+        </button>
+        <div class="seller-menu" id="seller-menu" hidden>
+          <div class="seller-menu-head">
+            <div class="name">{{ u.fullName }}</div>
+            <div class="sub">{{ RULES.maskPhone(u.phone) }} · {{ u.refCode }}</div>
+            <div class="mt-1">{{{ badge('rank', u.rank) }}}</div>
+          </div>
+          <a href="#profile">{{{ icon('user', 18) }}} Hồ sơ của tôi</a>
+          <button class="danger" onclick="App.logoutAgent()">{{{ icon('logout', 18) }}} Đăng xuất</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="seller-main">{{{ content }}}</main>
+
+  <nav class="seller-nav-bottom" aria-label="Điều hướng thành viên">
+    {% each n in nav %}<a href="#{{ n.code }}" class="{% if active === n.code %}is-active{% endif %}">{{{ icon(n.ico, 22) }}}<span>{{ n.label }}</span></a>{% endeach %}
+  </nav>
+</div>
+{% endblock %}

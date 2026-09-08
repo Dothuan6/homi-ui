@@ -1,0 +1,123 @@
+<!-- payment · Thanh toán: chọn phương thức / cổng / VietQR (cột tóm tắt đơn bên phải) -->
+<div class="buyer-split buyer-split-rev buyer-side-first">
+  <div class="stack">
+    {% if order.status === 'FAILED' %}
+    <div class="alert alert-error" role="alert">{{{ icon('x-circle', 22) }}}<div><span class="alert-title">Thanh toán không thành công</span>{{ order.failReason || 'Giao dịch bị huỷ hoặc cổng trả lỗi.' }} Bạn có thể chọn lại phương thức khi đơn còn thời hạn.</div></div>
+    {% endif %}
+    {{{ body }}}
+    <div class="demo-hint">Mô phỏng: <button class="btn-link" onclick="Buyer.a02SimExpire('{{ order.id }}')">hết thời gian giữ đơn</button> (thực tế đơn tự hết hạn sau {{ holdMin }} phút)</div>
+  </div>
+
+  <aside class="buyer-side"><div class="card"><div class="card-body">
+    <div class="order-summary">
+      <div>
+        <div class="text-sm text-muted">Mã đơn hàng</div><div class="order-id">{{ order.id }}</div>
+        <div class="text-sm mt-2">{{ pkg.fullName }}</div>
+        <div class="text-sm text-muted mt-1">Giao tới: {{ order.fullName }} · {{ RULES.maskPhone(order.phone) }}</div>
+      </div>
+      {{{ UI.countdown.markup('a02-countdown') }}}
+    </div>
+    <div class="total-row"><span>Số tiền cần thanh toán</span><span class="total-amt">{{{ money(order.price) }}}</span></div>
+    <p class="text-caption mt-3">Đơn được giữ trong {{ holdMin }} phút. Hết thời gian, đơn tự huỷ và bạn có thể đặt lại.</p>
+  </div></div></aside>
+</div>
+
+{% block buyer/payment-bank %}
+<!-- (c) Khối VietQR + "Tôi đã chuyển khoản" -->
+<div class="card">
+  <div class="card-head"><h2>Chuyển khoản VietQR</h2><span class="text-sm text-muted">Bước 3/3</span></div>
+  <div class="card-body stack">
+    {{{ UI.vietqr(order) }}}
+    <div class="alert alert-warning">{{{ icon('warning', 20) }}}<div>Nội dung chuyển khoản phải ghi <strong class="mono">{{ order.id }}</strong> để hệ thống đối soát đúng đơn. Chuyển đúng số tiền <strong>{{{ money(order.price) }}}</strong>.</div></div>
+    <div class="actions">
+      <button class="btn btn-primary btn-lg btn-block" onclick="Buyer.a02Claim('{{ order.id }}')">{{{ icon('check', 18) }}} Tôi đã chuyển khoản</button>
+      <button class="btn btn-ghost" onclick="App.navigate('payment')">{{{ icon('arrow-left', 16) }}} Chọn phương thức khác</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block buyer/payment-choose %}
+<div class="card">
+  <div class="card-head"><h2>Chọn phương thức thanh toán</h2><span class="text-sm text-muted">Bước 3/3</span></div>
+  <div class="card-body stack-sm" role="radiogroup" aria-label="Phương thức thanh toán">
+    {% each m in methods %}
+    <label class="radio-card {% if sel === m.id %}is-selected{% endif %}" for="pm-{{ m.id }}">
+      <input type="radio" name="pm" id="pm-{{ m.id }}" value="{{ m.id }}" {% if sel === m.id %}checked{% endif %} onchange="Buyer._a02Method='{{ m.id }}'; App.reload()">
+      <div class="grow"><div class="radio-card-title">{{ m.title }}</div><div class="radio-card-desc">{{ m.desc }}</div></div>
+      {{{ icon(m.ico, 24, 'text-navy') }}}
+    </label>
+    {% endeach %}
+    <div class="actions">
+      <button class="btn btn-primary btn-lg btn-block" onclick="Buyer.a02Go('{{ order.id }}')">Tiếp tục {{{ icon('arrow-right', 18) }}}</button>
+      <button class="btn btn-ghost" onclick="Buyer.a02Cancel('{{ order.id }}')">Huỷ đơn, quay về trang mua hàng</button>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block buyer/payment-expired %}
+<!-- (e) EXPIRED + Đặt lại (giữ mã giới thiệu — BR-06/07) -->
+<div class="card"><div class="card-body stack text-center">
+  <div class="result-icon is-pending" style="margin:0 auto">{{{ icon('clock', 34) }}}</div>
+  <div class="error-code">ĐƠN {{ order.id }} · HẾT HẠN</div>
+  <h1>Đơn hàng đã hết thời gian giữ</h1>
+  <p class="text-muted">Đơn chưa được thanh toán trong {{ holdMin }} phút nên đã hết hiệu lực. Thông tin và người giới thiệu của bạn vẫn được giữ — bạn có thể đặt lại ngay.</p>
+  <div class="alert alert-info" style="text-align:left">{{{ icon('info', 20) }}}<div>Nếu bạn <strong>đã chuyển khoản</strong> cho đơn này, đừng chuyển lại. Liên hệ hỗ trợ {{ CONFIG.brand.supportHotline }} kèm mã đơn để được đối soát.</div></div>
+  <div class="actions actions-row">
+    <a class="btn btn-secondary btn-lg" href="#order-lookup">Tra cứu đơn</a>
+    <button class="btn btn-primary btn-lg" onclick="App.navigate('buy')">{{{ icon('refresh', 18) }}} Đặt lại</button>
+  </div>
+</div></div>
+{% endblock %}
+
+{% block buyer/payment-gateway %}
+<!-- (b) Cổng online — loading rồi màn cổng giả lập -->
+<div class="card"><div class="card-body">
+  <div id="gw-loading" class="gateway-sim">
+    <div class="gateway-logo">{{{ icon('zap', 20) }}} {{ CONFIG.gateway.label }}</div>
+    <p class="pulse text-strong">Đang chuyển hướng tới cổng thanh toán…</p>
+    <p class="text-sm text-muted mt-2">Vui lòng không đóng trình duyệt. Số tiền: <strong>{{{ money(order.price) }}}</strong> · Mã đơn <span class="mono">{{ order.id }}</span></p>
+  </div>
+  <div id="gw-sim" class="gateway-sim" hidden>
+    <div class="gateway-logo">{{{ icon('shield', 20) }}} Cổng thanh toán (mô phỏng)</div>
+    <p class="text-muted text-sm">Màn hình này mô phỏng trang của cổng thanh toán. Khi tích hợp thật, cổng gọi callback về hệ thống và người mua được đưa về màn kết quả (order-result).</p>
+    <div class="actions">
+      <button class="btn btn-success btn-lg btn-block" onclick="Store.markPaid('{{ order.id }}', 'gateway'); App.navigate('order-result')">{{{ icon('check', 18) }}} Thanh toán thành công (callback PAID)</button>
+      <button class="btn btn-danger-outline btn-lg btn-block" onclick="Store.failOrder('{{ order.id }}'); App.navigate('payment')">Huỷ giao dịch trên cổng (FAILED)</button>
+      <button class="btn btn-ghost" onclick="App.navigate('payment')">{{{ icon('arrow-left', 16) }}} Chọn phương thức khác</button>
+    </div>
+  </div>
+</div></div>
+{% endblock %}
+
+{% block buyer/payment-proof %}
+<!-- Modal xác nhận đã chuyển khoản — bắt buộc đính kèm ảnh chứng từ trước khi gửi (7.1.4) -->
+<p>Đơn sẽ chuyển sang trạng thái <strong>Chờ đối soát</strong>. Bộ phận vận hành kiểm tra giao dịch và xác nhận trong giờ làm việc; mã kích hoạt được cấp ngay sau khi xác nhận.</p>
+
+<div class="modal-summary"><dl>
+  <dt>Mã đơn</dt><dd><span class="mono">{{ order.id }}</span></dd>
+  <dt>Số tiền</dt><dd>{{{ money(order.price) }}}</dd>
+  <dt>Nội dung</dt><dd><span class="mono">{{ order.id }}</span></dd>
+</dl></div>
+
+<div class="field mt-4">
+  <label class="field-label" for="proof-file">Ảnh chụp biên lai chuyển khoản<span class="req">*</span></label>
+  <input type="file" id="proof-file" class="input" accept="image/*,.pdf" onchange="Buyer.a02ProofPick(this)">
+  <p class="field-hint">Ảnh màn hình hoặc biên lai từ app ngân hàng, thấy rõ số tiền và nội dung chuyển khoản. Tối đa {{ maxMb }}MB.</p>
+  <div class="field-error" id="proof-err"></div>
+</div>
+
+<div id="proof-picked" hidden></div>
+
+<div class="alert alert-warning mt-3" style="text-align:left">{{{ icon('warning', 20) }}}<div>Nếu số tiền hoặc nội dung chuyển khoản chưa khớp, cứ gửi ảnh — bộ phận vận hành sẽ liên hệ theo số <strong>{{ RULES.maskPhone(order.phone) }}</strong> để xử lý.</div></div>
+{% endblock %}
+
+{% block buyer/payment-proof-foot %}
+<button class="btn btn-secondary btn-lg" onclick="UI.closeModal()">Huỷ</button>
+<button class="btn btn-primary btn-lg" id="proof-submit" disabled onclick="Buyer.a02ProofSubmit('{{ order.id }}')">{{{ icon('check', 18) }}} Đã chuyển khoản</button>
+{% endblock %}
+
+{% block buyer/payment-proof-picked %}
+<div class="alert alert-success" style="text-align:left">{{{ icon('check-circle', 20) }}}<div><strong>{{ name }}</strong><br><span class="text-sm text-muted">{{ size }} · đã đính kèm</span></div></div>
+{% endblock %}

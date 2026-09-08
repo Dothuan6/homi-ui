@@ -1,0 +1,175 @@
+<!-- orders · Đơn hàng & đối soát: tab + bộ lọc + vùng bảng (bảng render động bằng d-03-table) -->
+<div class="card">
+  <div class="tabs" role="tablist" style="padding:0 20px">
+    <button class="tab {{ f.tab === 'all' ? 'is-active' : '' }}" onclick="Admin.st.orders.tab='all'; Admin.st.orders.page=1; App.reload()">Tất cả đơn</button>
+    <button class="tab {{ f.tab === 'awaiting' ? 'is-active' : '' }}" onclick="Admin.st.orders.tab='awaiting'; Admin.st.orders.page=1; App.reload()">Chờ đối soát <span class="count">{{{ awaiting }}}</span></button>
+    <button class="tab {{ f.tab === 'late' ? 'is-active' : '' }}" onclick="Admin.st.orders.tab='late'; Admin.st.orders.page=1; App.reload()">Callback sau hết hạn <span class="count">{{{ late }}}</span></button>
+  </div>
+  <div class="card-body">
+    {% if f.tab === 'awaiting' %}
+    <div class="alert alert-info mb-4">{{{ icon('info', 18) }}}<div class="text-sm">Đối chiếu sao kê theo <strong>nội dung CK = mã đơn</strong> và số tiền. Xác nhận → cấp mã (Đã gắn đơn hàng) + ghi nhận hoa hồng theo chuỗi tuyến ngay.</div></div>
+    {% endif %}
+    <div class="table-toolbar">
+      <div class="field field-search"><label class="field-label" for="o-q">Tìm kiếm</label><input class="input" id="o-q" placeholder="Mã đơn, tên, SĐT, ref_code" value="{{ f.q }}" oninput="Admin.st.orders.q=this.value; Admin.st.orders.page=1; Admin.renderOrders()"></div>
+      {% if f.tab === 'all' %}
+      <div class="field"><label class="field-label" for="o-status">Trạng thái</label><select class="select" id="o-status" onchange="Admin.st.orders.status=this.value; Admin.st.orders.page=1; Admin.renderOrders()"><option value="">Tất cả</option>{% each k in Object.keys(LABELS.orderStatus) %}<option value="{{ k }}" {{ f.status === k ? 'selected' : '' }}>{{{ LABELS.orderStatus[k].text }}}</option>{% endeach %}</select></div>
+      {% endif %}
+      <div class="toolbar-actions"><button class="btn btn-secondary" onclick="Admin.exportOrders()">{{{ icon('download', 16) }}} Xuất Excel</button></div>
+    </div>
+    <div id="o-table">{{{ UI.skeletonTable(8, 6) }}}</div>
+  </div>
+</div>
+
+{% block admin/orders-allocation %}
+<!-- orders · Phân bổ hoa hồng theo chuỗi tuyến của một đơn: rows = [{ c, level, who, rate }], total, expected, ok -->
+{% if !rows.length %}
+<p class="text-muted">Chưa có (đơn chưa thanh toán hoặc không có người bán).</p>
+{% else %}
+<div class="table-wrap"><table class="table" style="min-width:0">
+  <thead><tr><th>Cấp</th><th>Người thụ hưởng</th><th>Hạng lúc tính</th><th class="num">Mức hạng</th><th class="num">Nhận</th><th>TT</th></tr></thead>
+  <tbody>
+  {% each row in rows %}
+    <tr>
+      <td>{{{ row.level }}}</td>
+      <td>{% if row.c.beneficiaryId === 'COMPANY' %}<strong>HOMI365</strong>{% else %}{{ row.who }}{% endif %}</td>
+      <td>{{{ badge('rank', row.c.rankAtCalc) }}}</td>
+      <td class="num mono">{{ money(row.rate) }}</td>
+      <td class="num mono text-strong">{{ money(row.c.amount) }}</td>
+      <td>{{{ badge('commission', row.c.status) }}}</td>
+    </tr>
+  {% endeach %}
+  </tbody>
+  <tfoot><tr><th colspan="4">Tổng (kiểm: {{ money(expected) }})</th><th class="num {{ ok ? 'text-success' : 'text-error' }}">{{ money(total) }}</th><th></th></tr></tfoot>
+</table></div>
+{% endif %}
+{% endblock %}
+
+{% block admin/orders-drawer %}
+<!-- orders · Drawer chi tiết đơn hàng · part = 'title' | 'body' | 'foot' -->
+{% if part === 'title' %}
+<h2 class="mono">{{ o.id }}</h2>
+<div class="row-wrap mt-1">{{{ badge('orderStatus', o.status) }}}{{{ o.status === 'PAID' ? badge('shipping', o.shipping) : '' }}}{% if o.flags && o.flags.lateCallback %}<span class="badge badge-warning">Callback muộn</span>{% endif %}{% if o.refunded %}<span class="badge badge-error">Đã hoàn tiền</span>{% endif %}</div>
+
+{% elif part === 'body' %}
+<div class="section">
+  <div class="section-title">Đơn hàng</div>
+  <dl class="dl">
+    <dt>Gói</dt><dd>{{ pkg.fullName }}</dd>
+    <dt>Số tiền</dt><dd>{{ money(o.price) }}</dd>
+    <dt>Phương thức</dt><dd>{{ LABELS.method[o.method] || '—' }}</dd>
+    <dt>Tạo lúc</dt><dd>{{ dt(o.createdAt) }}</dd>
+    {% if o.paidAt %}<dt>Thanh toán lúc</dt><dd>{{ dt(o.paidAt) }}</dd>{% endif %}
+  </dl>
+</div>
+
+<div class="section">
+  <div class="section-title">Người mua & giao hàng</div>
+  <dl class="dl">
+    <dt>Họ tên</dt><dd>{{ o.fullName }}</dd>
+    <dt>SĐT</dt><dd class="mono">{{ o.phone }}</dd>
+    <dt>Email</dt><dd>{{ o.email || '—' }}</dd>
+    <dt>Địa chỉ</dt><dd>{{ o.address }}</dd>
+    <dt>Ghi chú</dt><dd>{{ o.note || '—' }}</dd>
+    <dt>Người bán</dt><dd>{% if s %}{{ s.fullName }} · <span class="mono">{{ o.refCode }}</span> · {% if o.referrerRankAtOrder %}{{{ RULES.rank(o.referrerRankAtOrder).label }}} lúc đơn{% endif %}{% else %}—{% endif %}</dd>
+  </dl>
+  {% if o.status === 'PAID' && pkg.hasShipping %}
+  <div class="row-between mt-3">
+    <span>Giao hàng: {{{ badge('shipping', o.shipping) }}}</span>
+    {% if next %}
+    <button class="btn btn-primary btn-sm" onclick="Admin.updateShipping('{{ o.id }}', '{{ next }}')">{{{ icon('truck', 16) }}} Chuyển sang "{{{ RULES.shippingLabel(next) }}}"</button>
+    {% else %}
+    <span class="text-sm text-success">Đã giao xong</span>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+
+<div class="section">
+  <div class="section-title">Mã kích hoạt & thiết bị</div>
+  {% if code %}
+  <div class="code-box">
+    <div class="grow"><span class="code-label">{{{ label('license', code.status) }}} · {{ code.deviceSku }} {{ code.deviceSerial || '' }}</span><span class="code-value">{{ code.code }}</span></div>
+    <button class="btn btn-secondary btn-icon" aria-label="Sao chép" onclick="UI.copy('{{{ code.code }}}')">{{{ icon('copy', 18) }}}</button>
+  </div>
+  {% if code.device %}<p class="text-sm text-muted mt-2">Thiết bị: {{ code.device.name }} · <span class="mono">{{ code.device.deviceId }}</span> · {{ dt(code.activatedAt) }}</p>{% endif %}
+  {% elif o.status === 'PAID' %}
+  <div class="alert alert-warning">{{{ icon('warning', 18) }}}<div class="text-sm">Đã thanh toán nhưng chưa có mã (kho hết). <a href="#inventory">Bổ sung kho</a>.</div></div>
+  {% else %}
+  <p class="text-muted">Chưa gắn (đơn chưa thanh toán).</p>
+  {% endif %}
+</div>
+
+<div class="section">
+  <div class="section-title">Phân bổ hoa hồng theo chuỗi tuyến</div>
+  {{{ allocation }}}
+</div>
+
+{% if o.transferProof %}
+<div class="section">
+  <div class="section-title">Biên lai người mua gửi</div>
+  <div class="alert alert-info" style="text-align:left">{{{ icon('file', 20) }}}<div>
+    <strong>{{ o.transferProof.name }}</strong><br>
+    <span class="text-sm text-muted">{{ o.transferProof.size }} · gửi lúc {{{ dt(o.transferProof.at) }}}</span><br>
+    <span class="text-sm text-muted">Bản mô phỏng chỉ lưu tên file. Khi tích hợp thật, ảnh hiển thị tại đây để đối chiếu số tiền và nội dung.</span>
+  </div></div>
+</div>
+{% elif o.status === 'AWAITING_RECONCILE' %}
+<div class="section">
+  <div class="section-title">Biên lai người mua gửi</div>
+  <div class="alert alert-warning" style="text-align:left">{{{ icon('warning', 20) }}}<div>Đơn này chưa có biên lai đính kèm (tạo trước khi bật yêu cầu upload). Đối soát trực tiếp trên sao kê ngân hàng.</div></div>
+</div>
+{% endif %}
+
+<div class="section">
+  <div class="section-title">Dòng thời gian</div>
+  {{{ include('partials/admin-timeline', { rows: timeline }) }}}
+</div>
+
+{% elif part === 'foot' %}
+{% if o.status === 'AWAITING_RECONCILE' %}
+<button class="btn btn-danger-outline" onclick="Admin.rejectReconcile('{{ o.id }}')">Từ chối</button>
+<button class="btn btn-success" onclick="Admin.confirmReconcile('{{ o.id }}')">{{{ icon('check', 16) }}} Xác nhận đã nhận tiền</button>
+{% endif %}
+{% if o.flags && o.flags.lateCallback && !o.flags.lateChecked %}
+<button class="btn btn-secondary" onclick="Store.clearLateFlag('{{ o.id }}'); UI.toast('Đã đánh dấu kiểm tra.'); App.reload()">{{{ icon('check', 16) }}} Đã kiểm tra</button>
+{% endif %}
+{% if o.status === 'PAID' && !o.refunded %}
+<button class="btn btn-danger-outline" onclick="Admin.refundOrder('{{ o.id }}')">Hoàn tiền & huỷ hoa hồng</button>
+{% endif %}
+{% endif %}
+{% endblock %}
+
+{% block admin/orders-table %}
+<!-- orders · Bảng đơn hàng: rows = [{ o, s (người bán), c (mã KH) }], pg = UI.paginate(...) -->
+{% if !rows.length %}
+{{{ UI.empty('inbox', 'Không có đơn phù hợp') }}}
+{% else %}
+<div class="table-wrap"><table class="table">
+  <thead><tr><th>Mã đơn</th><th>Người mua</th><th>Người bán</th><th>Hạng lúc đơn</th><th>Phương thức</th><th class="num">Số tiền</th><th>Thanh toán</th><th>Giao hàng</th><th>Mã KH</th><th></th></tr></thead>
+  <tbody>
+  {% each row in rows %}
+  {% set o = row.o %}
+    <tr>
+      <td><span class="cell-main mono">{{ o.id }}</span><span class="cell-sub">{{ dt(o.createdAt) }}</span></td>
+      <td><span class="cell-main">{{ o.fullName }}</span><span class="cell-sub mono">{{ o.phone }}</span></td>
+      <td>{% if row.s %}{{ row.s.fullName }}<span class="cell-sub mono">{{ o.refCode }}</span>{% else %}—{% endif %}</td>
+      <td>{{{ o.referrerRankAtOrder ? badge('rank', o.referrerRankAtOrder) : '—' }}}</td>
+      <td>{{ LABELS.method[o.method] || '—' }}</td>
+      <td class="num mono">{{ money(o.price) }}</td>
+      <td>{{{ badge('orderStatus', o.status) }}}{% if o.flags && o.flags.lateCallback && !o.flags.lateChecked %}<span class="cell-sub text-warning">Callback muộn</span>{% endif %}{% if o.refunded %}<span class="cell-sub text-error">Đã hoàn tiền</span>{% endif %}</td>
+      <td>{{{ o.status === 'PAID' ? badge('shipping', o.shipping) : '—' }}}</td>
+      <td>{{{ o.status === 'PAID' ? badge('license', row.c ? row.c.status : 'PENDING') : '—' }}}</td>
+      <td><div class="row-actions">
+        {% if o.status === 'AWAITING_RECONCILE' %}
+        <button class="btn btn-success btn-sm" onclick="Admin.confirmReconcile('{{ o.id }}')">Xác nhận</button>
+        <button class="btn btn-danger-outline btn-sm" onclick="Admin.rejectReconcile('{{ o.id }}')">Từ chối</button>
+        {% endif %}
+        <button class="btn btn-secondary btn-sm" onclick="Admin.orderDrawer('{{ o.id }}')">Chi tiết</button>
+      </div></td>
+    </tr>
+  {% endeach %}
+  </tbody>
+</table></div>
+{{{ UI.pagination(pg, 'Admin.gotoOrders') }}}
+{% endif %}
+{% endblock %}

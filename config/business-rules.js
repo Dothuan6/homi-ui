@@ -25,7 +25,8 @@ const CONFIG = {
   otp: { length: 6, ttlSeconds: 300, maxWrong: 3, resendSeconds: 60, maxSendsPerWindow: 5, windowMinutes: 30, lockMinutes: 30, mockCode: '123456' },
 
   /** Giữ đơn / QR (LP-4/5) */
-  order: { holdSeconds: 900, warnSeconds: 60, reconcilePollSeconds: 10, idPrefix: 'HM' },
+  /** proofMaxMb: giới hạn ảnh biên lai khách đính kèm khi báo đã chuyển khoản (7.1.4). */
+  order: { holdSeconds: 900, warnSeconds: 60, reconcilePollSeconds: 10, idPrefix: 'HM', proofMaxMb: 5 },
 
   session: { refDays: 7, agentHours: 24, rememberDays: 30 },
 
@@ -50,7 +51,7 @@ const CONFIG = {
   admin: {
     maxLoginFail: 5, lockMinutes: 15, pageSize: 10,
     roles: { SPECIALIST: 'Admin Specialist', HEAD: 'Head Admin' },
-    /** Tài khoản demo khởi tạo (bản thật: Head Admin cấp tại D-10) */
+    /** Tài khoản demo khởi tạo (bản thật: Head Admin cấp tại admin-users) */
     accounts: [
       { username: 'head',   password: 'Homi@2026', role: 'HEAD',       fullName: 'Trưởng bộ phận' },
       { username: 'admin',  password: 'Homi@2026', role: 'SPECIALIST', fullName: 'Chuyên viên 1' },
@@ -78,7 +79,7 @@ const CONFIG = {
   periods: [{ id: 'week', label: '7 ngày' }, { id: 'month', label: '30 ngày' }, { id: 'quarter', label: '90 ngày' }, { id: 'custom', label: 'Tuỳ chọn' }],
   defaultPeriod: 'month',
 
-  /** Nội dung giới thiệu sản phẩm (cột phải A-01). */
+  /** Nội dung giới thiệu sản phẩm (cột phải buy). */
   productContent: {
     CN02: {
       lead: 'Gói dịch vụ cao cấp bao gồm 01 đồng hồ thông minh HW01 theo dõi nhịp tim / SOS giao tận nơi và 01 năm phần mềm Bác sĩ 24/7 (mã kích hoạt gửi qua SMS).',

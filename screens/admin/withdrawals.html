@@ -1,0 +1,133 @@
+<!-- withdrawals · Rút tiền & sổ hoa hồng: khung tab (nội dung tab render động vào #d07-body bằng d-07-withdraw / d-07-ledger) -->
+<div class="card">
+  <div class="tabs" role="tablist" style="padding:0 20px">
+    <button class="tab {{ tab === 'withdraw' ? 'is-active' : '' }}" onclick="Admin.st.d07.tab='withdraw'; App.reload()">{{{ icon('cash', 18) }}} Rút tiền <span class="count">{{{ pending }}}</span></button>
+    <button class="tab {{ tab === 'ledger' ? 'is-active' : '' }}" onclick="Admin.st.d07.tab='ledger'; App.reload()">{{{ icon('layers', 18) }}} Sổ hoa hồng</button>
+  </div>
+  <div class="card-body" id="d07-body"></div>
+</div>
+
+{% block admin/withdrawals-drawer %}
+<!-- withdrawals · Drawer chi tiết yêu cầu rút tiền: w, u, wal, timeline (html), audit (html), canApprove · part = 'title' | 'body' | 'foot' -->
+{% if part === 'title' %}
+<h2 class="mono">{{ w.id }}</h2>
+<div class="row-wrap mt-1">{{{ badge('withdrawal', w.status, true) }}}<span class="text-strong">{{ money(w.amount) }}</span></div>
+
+{% elif part === 'body' %}
+<div class="section">
+  <div class="section-title">Thành viên</div>
+  <dl class="dl">
+    <dt>Họ tên</dt><dd>{{ u.fullName }} {{{ badge('rank', u.rank) }}}</dd>
+    <dt>SĐT</dt><dd class="mono">{{ u.phone }}</dd>
+    <dt>Số dư</dt><dd>Ghi nhận {{ money(wal.recorded) }} · giữ {{ money(wal.held) }} · đã rút {{ money(wal.withdrawn) }} · khả dụng {{ money(wal.available) }}</dd>
+  </dl>
+</div>
+<div class="section">
+  <div class="section-title">Tài khoản nhận</div>
+  <dl class="dl">
+    <dt>Ngân hàng</dt><dd>{{ w.bank.bankName }}</dd>
+    <dt>Số TK</dt><dd class="mono">{{ w.bank.accountNo }}</dd>
+    <dt>Chủ TK</dt><dd>{{ w.bank.owner }}</dd>
+  </dl>
+</div>
+<div class="section">
+  <div class="section-title">Tiến trình duyệt</div>
+  {{{ timeline }}}
+</div>
+<div class="section">
+  <div class="section-title">Audit</div>
+  {{{ audit }}}
+</div>
+
+{% elif part === 'foot' %}
+{% if w.status.startsWith('PENDING') %}
+<button class="btn btn-danger-outline" onclick="Admin.wdReject('{{ w.id }}')">Từ chối</button>
+<button class="btn btn-success" {{{ canApprove ? '' : 'disabled' }}} onclick="Admin.wdApprove('{{ w.id }}')">Xác nhận</button>
+{% endif %}
+{% if w.status === 'APPROVED' %}<button class="btn btn-primary" onclick="Admin.wdPaid('{{ w.id }}')">Đánh dấu đã chi trả</button>{% endif %}
+{% endif %}
+{% endblock %}
+
+{% block admin/withdrawals-ledger %}
+<!-- withdrawals · Tab sổ hoa hồng (chỉ đọc): s = Admin.st.d07, rows = [{ c, who }], pg, total, company -->
+<div class="alert alert-neutral mb-4">{{{ icon('info', 18) }}}<div class="text-sm">Sổ hoa hồng <strong>chỉ đọc</strong>: mỗi khoản ghi nhận ngay khi đơn thanh toán theo bảng hoa hồng hiệu lực; không có bước duyệt hoa hồng. Kiểm tra Σ theo đơn tại chi tiết đơn (orders).</div></div>
+<div class="table-toolbar">
+  <div class="field field-search"><label class="field-label" for="cm-q">Tìm theo thành viên / đơn</label><input class="input" id="cm-q" value="{{ s.cmQ }}" oninput="Admin.st.d07.cmQ=this.value; Admin.st.d07.cmPage=1; Admin.renderLedgerTab()"></div>
+  <div class="toolbar-actions">
+    <span class="text-sm text-muted">Tổng ghi nhận {{ money(total) }} · về công ty {{ money(company) }}</span>
+    <button class="btn btn-secondary" onclick="Admin.exportCm()">{{{ icon('download', 16) }}} Xuất Excel</button>
+  </div>
+</div>
+{% if !rows.length %}
+{{{ UI.empty('layers', 'Không có khoản hoa hồng') }}}
+{% else %}
+<div class="table-wrap"><table class="table">
+  <thead><tr><th>Mã</th><th>Ngày</th><th>Đơn</th><th>Người thụ hưởng</th><th>Cấp</th><th>Hạng lúc tính</th><th class="num">Số tiền</th><th>TT</th></tr></thead>
+  <tbody>
+  {% each row in rows %}
+  {% set c = row.c %}
+    <tr>
+      <td class="mono">{{ c.id }}</td>
+      <td>{{ date(c.createdAt) }}</td>
+      <td><button class="btn-link mono" onclick="Admin.orderDrawer('{{ c.orderId }}')">{{ c.orderId }}</button></td>
+      <td>{% if c.beneficiaryId === 'COMPANY' %}<strong>HOMI365</strong>{% else %}{{ row.who }}{% endif %}</td>
+      <td>{{{ badge('commissionKind', c.kind) }}}{% if c.kind === 'DIFF' %} <span class="text-sm text-muted">F{{{ c.depth }}}</span>{% endif %}</td>
+      <td>{{{ badge('rank', c.rankAtCalc) }}}</td>
+      <td class="num mono text-strong">{{ money(c.amount) }}</td>
+      <td>{{{ badge('commission', c.status) }}}</td>
+    </tr>
+  {% endeach %}
+  </tbody>
+</table></div>
+{{{ UI.pagination(pg, 'Admin.gotoCm') }}}
+{% endif %}
+{% endblock %}
+
+{% block admin/withdrawals-list %}
+<!-- withdrawals · Tab rút tiền (duyệt 2 lớp): s = Admin.st.d07, rows = [{ w, u, wal, okBal, cb, cell }], pg -->
+<div class="alert alert-info mb-4">{{{ icon('info', 18) }}}<div class="text-sm">Duyệt <strong>2 lớp</strong>: Specialist thứ nhất → Chờ duyệt (1/2) → Specialist thứ hai (khác người) → Đã duyệt; Head Admin xác nhận 1 lần là đủ. Sau khi chuyển khoản, bấm <strong>Đánh dấu đã chi trả</strong>. Từ chối phải nêu lý do — thành viên thấy tại wallet và số tiền hoàn về khả dụng.</div></div>
+<div class="table-toolbar">
+  <div class="field"><label class="field-label" for="wd-status">Trạng thái</label><select class="select" id="wd-status" onchange="Admin.st.d07.wdStatus=this.value; Admin.st.d07.wdPage=1; Admin.renderWithdrawTab()"><option value="">Tất cả (5 trạng thái)</option>{% each k in Object.keys(LABELS.withdrawal) %}<option value="{{ k }}" {{ s.wdStatus === k ? 'selected' : '' }}>{{{ LABELS.withdrawal[k].text }}}</option>{% endeach %}</select></div>
+  <div class="toolbar-actions">
+    <button class="btn btn-secondary" onclick="Admin.wdExportBank()">{{{ icon('download', 16) }}} File ngân hàng (đã duyệt)</button>
+    <button class="btn btn-secondary" onclick="Admin.exportWd()">{{{ icon('download', 16) }}} Xuất Excel</button>
+  </div>
+</div>
+{% if !rows.length %}
+{{{ UI.empty('cash', 'Không có yêu cầu rút tiền') }}}
+{% else %}
+<div class="table-wrap"><table class="table">
+  <thead><tr><th>Mã</th><th>Thành viên</th><th class="num">Số tiền</th><th>Đối chiếu số dư</th><th>Nhận về</th><th>Tiến trình</th><th>Hành động</th></tr></thead>
+  <tbody>
+  {% each row in rows %}
+  {% set w = row.w %}
+  {% set u = row.u %}
+  {% set wal = row.wal %}
+    <tr>
+      <td class="mono">{{ w.id }}<span class="cell-sub">{{ dt(w.createdAt) }}</span></td>
+      <td><span class="cell-main">{{ u.fullName }}</span><span class="cell-sub">{{{ badge('rank', u.rank) }}} <span class="mono">{{ u.phone }}</span></span></td>
+      <td class="num mono text-strong">{{ money(w.amount) }}</td>
+      <td>
+        {% if w.status.startsWith('PENDING') %}
+        <span class="{{ row.okBal ? 'text-success' : 'text-error' }}">{{{ icon(row.okBal ? 'check-circle' : 'x-circle', 14) }}} {{{ row.okBal ? 'Đủ số dư' : 'Thiếu số dư' }}}</span><span class="cell-sub">ghi nhận {{ money(wal.recorded) }} · giữ {{ money(wal.held) }} · đã rút {{ money(wal.withdrawn) }}</span>
+        {% else %}
+        <span class="text-muted">—</span>
+        {% endif %}
+      </td>
+      <td>{{ w.bank.bankName }}<span class="cell-sub mono">{{ w.bank.accountNo }} · {{ w.bank.owner }}</span></td>
+      <td>{{{ row.cell }}}</td>
+      <td><div class="row-actions">
+        {% if w.status.startsWith('PENDING') %}
+        <button class="btn btn-success btn-sm" {{{ row.cb.ok && row.okBal ? '' : 'disabled' }}} title="{{{ row.cb.why || (row.okBal ? '' : 'Thiếu số dư') }}}" onclick="Admin.wdApprove('{{ w.id }}')">Xác nhận</button>
+        <button class="btn btn-danger-outline btn-sm" onclick="Admin.wdReject('{{ w.id }}')">Từ chối</button>
+        {% endif %}
+        {% if w.status === 'APPROVED' %}<button class="btn btn-primary btn-sm" onclick="Admin.wdPaid('{{ w.id }}')">Đánh dấu đã chi trả</button>{% endif %}
+        <button class="btn btn-secondary btn-sm" onclick="Admin.wdDrawer('{{ w.id }}')">Chi tiết</button>
+      </div></td>
+    </tr>
+  {% endeach %}
+  </tbody>
+</table></div>
+{{{ UI.pagination(pg, 'Admin.gotoWd') }}}
+{% endif %}
+{% endblock %}

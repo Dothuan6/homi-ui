@@ -1,6 +1,0 @@
-<!-- Bộ chọn kỳ thống kê (tuần / tháng / quý) trên D-01 -->
-<div class="seg" role="group" aria-label="Kỳ">
-  {% each p in periods %}
-  <button class="{{ period === p.id ? 'is-active' : '' }}" onclick="Admin.st.period='{{ p.id }}'; App.reload()">{{{ p.label }}}</button>
-  {% endeach %}
-</div>

@@ -1,0 +1,185 @@
+<!-- dashboard · Tổng quan: tiêu đề + thanh tab (Thống kê · Hoa hồng · Tuyến) — data: u, tab, tabs, treeCount, tabHtml -->
+<div class="stack-lg">
+  <div class="page-title">
+    <div>
+      <h1>Xin chào, {{ u.fullName }}</h1>
+      <p class="row-wrap">{{{ badge('rank', u.rank, true) }}}<span>Mã giới thiệu <span class="mono text-strong">{{ u.refCode }}</span> · thành viên từ {{ date(u.activatedAt || u.createdAt) }}</span></p>
+    </div>
+  </div>
+  <div class="c01-tabs">
+    <div class="tabs" role="tablist">
+      {% each t in tabs %}
+      <button class="tab {{ tab === t.id ? 'is-active' : '' }}" role="tab" aria-selected="{{ tab === t.id }}" onclick="Seller.setTab('{{ t.id }}')">{{{ icon(t.ico, 18) }}} {{ t.label }}{% if t.id === 'tree' %} <span class="count">{{ treeCount }}</span>{% endif %}</button>
+      {% endeach %}
+    </div>
+  </div>
+  {{{ tabHtml }}}
+</div>
+
+{% block seller/dashboard-cmchart %}
+<!-- dashboard · biểu đồ hoa hồng theo ngày trong #c01-cmchart — data: rangeLabel, chartHtml -->
+<h3 class="mb-2">Hoa hồng ghi nhận theo ngày (triệu đồng) · {{ rangeLabel }}</h3>
+{{{ chartHtml }}}
+{% endblock %}
+
+{% block seller/dashboard-commissions %}
+<!-- dashboard · tab Hoa hồng: 4 ô ví, biểu đồ, bộ lọc bảng kê — data: w, cw, cmKind -->
+<div class="stack-lg">
+  <div class="card">
+    <div class="card-head">
+      <h2>Hoa hồng</h2>
+      <button class="btn btn-accent" {{{ cw.ok ? '' : 'disabled' }}} title="{{ cw.ok ? '' : cw.message }}" onclick="App.navigate('wallet?withdraw=1')">{{{ icon('cash', 18) }}} Rút tiền</button>
+    </div>
+    <div class="card-body">
+      <div class="stat-grid stat-grid-4">
+        <div class="stat"><div class="stat-label">{{{ icon('check-circle', 16) }}} Đã ghi nhận</div><div class="stat-value">{{ money(w.recorded) }}</div><div class="stat-sub">Tổng hoa hồng từ khi tham gia</div></div>
+        <div class="stat"><div class="stat-label">{{{ icon('clock', 16) }}} Đang chờ duyệt rút</div><div class="stat-value text-warning">{{ money(w.held) }}</div></div>
+        <div class="stat"><div class="stat-label">{{{ icon('cash', 16) }}} Đã rút</div><div class="stat-value">{{ money(w.withdrawn) }}</div></div>
+        <div class="stat stat-navy stat-clickable" onclick="App.navigate('wallet')"><div class="stat-label">{{{ icon('wallet', 16) }}} Khả dụng</div><div class="stat-value">{{ money(w.available) }}</div><div class="stat-sub">Xem ví {{{ icon('arrow-right', 12) }}}</div></div>
+      </div>
+      {% if !cw.ok %}<p class="text-sm text-muted mt-3">{{{ icon('info', 14) }}} {{ cw.message }}</p>{% endif %}
+      <div id="c01-cmchart" class="mt-4"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head">
+      <h2>Bảng kê hoa hồng</h2>
+      <div class="row-wrap">
+        <select class="select" style="min-height:40px;width:auto" aria-label="Lọc nguồn" onchange="Seller.state.cmKind=this.value; Seller.state.cmPage=1; Seller.renderCommissions()">
+          <option value="">Tất cả nguồn</option>
+          <option value="SELF" {{{ cmKind === 'SELF' ? 'selected' : '' }}}>Tự bán</option>
+          <option value="DIFF" {{{ cmKind === 'DIFF' ? 'selected' : '' }}}>Chênh lệch tuyến dưới</option>
+        </select>
+        <button class="btn btn-secondary btn-sm" onclick="Seller.exportCommissions()">{{{ icon('download', 16) }}} Xuất Excel</button>
+      </div>
+    </div>
+    <div class="card-body" id="c01-cm">{{{ UI.skeletonTable(6, 5) }}}</div>
+  </div>
+</div>
+{% endblock %}
+
+{% block seller/dashboard-commissions-table %}
+<!-- dashboard · bảng kê hoa hồng trong #c01-cm (có phân trang)
+     data: rows [{ c, o, phone, source, showSeller, seller, sellerRankLabel }], pg, count, total -->
+{% if !count %}
+{{{ UI.empty('cash', 'Chưa có khoản hoa hồng trong kỳ', 'Hoa hồng ghi nhận ngay khi đơn của bạn hoặc tuyến dưới thanh toán thành công.') }}}
+{% else %}
+<div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Ngày</th><th>Đơn</th><th>Nguồn</th><th>Hạng lúc tính</th><th class="num">Số tiền</th><th>Trạng thái</th></tr></thead>
+    <tbody>
+      {% each r in rows %}
+      <tr>
+        <td>{{ date(r.c.createdAt) }}</td>
+        <td><span class="cell-main mono">{{ r.c.orderId }}</span><span class="cell-sub">{% if r.o %}{{ r.o.fullName }} · {{ r.phone }}{% endif %}</span></td>
+        <td><span class="badge badge-{{ r.c.kind === 'SELF' ? 'navy' : 'info' }} badge-plain">{{ r.source }}</span>{% if r.showSeller %}<span class="cell-sub">bán bởi {{ r.seller.fullName }} ({{ r.sellerRankLabel }})</span>{% endif %}</td>
+        <td>{{{ badge('rank', r.c.rankAtCalc) }}}</td>
+        <td class="num mono text-strong">{{ money(r.c.amount) }}</td>
+        <td>{{{ badge('commission', r.c.status) }}}</td>
+      </tr>
+      {% endeach %}
+    </tbody>
+    <tfoot><tr><th colspan="4">Tổng {{ count }} khoản</th><th class="num">{{ money(total) }}</th><th></th></tr></tfoot>
+  </table>
+</div>
+{{{ UI.pagination(pg, 'Seller.gotoCmPage') }}}
+{% endif %}
+{% endblock %}
+
+{% block seller/dashboard-stats %}
+<!-- dashboard · tab Thống kê: link giới thiệu, hạng & điểm, thang hạng, khung thống kê theo kỳ
+     data: u, w, rk, nx, need, pct, sold, rr, canRecruit, keepOk, refUrl, aliasUrl, publicAliasUrl, jobTime, ladderHtml, periodSegHtml -->
+<div class="stack-lg">
+  <div class="grid-2 grid-2-wide">
+    <div class="card">
+      <div class="card-head">
+        <h2>Link của bạn</h2>
+        {% if canRecruit %}<span class="text-sm text-muted">Khách mua qua link được tính vào tuyến của bạn</span>{% else %}<span class="badge badge-warning">Hạng Copper: chỉ bán, chưa được tuyển thành viên</span>{% endif %}
+      </div>
+      <div class="card-body stack">
+        <div>
+          <div class="field-label mb-2">Link giới thiệu (ref_code)</div>
+          <div class="ref-url">
+            <input class="input" readonly value="{{ refUrl }}" aria-label="Link giới thiệu" onclick="this.select()">
+            <button class="btn btn-primary" onclick="UI.copy('{{ refUrl }}', 'Đã sao chép link giới thiệu.')">{{{ icon('copy', 18) }}} Sao chép</button>
+          </div>
+        </div>
+        <div>
+          <div class="field-label mb-2">Link mua hàng cá nhân · <span class="mono">{{ publicAliasUrl }}</span></div>
+          <div class="ref-url">
+            <input class="input" readonly value="{{ aliasUrl }}" aria-label="Link mua hàng cá nhân" onclick="this.select()">
+            <button class="btn btn-secondary" onclick="UI.copy('{{ aliasUrl }}', 'Đã sao chép link mua hàng cá nhân.')">{{{ icon('copy', 18) }}} Sao chép</button>
+          </div>
+        </div>
+        <div class="share-row">
+          <button class="btn btn-secondary share-btn" onclick="Seller.shareZalo('{{ aliasUrl }}')"><span class="share-mark share-zalo">Z</span> Zalo</button>
+          <button class="btn btn-secondary share-btn" onclick="window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent('{{ aliasUrl }}'), '_blank', 'noopener')"><span class="share-mark share-fb">f</span> Facebook</button>
+          <button class="btn btn-secondary share-btn" onclick="UI.share('{{ aliasUrl }}', 'Gói Bác sĩ 24/7 HOMI365')">{{{ icon('share', 18) }}} Khác</button>
+        </div>
+        <div class="ref-qr ref-qr-inline">
+          {{{ UI.qrSvg(aliasUrl, 150) }}}
+          <div class="qr-label">QR link mua hàng cá nhân</div>
+          <button class="btn btn-ghost btn-sm mt-1" onclick="Seller.downloadQr('{{ u.purchaseAlias }}')">{{{ icon('download', 16) }}} Tải QR</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="stack">
+      <div class="card card-tint">
+        <div class="card-body">
+          <div class="row-between"><h2 style="font-size:var(--fs-lg)">Hạng & điểm</h2>{{{ badge('rank', u.rank, true) }}}</div>
+          <div class="stat-grid mt-3" style="grid-template-columns:1fr 1fr">
+            <div><div class="stat-label">Điểm tích luỹ</div><div class="stat-value">{{ num(w.points) }}</div><div class="stat-sub">1 điểm = 1đ hoa hồng</div></div>
+            <div><div class="stat-label">Gói bán luỹ kế</div><div class="stat-value">{{ num(u.cumulativeSales) }}</div><div class="stat-sub">{% if nx %}Còn thiếu {{ need }} gói lên {{ nx.label }}{% else %}Hạng cao nhất{% endif %}</div></div>
+          </div>
+          {% if nx %}
+          <div class="progress mt-3"><span style="width:{{ pct }}%"></span></div>
+          <div class="text-caption mt-1">{{ rk.label }} ({{ rk.threshold }}) → {{ nx.label }} ({{ nx.threshold }})</div>
+          {% endif %}
+          <div class="mt-3 {{ keepOk ? 'alert alert-success' : 'alert alert-warning' }}">
+            {{{ icon(keepOk ? 'check-circle' : 'warning', 18) }}}
+            <div class="text-sm">Tháng này đã bán <strong>{{ sold }}</strong> gói. {% if keepOk %}Đã đủ điều kiện giữ hạng tháng này.{% else %}Cần tối thiểu {{ rr.minSalesPerMonth }} gói/tháng để giữ hạng — nếu không sẽ giáng 1 bậc vào cuối tháng.{% endif %}</div>
+          </div>
+          <div class="mt-2 text-right"><a href="#profile" class="btn-link">Lịch sử thăng/giáng hạng {{{ icon('arrow-right', 14) }}}</a></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2 style="font-size:var(--fs-lg)">Thang hạng & điều kiện lên hạng</h2><span class="text-sm text-muted">Xét vào {{ jobTime }}</span></div>
+        <div class="card-body">{{{ ladderHtml }}}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-head"><h2>Thống kê</h2>{{{ periodSegHtml }}}</div>
+    <div class="card-body" id="c01-stats">{{{ UI.skeletonCards(2) }}}</div>
+  </div>
+</div>
+{% endblock %}
+
+{% block seller/dashboard-stats-body %}
+<!-- dashboard · nội dung #c01-stats sau khi tải: 6 ô số liệu kỳ + biểu đồ đơn/click — data: st, conversion, rangeLabel, chartHtml -->
+<div class="stat-grid stat-grid-6">
+  <div class="stat"><div class="stat-label">{{{ icon('external', 16) }}} Lượt click</div><div class="stat-value">{{ num(st.clicks) }}</div></div>
+  <div class="stat"><div class="stat-label">{{{ icon('inbox', 16) }}} Đơn đã đặt</div><div class="stat-value">{{ num(st.orders) }}</div></div>
+  <div class="stat"><div class="stat-label">{{{ icon('check-circle', 16) }}} Đơn thanh toán</div><div class="stat-value">{{ num(st.paid) }}</div><div class="stat-sub">Chuyển đổi {{ conversion }}</div></div>
+  <div class="stat"><div class="stat-label">{{{ icon('bars', 16) }}} Doanh số kỳ</div><div class="stat-value">{{ money(st.revenue) }}</div></div>
+  <div class="stat stat-accent"><div class="stat-label">{{{ icon('cash', 16) }}} Hoa hồng kỳ</div><div class="stat-value">{{ money(st.commission) }}</div></div>
+  <div class="stat"><div class="stat-label">{{{ icon('calendar', 16) }}} Kỳ</div><div class="stat-value" style="font-size:var(--fs-md)">{{ rangeLabel }}</div></div>
+</div>
+<div class="mt-6">
+  <h3 class="mb-2">Xu hướng đơn & click</h3>
+  {{{ chartHtml }}}
+</div>
+{% endblock %}
+
+{% block seller/dashboard-tree %}
+<!-- dashboard · tab Tuyến: cây tuyến dưới 3 cấp — data: countsText, treeHtml -->
+<div class="stack-lg">
+  <div class="card">
+    <div class="card-head"><h2>Tuyến dưới (F1 · F2 · F3)</h2><span class="text-sm text-muted">{{ countsText }}</span></div>
+    <div class="card-body">{{{ treeHtml }}}</div>
+  </div>
+</div>
+{% endblock %}

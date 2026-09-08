@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trang mua hàng · HOMI365</title>
+  <meta name="theme-color" content="#1E3A66">
+  <link rel="icon" href="./public/image/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./css/tokens.css">
+  <link rel="stylesheet" href="./css/base.css">
+  <link rel="stylesheet" href="./css/components.css">
+  <link rel="stylesheet" href="./css/buyer.css">
+  <link rel="stylesheet" href="./css/seller.css">
+  <link rel="stylesheet" href="./css/admin.css">
+  <style>
+  .proto-nav{position:fixed;right:16px;bottom:16px;z-index:9999;font:13px/1.4 system-ui,sans-serif}
+  .proto-nav>summary{list-style:none;cursor:pointer;background:#1E3A66;color:#fff;padding:8px 14px;
+    border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.25);user-select:none}
+  .proto-nav>summary::-webkit-details-marker{display:none}
+  .proto-nav[open]>summary{border-radius:8px 8px 0 0}
+  .proto-nav .panel{background:#fff;border:1px solid #d8dee9;border-radius:8px;padding:12px 14px;
+    max-height:70vh;overflow:auto;min-width:230px;box-shadow:0 8px 28px rgba(0,0,0,.18)}
+  .proto-nav h4{margin:10px 0 4px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#6b7a90}
+  .proto-nav h4:first-child{margin-top:0}
+  .proto-nav a{display:block;padding:3px 0;color:#1E3A66;text-decoration:none}
+  .proto-nav a:hover{text-decoration:underline}
+  .proto-nav a[aria-current]{font-weight:700}
+  </style>
+</head>
+<body>
+<!-- Nội dung dựng sẵn: xem được ngay cả khi tắt JS. Có JS thì app thật render đè lên. -->
+<div id="app-root">
+
+<div class="buyer">
+  <header class="buyer-header">
+    <div class="buyer-header-inner">
+      <a href="index.html" class="brand" aria-label="HOMI365 — trang giới thiệu"><span class="brand " aria-label="HOMI365"><svg width="34" height="34" viewBox="0 0 100 100" aria-hidden="true"><g fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 46 L50 13 L86 46 V85 A3 3 0 0 1 83 88 H17 A3 3 0 0 1 14 85 Z" stroke="var(--navy-600)" stroke-width="7"/><path d="M50 76 C40 67 32.5 60.5 32.5 54 C32.5 49 36.5 45 41.5 45 C45.3 45 48.6 47.2 50 50 C51.4 47.2 54.7 45 58.5 45 C63.5 45 67.5 49 67.5 54 C67.5 60.5 60 67 50 76 Z" stroke="var(--teal-500)" stroke-width="6"/></g></svg><span class="brand-word" style="font-size:23px">HOMI<span class="n365">365</span></span></span></a>
+      <nav class="buyer-nav" aria-label="Điều hướng">
+        <a href="order-lookup.html" class=""><svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><span>Tra cứu đơn hàng</span></a>
+        <a href="login.html" class=""><svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M10.85 12.15L19 4M18 5l2 2M15 8l2 2"/></svg><span>Đăng nhập thành viên</span></a>
+      </nav>
+    </div>
+  </header>
+
+  
+
+  <main class="buyer-main " id="buyer-main"><!-- buy · Trang mua hàng: (a) form · (b) OTP tại chỗ · (c) lỗi field · (g) SMS lỗi -->
+<div class="a01-grid">
+  <div class="a01-pkg">
+<div class="pkg">
+  <div class="pkg-icon"><svg class="ico " width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="6"/><path d="M12 9v3l2 1M9 4l.5-2h5l.5 2M9 20l.5 2h5l.5-2"/></svg></div>
+  <div class="grow">
+    <h1 class="pkg-name">Gói Bác sĩ 24/7</h1>
+    <div class="pkg-meta">CN02 · License 12 tháng · kèm đồng hồ HW01</div>
+  </div>
+  <div class="pkg-price">10.000.000đ</div>
+</div>
+</div>
+
+  <div class="a01-ref">
+    <div class="card card-tint"><div class="card-body ref-card">
+      <span class="avatar" aria-hidden="true">A</span>
+      <div>
+        <div class="text-sm text-muted">Người giới thiệu</div>
+        <div class="text-strong">Nguyễn Văn An</div>
+        <div class="text-caption mono">Mã AN7K2Q</div>
+      </div>
+    </div></div>
+  </div>
+
+  <div class="card a01-form" id="a01-card">
+    <div class="card-head"><h2>Thông tin nhận hàng</h2><span class="text-sm text-muted">Bước 1/3</span></div>
+    <div class="card-body" id="a01-body">
+      <form id="a01-form" novalidate action="payment.html" method="get">
+        <div class="field " id="fullName-field">
+      <label class="field-label" for="fullName">Họ và tên<span class="req" aria-hidden="true">*</span></label>
+      
+      <input class="input " type="text" id="fullName" name="fullName" placeholder="Nguyễn Văn A" autocomplete="name" required aria-required="true" aria-describedby="fullName-err" value="">
+      <div class="field-error" id="fullName-err"></div>
+    </div>
+        <div class="field " id="phone-field">
+      <label class="field-label" for="phone">Số điện thoại<span class="req" aria-hidden="true">*</span></label>
+      <div class="field-hint">Dùng để nhận mã OTP, mã kích hoạt và đăng nhập sau này.</div>
+      <input class="input input-mono" type="tel" id="phone" name="phone" placeholder="0912 345 678" autocomplete="tel" inputmode="numeric" required aria-required="true" aria-describedby="phone-err" value="">
+      <div class="field-error" id="phone-err"></div>
+    </div>
+        <div class="field " id="email-field">
+      <label class="field-label" for="email">Email<span class="req" aria-hidden="true">*</span></label>
+      <div class="field-hint">Nhận xác nhận đơn hàng và thông tin thành viên.</div>
+      <input class="input " type="email" id="email" name="email" placeholder="ban@email.com" autocomplete="email" required aria-required="true" aria-describedby="email-err" value="">
+      <div class="field-error" id="email-err"></div>
+    </div>
+        <div class="field " id="address-field">
+      <label class="field-label" for="address">Địa chỉ nhận hàng<span class="req" aria-hidden="true">*</span></label>
+      
+      <textarea class="textarea" id="address" name="address" placeholder="Số nhà, đường, phường/xã, tỉnh/thành phố" autocomplete="street-address" required aria-required="true" aria-describedby="address-err" rows="2"></textarea>
+      <div class="field-error" id="address-err"></div>
+    </div>
+        <div class="field " id="note-field">
+      <label class="field-label" for="note">Ghi chú</label>
+      
+      <textarea class="textarea" id="note" name="note" placeholder="Ví dụ: giao giờ hành chính, gọi trước khi giao…"   aria-describedby="note-err" rows="2"></textarea>
+      <div class="field-error" id="note-err"></div>
+    </div>
+        <div class="qty-fixed mt-4"><span>Số lượng</span><strong>1 gói (cố định)</strong></div>
+        <div class="total-row"><span>Tổng thanh toán</span><span class="total-amt">10.000.000đ</span></div>
+        <div id="a01-alert" class="mt-4" hidden></div>
+        <div class="actions"><a href="payment.html" role="button" class="btn btn-primary btn-lg btn-block" id="a01-submit"><svg class="ico " width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/><path d="M8 9h8M8 13h5"/></svg> Gửi OTP &amp; tiếp tục</a></div>
+        <p class="text-caption text-center mt-3">Bằng việc tiếp tục, bạn đồng ý nhận SMS xác thực từ HOMI365.</p>
+      </form>
+    </div>
+  </div>
+
+  <div class="a01-intro stack">
+
+<div class="card product-card">
+  <div class="gallery">
+    <div class="gallery-main" id="gallery-main" tabindex="0" role="group" aria-roledescription="carousel" aria-label="Ảnh giới thiệu gói CN02">
+      <img id="gallery-img" src="./public/product/nc-1.png" alt="Theo dõi, quản lý sức khoẻ cá nhân" width="1890" height="1063" decoding="async" draggable="false">
+      <button class="gallery-nav gallery-nav-prev" aria-label="Ảnh trước"><svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+      <button class="gallery-nav gallery-nav-next" aria-label="Ảnh kế tiếp"><svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg></button>
+      <span class="gallery-caption" id="gallery-caption" aria-live="polite">Theo dõi, quản lý sức khoẻ cá nhân</span>
+    </div>
+    <div class="gallery-thumbs" role="tablist" aria-label="Chọn ảnh">
+      
+      <button class="gallery-thumb is-active" role="tab" id="gthumb-0" aria-selected="true" title="Theo dõi, quản lý sức khoẻ cá nhân">
+        <img src="./public/product/thumbs/nc-1.png" alt="" loading="lazy" decoding="async" draggable="false"><span class="sr-only">Theo dõi, quản lý sức khoẻ cá nhân</span>
+      </button>
+      
+      <button class="gallery-thumb " role="tab" id="gthumb-1" aria-selected="false" title="Thu nhận dữ liệu vào ứng dụng">
+        <img src="./public/product/thumbs/nc-2.png" alt="" loading="lazy" decoding="async" draggable="false"><span class="sr-only">Thu nhận dữ liệu vào ứng dụng</span>
+      </button>
+      
+      <button class="gallery-thumb " role="tab" id="gthumb-2" aria-selected="false" title="Lưu trữ dữ liệu sức khoẻ">
+        <img src="./public/product/thumbs/nc-3.png" alt="" loading="lazy" decoding="async" draggable="false"><span class="sr-only">Lưu trữ dữ liệu sức khoẻ</span>
+      </button>
+      
+      <button class="gallery-thumb " role="tab" id="gthumb-3" aria-selected="false" title="Chia sẻ thông tin sức khoẻ online">
+        <img src="./public/product/thumbs/nc-4.png" alt="" loading="lazy" decoding="async" draggable="false"><span class="sr-only">Chia sẻ thông tin sức khoẻ online</span>
+      </button>
+      
+      <button class="gallery-thumb " role="tab" id="gthumb-4" aria-selected="false" title="Cảnh báo và hỗ trợ khẩn cấp (SOS)">
+        <img src="./public/product/thumbs/nc-5.png" alt="" loading="lazy" decoding="async" draggable="false"><span class="sr-only">Cảnh báo và hỗ trợ khẩn cấp (SOS)</span>
+      </button>
+      
+      <button class="gallery-thumb " role="tab" id="gthumb-5" aria-selected="false" title="Theo dõi và chăm sóc sức khoẻ từ xa">
+        <img src="./public/product/thumbs/nc-6.png" alt="" loading="lazy" decoding="async" draggable="false"><span class="sr-only">Theo dõi và chăm sóc sức khoẻ từ xa</span>
+      </button>
+      
+    </div>
+  </div>
+  <div class="card-body">
+    <p>Gói dịch vụ cao cấp bao gồm 01 đồng hồ thông minh HW01 theo dõi nhịp tim / SOS giao tận nơi và 01 năm phần mềm Bác sĩ 24/7 (mã kích hoạt gửi qua SMS).</p>
+    <ul class="pkg-benefits"><li><svg class="ico " width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg><span>Bác sĩ trực 24/7, gọi hỗ trợ khẩn cấp</span></li><li><svg class="ico " width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg><span>Đồng hồ HW01 đo nhịp tim, SpO2, huyết áp</span></li><li><svg class="ico " width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg><span>Cảnh báo SOS tự động tới người thân</span></li><li><svg class="ico " width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg><span>Lưu trữ hồ sơ sức khoẻ 10 năm</span></li></ul>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <h2 style="font-size:var(--fs-lg)">Chi tiết tính năng gói CN02</h2>
+    <button class="btn btn-ghost btn-sm" id="feat-toggle" aria-expanded="false" aria-controls="feat-body">Xem chi tiết <svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
+  </div>
+  <div class="card-body" id="feat-body" hidden>
+    <p class="text-sm text-muted">Gói Bác sĩ 24/7 hỗ trợ, tư vấn sức khoẻ (ký hiệu CN02) cung cấp các tính năng nâng cao của nền tảng HOMI365. Ngoài việc tự theo dõi sức khoẻ cá nhân, người dùng được Trợ lý sức khoẻ theo dõi 24/7, được tư vấn trực tuyến từ đội ngũ bác sĩ, và khi có tình huống bất thường khẩn cấp hệ thống tự động gọi tới người thân kèm vị trí của người dùng để hỗ trợ kịp thời.</p>
+    <div class="feature-list mt-3">
+      
+      <details class="feature" open>
+        <summary>1. Theo dõi, quản lý sức khoẻ cá nhân</summary>
+        <ul><li>Sử dụng nền tảng HOMI365 để theo dõi, quản lý dữ liệu sức khoẻ cá nhân với các tính năng nâng cao.</li></ul>
+      </details>
+      
+      <details class="feature" >
+        <summary>2. Thu nhận dữ liệu vào ứng dụng</summary>
+        <ul><li>Thu nhận dữ liệu từ thiết bị đo kết nối đến ứng dụng</li><li>Nhập dữ liệu thông tin sức khoẻ thủ công</li><li>Tải hồ sơ sức khoẻ</li><li>Nhập hồ sơ sức khoẻ bằng chụp OCR</li></ul>
+      </details>
+      
+      <details class="feature" >
+        <summary>3. Lưu trữ dữ liệu sức khoẻ</summary>
+        <ul><li>Thời gian lưu trữ kéo dài 10 năm</li><li>Dung lượng lưu trữ tối đa 50MB</li></ul>
+      </details>
+      
+      <details class="feature" >
+        <summary>4. Chia sẻ thông tin sức khoẻ online</summary>
+        <ul><li>Chia sẻ dữ liệu sức khoẻ với Trung tâm theo dõi, chăm sóc sức khoẻ TT247</li><li>Thêm không giới hạn người thân theo dõi</li><li>Không cho phép thêm bác sĩ theo dõi</li></ul>
+      </details>
+      
+      <details class="feature" >
+        <summary>5. Cảnh báo và hỗ trợ khẩn cấp (SOS)</summary>
+        <ul><li>Tự động gửi cảnh báo khi có chỉ số sức khoẻ bất thường qua thông báo trên ứng dụng</li><li>Cuộc gọi tự động (Callbot) thông báo tình trạng bất thường nghiêm trọng đến người thân</li><li>Nút SOS trên ứng dụng để yêu cầu hỗ trợ từ TT247 và người thân</li></ul>
+      </details>
+      
+      <details class="feature" >
+        <summary>6. Theo dõi và chăm sóc sức khoẻ từ xa</summary>
+        <ul><li>Gọi lên TT247 để được Trợ lý sức khoẻ giải đáp về dịch vụ và tư vấn sức khoẻ trong phạm vi được hướng dẫn</li><li>TT247 chủ động theo dõi và hỗ trợ từ xa khi có bất thường nghiêm trọng hoặc khi nhấn nút SOS</li></ul>
+      </details>
+      
+      <details class="feature" >
+        <summary>7. Dịch vụ Bác sĩ 24/7</summary>
+        <ul><li>Bác sĩ 24/7 hỗ trợ khi người dùng gặp bất thường nghiêm trọng về sức khoẻ hoặc nhấn nút SOS trên ứng dụng</li></ul>
+      </details>
+      
+      <details class="feature" >
+        <summary>8. Tính năng nâng cao của nền tảng</summary>
+        <ul><li>Nhắc lịch uống thuốc</li><li>Người thân theo dõi lịch uống thuốc</li><li>Phân tích dữ liệu bằng AI theo tuần, tháng, năm để đưa ra xu hướng bệnh lý và nguy cơ tiềm ẩn, kèm tư vấn của bác sĩ</li></ul>
+      </details>
+      
+    </div>
+  </div>
+</div>
+
+</div>
+</div>
+
+
+</main>
+
+  <footer class="site-footer">
+    <div class="site-footer-inner">
+      <div>
+        <span class="brand " aria-label="HOMI365"><svg width="28" height="28" viewBox="0 0 100 100" aria-hidden="true"><g fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 46 L50 13 L86 46 V85 A3 3 0 0 1 83 88 H17 A3 3 0 0 1 14 85 Z" stroke="var(--navy-600)" stroke-width="7"/><path d="M50 76 C40 67 32.5 60.5 32.5 54 C32.5 49 36.5 45 41.5 45 C45.3 45 48.6 47.2 50 50 C51.4 47.2 54.7 45 58.5 45 C63.5 45 67.5 49 67.5 54 C67.5 60.5 60 67 50 76 Z" stroke="var(--teal-500)" stroke-width="6"/></g></svg><span class="brand-word" style="font-size:19px">HOMI<span class="n365">365</span></span></span>
+        <p class="mt-2">CÔNG TY TNHH GIẢI PHÁP CÔNG NGHỆ HUY GIÁP</p>
+        <p>Hỗ trợ <strong>1900 6868</strong> · 08:00 – 20:00 hằng ngày</p>
+      </div>
+      <div>
+        <div class="footer-title">Khách hàng</div>
+        <a href="order-lookup.html">Tra cứu đơn hàng</a>
+        <a href="login.html">Đăng nhập thành viên</a>
+        <a href="register.html">Đăng ký thành viên</a>
+        <a href="index.html">Trang giới thiệu prototype</a>
+      </div>
+      <div>
+        <div class="footer-title">Chính sách</div>
+        <a href="policy.html">Chính sách bảo hành</a><a href="policy.html">Chính sách đổi trả và hoàn tiền</a><a href="policy.html">Quy chế hoạt động website bán hàng</a><a href="policy.html">Chính sách vận chuyển và giao nhận</a><a href="policy.html">Chính sách thanh toán</a><a href="policy.html">Chính sách bảo mật thông tin</a><a href="policy.html">Chính sách kiểm hàng</a>
+      </div>
+      <div>
+        <div class="footer-title">Quản trị</div>
+        <a href="admin-login.html">Đăng nhập quản trị</a>
+        <a href="./styleguide.html">Bộ thành phần giao diện</a>
+      </div>
+    </div>
+  </footer>
+</div>
+
+</div>
+<details class="proto-nav"><summary>Màn hình</summary><div class="panel"><h4>Người mua & công khai</h4><a href="index.html">Trang bìa prototype</a><a href="buy.html" aria-current="page">Trang mua hàng</a><a href="buy-invalid.html">Link giới thiệu không hợp lệ</a><a href="buy-inactive.html">Thành viên bị khoá</a><a href="payment.html">Thanh toán</a><a href="order-result-paid.html">Đơn hàng đã thanh toán</a><a href="order-result-awaiting.html">Chờ đối soát chuyển khoản</a><a href="order-result-failed.html">Thanh toán thất bại</a><a href="order-result-rejected.html">Đơn bị từ chối đối soát</a><a href="order-result-later.html">Đã gửi mã qua SMS, đăng ký sau</a><a href="order-result-nocode.html">Đã thanh toán, kho hết mã</a><a href="order-lookup.html">Tra cứu đơn hàng</a><a href="login.html">Đăng nhập thành viên</a><a href="login-forgot.html">Quên mật khẩu</a><a href="register.html">Đăng ký thành viên</a><a href="register-pending.html">Hồ sơ chờ duyệt</a><a href="register-rejected.html">Hồ sơ bị từ chối</a><a href="policy.html">Chính sách</a><a href="403.html">Không có quyền truy cập</a><h4>Thành viên</h4><a href="dashboard.html">Tổng quan</a><a href="my-package.html">Gói của tôi</a><a href="wallet.html">Ví & rút tiền</a><a href="profile.html">Hồ sơ</a><h4>Quản trị</h4><a href="admin-login.html">Đăng nhập</a><a href="admin-dashboard.html">Tổng quan</a><a href="agents.html">Thành viên</a><a href="orders.html">Đơn hàng & đối soát</a><a href="products.html">Sản phẩm & hoa hồng</a><a href="inventory.html">Kho mã & thiết bị</a><a href="ranks.html">Hạng & quy tắc</a><a href="withdrawals.html">Rút tiền & sổ hoa hồng</a><a href="registrations.html">Duyệt đăng ký</a><a href="admin-users.html">Tài khoản admin</a></div></details>
+
+<script>window.__ROUTE__ = "buy";</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js" crossorigin="anonymous"></script>
+<script src="./config/business-rules.js"></script>
+<script src="./config/policies.js"></script>
+<script src="./mock/data.js"></script>
+<script src="./js/ui.js"></script>
+<script src="./js/tpl.js"></script>
+<script src="./js/templates.js"></script>
+<script src="./js/views-buyer.js"></script>
+<script src="./js/views-seller.js"></script>
+<script src="./js/views-admin.js"></script>
+<script>document.addEventListener("DOMContentLoaded", function () { try {
+  Store.captureRef("AN7K2Q");
+} catch (e) { console.error(e); } });</script>
+<script src="./js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản trị · Tổng quan · HOMI365</title>
+  <meta name="theme-color" content="#1E3A66">
+  <link rel="icon" href="./public/image/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./css/tokens.css">
+  <link rel="stylesheet" href="./css/base.css">
+  <link rel="stylesheet" href="./css/components.css">
+  <link rel="stylesheet" href="./css/buyer.css">
+  <link rel="stylesheet" href="./css/seller.css">
+  <link rel="stylesheet" href="./css/admin.css">
+  <style>
+  .proto-nav{position:fixed;right:16px;bottom:16px;z-index:9999;font:13px/1.4 system-ui,sans-serif}
+  .proto-nav>summary{list-style:none;cursor:pointer;background:#1E3A66;color:#fff;padding:8px 14px;
+    border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.25);user-select:none}
+  .proto-nav>summary::-webkit-details-marker{display:none}
+  .proto-nav[open]>summary{border-radius:8px 8px 0 0}
+  .proto-nav .panel{background:#fff;border:1px solid #d8dee9;border-radius:8px;padding:12px 14px;
+    max-height:70vh;overflow:auto;min-width:230px;box-shadow:0 8px 28px rgba(0,0,0,.18)}
+  .proto-nav h4{margin:10px 0 4px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#6b7a90}
+  .proto-nav h4:first-child{margin-top:0}
+  .proto-nav a{display:block;padding:3px 0;color:#1E3A66;text-decoration:none}
+  .proto-nav a:hover{text-decoration:underline}
+  .proto-nav a[aria-current]{font-weight:700}
+  </style>
+</head>
+<body>
+<!-- Nội dung dựng sẵn: xem được ngay cả khi tắt JS. Có JS thì app thật render đè lên. -->
+<div id="app-root">
+
+<div class="admin">
+  <aside class="admin-sidebar" id="admin-sidebar">
+    <div class="admin-sidebar-brand"><span class="brand brand-invert" aria-label="HOMI365"><svg width="30" height="30" viewBox="0 0 100 100" aria-hidden="true"><g fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 46 L50 13 L86 46 V85 A3 3 0 0 1 83 88 H17 A3 3 0 0 1 14 85 Z" stroke="#FFFFFF" stroke-width="7"/><path d="M50 76 C40 67 32.5 60.5 32.5 54 C32.5 49 36.5 45 41.5 45 C45.3 45 48.6 47.2 50 50 C51.4 47.2 54.7 45 58.5 45 C63.5 45 67.5 49 67.5 54 C67.5 60.5 60 67 50 76 Z" stroke="var(--teal-300)" stroke-width="6"/></g></svg><span class="brand-word" style="font-size:20px">HOMI<span class="n365">365</span></span></span><span class="sub">Quản trị HOMI365</span></div>
+    <nav class="admin-nav" aria-label="Menu quản trị">
+      
+        
+        <a href="admin-dashboard.html" class="is-active">
+          <svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg><span>Tổng quan</span>
+          <span class="nav-code">admin-dashboard</span>
+        </a>
+        
+      
+        
+        <div class="admin-nav-group">Vận hành</div>
+        
+      
+        
+        <a href="registrations.html" class="">
+          <svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg><span>Duyệt đăng ký thành viên</span>
+          <span class="nav-badge">2</span>
+        </a>
+        
+      
+        
+        <a href="withdrawals.html" class="">
+          <svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 12h.01M18 12h.01"/></svg><span>Rút tiền &amp; sổ hoa hồng</span>
+          <span class="nav-badge">3</span>
+        </a>
+        
+      
+        
+        <a href="orders.html" class="">
+          <svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.1L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.5-6.9A2 2 0 0016.8 4H7.2a2 2 0 00-1.7 1.1z"/></svg><span>Đơn hàng &amp; đối soát</span>
+          <span class="nav-badge">4</span>
+        </a>
+        
+      
+        
+        <a href="agents.html" class="">
+          <svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2 20a7 7 0 0114 0M16 4a3.5 3.5 0 010 7M22 20a7 7 0 00-6-6.9"/></svg><span>Thành viên</span>
+          <span class="nav-code">agents</span>
+        </a>
+        
+      
+        
+        <a href="inventory.html" class="">
+          <svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M10.85 12.15L19 4M18 5l2 2M15 8l2 2"/></svg><span>Kho mã &amp; thiết bị</span>
+          <span class="nav-code">inventory</span>
+        </a>
+        
+      
+        
+        <div class="admin-nav-group">Cấu hình</div>
+        
+      
+        
+        <a href="products.html" class="">
+          <svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16.5 9.4L7.5 4.2M21 16V8a2 2 0 00-1-1.7l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.7l7 4a2 2 0 002 0l7-4a2 2 0 001-1.7z"/><path d="M3.3 7L12 12l8.7-5M12 22V12"/></svg><span>Sản phẩm &amp; hoa hồng</span>
+          <span class="nav-code">products</span>
+        </a>
+        
+      
+        
+        <a href="ranks.html" class="">
+          <svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg><span>Hạng &amp; quy tắc</span>
+          <span class="nav-code">ranks</span>
+        </a>
+        
+      
+        
+        <a href="admin-users.html" class="">
+          <svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>Tài khoản admin</span>
+          <span class="nav-code">admin-users</span>
+        </a>
+        
+      
+    </nav>
+    <div class="admin-sidebar-foot">
+      <div class="who">Trưởng bộ phận</div>
+      <div class="role">Head Admin · head</div>
+      <button class="btn btn-sm btn-secondary"><svg class="ico " width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg> Đăng xuất</button>
+    </div>
+  </aside>
+
+  <div class="admin-content">
+    <div class="admin-topbar">
+      <div class="row">
+        <button class="btn btn-icon btn-secondary admin-menu-btn" aria-label="Mở menu"><svg class="ico " width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+        <div><div class="crumb">admin-dashboard</div><h1>Tổng quan</h1></div>
+      </div>
+      <div class="row"></div>
+    </div>
+    <main class="admin-main"><!-- admin-dashboard · Tổng quan: thống kê kỳ, biểu đồ doanh thu, job xét hạng, việc cần làm -->
+<div class="stack-lg">
+  <div class="row-between">
+    <p class="text-muted">Số liệu 30 ngày gần nhất</p>
+    
+<!-- Bộ chọn kỳ thống kê (tuần / tháng / quý) trên admin-dashboard -->
+<div class="seg" role="group" aria-label="Kỳ">
+  
+  <button class="">7 ngày</button>
+  
+  <button class="is-active">30 ngày</button>
+  
+  <button class="">90 ngày</button>
+  
+</div>
+
+  </div>
+
+  <div class="stat-grid stat-grid-6">
+    <div class="stat stat-navy"><div class="stat-label"><svg class="ico " width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-8M22 20H2"/></svg> Doanh thu</div><div class="stat-value">460.000.000đ</div><div class="stat-sub">46 đơn thanh toán · về công ty 1.750.000đ</div></div>
+    <div class="stat"><div class="stat-label"><svg class="ico " width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.1L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.5-6.9A2 2 0 0016.8 4H7.2a2 2 0 00-1.7 1.1z"/></svg> Số đơn</div><div class="stat-value">58</div></div>
+    <div class="stat"><div class="stat-label"><svg class="ico " width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2 20a7 7 0 0114 0M16 4a3.5 3.5 0 010 7M22 20a7 7 0 00-6-6.9"/></svg> Thành viên mới</div><div class="stat-value">0</div><div class="stat-sub">11 thành viên tổng</div></div>
+    <div class="stat stat-clickable stat-accent"><div class="stat-label"><svg class="ico " width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg> Đăng ký chờ duyệt</div><div class="stat-value text-warning">2</div></div>
+    <div class="stat stat-clickable"><div class="stat-label"><svg class="ico " width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 12h.01M18 12h.01"/></svg> Rút tiền chờ duyệt</div><div class="stat-value text-warning">2</div><div class="stat-sub">1 chờ chi trả</div></div>
+    <div class="stat stat-clickable"><div class="stat-label"><svg class="ico " width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M10.85 12.15L19 4M18 5l2 2M15 8l2 2"/></svg> Mã còn trong kho</div><div class="stat-value ">1.116</div></div>
+  </div>
+
+  <div class="split-2">
+    <div class="stack">
+      <div class="card">
+        <div class="card-head"><h2>Doanh thu theo ngày (triệu đồng)</h2></div>
+        <div class="card-body"><div class="chart"><svg viewBox="0 0 640 240" role="img" aria-label="Doanh thu theo ngày"><line class="grid-line" x1="44" x2="628" y1="212" y2="212"/><text class="axis-text" x="38" y="216" text-anchor="end">0</text><line class="grid-line" x1="44" x2="628" y1="162" y2="162"/><text class="axis-text" x="38" y="166" text-anchor="end">10</text><line class="grid-line" x1="44" x2="628" y1="112" y2="112"/><text class="axis-text" x="38" y="116" text-anchor="end">20</text><line class="grid-line" x1="44" x2="628" y1="62" y2="62"/><text class="axis-text" x="38" y="66" text-anchor="end">30</text><line class="grid-line" x1="44" x2="628" y1="12" y2="12"/><text class="axis-text" x="38" y="16" text-anchor="end">40</text><rect class="bar is-accent" x="47.89333333333333" y="162" width="11.679999999999998" height="50" rx="2"><title>09/08: triệu đ 10</title></rect><rect class="bar is-accent" x="67.36" y="212" width="11.679999999999998" height="0" rx="2"><title>10/08: triệu đ 0</title></rect><rect class="bar is-accent" x="86.82666666666667" y="112" width="11.679999999999998" height="100" rx="2"><title>11/08: triệu đ 20</title></rect><rect class="bar is-accent" x="106.29333333333332" y="162" width="11.679999999999998" height="50" rx="2"><title>12/08: triệu đ 10</title></rect><rect class="bar is-accent" x="125.75999999999999" y="162" width="11.679999999999998" height="50" rx="2"><title>13/08: triệu đ 10</title></rect><rect class="bar is-accent" x="145.22666666666666" y="162" width="11.679999999999998" height="50" rx="2"><title>14/08: triệu đ 10</title></rect><rect class="bar is-accent" x="164.69333333333333" y="212" width="11.679999999999998" height="0" rx="2"><title>15/08: triệu đ 0</title></rect><rect class="bar is-accent" x="184.16" y="162" width="11.679999999999998" height="50" rx="2"><title>16/08: triệu đ 10</title></rect><rect class="bar is-accent" x="203.62666666666667" y="212" width="11.679999999999998" height="0" rx="2"><title>17/08: triệu đ 0</title></rect><rect class="bar is-accent" x="223.09333333333333" y="162" width="11.679999999999998" height="50" rx="2"><title>18/08: triệu đ 10</title></rect><rect class="bar is-accent" x="242.56" y="162" width="11.679999999999998" height="50" rx="2"><title>19/08: triệu đ 10</title></rect><rect class="bar is-accent" x="262.02666666666664" y="112" width="11.679999999999998" height="100" rx="2"><title>20/08: triệu đ 20</title></rect><rect class="bar is-accent" x="281.4933333333333" y="162" width="11.679999999999998" height="50" rx="2"><title>21/08: triệu đ 10</title></rect><rect class="bar is-accent" x="300.9599999999999" y="162" width="11.679999999999998" height="50" rx="2"><title>22/08: triệu đ 10</title></rect><rect class="bar is-accent" x="320.4266666666666" y="112" width="11.679999999999998" height="100" rx="2"><title>23/08: triệu đ 20</title></rect><rect class="bar is-accent" x="339.8933333333333" y="212" width="11.679999999999998" height="0" rx="2"><title>24/08: triệu đ 0</title></rect><rect class="bar is-accent" x="359.35999999999996" y="162" width="11.679999999999998" height="50" rx="2"><title>25/08: triệu đ 10</title></rect><rect class="bar is-accent" x="378.8266666666666" y="62" width="11.679999999999998" height="150" rx="2"><title>26/08: triệu đ 30</title></rect><rect class="bar is-accent" x="398.2933333333333" y="162" width="11.679999999999998" height="50" rx="2"><title>27/08: triệu đ 10</title></rect><rect class="bar is-accent" x="417.75999999999993" y="162" width="11.679999999999998" height="50" rx="2"><title>28/08: triệu đ 10</title></rect><rect class="bar is-accent" x="437.22666666666663" y="112" width="11.679999999999998" height="100" rx="2"><title>29/08: triệu đ 20</title></rect><rect class="bar is-accent" x="456.69333333333327" y="162" width="11.679999999999998" height="50" rx="2"><title>30/08: triệu đ 10</title></rect><rect class="bar is-accent" x="476.15999999999997" y="112" width="11.679999999999998" height="100" rx="2"><title>31/08: triệu đ 20</title></rect><rect class="bar is-accent" x="495.6266666666666" y="12" width="11.679999999999998" height="200" rx="2"><title>01/09: triệu đ 40</title></rect><rect class="bar is-accent" x="515.0933333333332" y="162" width="11.679999999999998" height="50" rx="2"><title>02/09: triệu đ 10</title></rect><rect class="bar is-accent" x="534.56" y="112" width="11.679999999999998" height="100" rx="2"><title>03/09: triệu đ 20</title></rect><rect class="bar is-accent" x="554.0266666666665" y="62" width="11.679999999999998" height="150" rx="2"><title>04/09: triệu đ 30</title></rect><rect class="bar is-accent" x="573.4933333333332" y="62" width="11.679999999999998" height="150" rx="2"><title>05/09: triệu đ 30</title></rect><rect class="bar is-accent" x="592.9599999999999" y="12" width="11.679999999999998" height="200" rx="2"><title>06/09: triệu đ 40</title></rect><rect class="bar is-accent" x="612.4266666666666" y="62" width="11.679999999999998" height="150" rx="2"><title>07/09: triệu đ 30</title></rect><text class="axis-text" x="53.733333333333334" y="232" text-anchor="middle">09/08</text><text class="axis-text" x="131.6" y="232" text-anchor="middle">13/08</text><text class="axis-text" x="209.46666666666664" y="232" text-anchor="middle">17/08</text><text class="axis-text" x="287.3333333333333" y="232" text-anchor="middle">21/08</text><text class="axis-text" x="365.2" y="232" text-anchor="middle">25/08</text><text class="axis-text" x="443.06666666666666" y="232" text-anchor="middle">29/08</text><text class="axis-text" x="520.9333333333333" y="232" text-anchor="middle">02/09</text><text class="axis-text" x="598.8" y="232" text-anchor="middle">06/09</text></svg>
+        </div></div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2>Job xét hạng cuối tháng</h2><span class="text-sm text-muted">0h ngày cuối tháng · tự động</span></div>
+        <div class="card-body">
+          <p><strong>1</strong> thành viên chưa bán đủ 1 gói trong tháng này (sẽ giáng 1 bậc nếu không phát sinh đơn). Thành viên đủ luỹ kế sẽ được thăng thẳng lên hạng tương ứng.</p>
+          
+          <div class="actions actions-row"><button class="btn btn-primary"><svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L3 14h9l-1 8 10-12h-9z"/></svg> Chạy xét hạng ngay (mô phỏng)</button></div>
+          
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>Việc cần làm</h2><span class="badge badge-warning">6</span></div>
+      <div class="card-body">
+        
+        <ul class="todo-list">
+          
+          <li><span class="todo-count">2</span><div class="todo-text">Hồ sơ đăng ký thành viên chờ duyệt<small>Duyệt 2 lớp: Specialist ×2 hoặc Head Admin</small></div><a class="btn btn-secondary btn-sm" href="registrations.html">Xử lý <svg class="ico " width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a></li>
+          
+          <li><span class="todo-count">2</span><div class="todo-text">Yêu cầu rút tiền chờ duyệt<small>Đối chiếu số dư rồi xác nhận / từ chối</small></div><a class="btn btn-secondary btn-sm" href="withdrawals.html">Xử lý <svg class="ico " width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a></li>
+          
+          <li><span class="todo-count">1</span><div class="todo-text">Rút tiền đã duyệt, chờ chi trả<small>Xuất file ngân hàng, đánh dấu đã chi trả</small></div><a class="btn btn-secondary btn-sm" href="withdrawals.html">Xử lý <svg class="ico " width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a></li>
+          
+          <li><span class="todo-count">4</span><div class="todo-text">Đơn chuyển khoản chờ đối soát<small>Xác nhận để cấp mã và ghi hoa hồng</small></div><a class="btn btn-secondary btn-sm" href="orders.html">Xử lý <svg class="ico " width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a></li>
+          
+          <li><span class="todo-count">1</span><div class="todo-text">Callback cổng đến sau khi đơn hết hạn<small>Cần kiểm tra thủ công</small></div><a class="btn btn-secondary btn-sm" href="orders.html">Xử lý <svg class="ico " width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a></li>
+          
+          <li><span class="todo-count">1</span><div class="todo-text">Đơn đã thanh toán chưa có mã<small>Kho hết — bổ sung mã</small></div><a class="btn btn-secondary btn-sm" href="inventory.html">Xử lý <svg class="ico " width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M12 5l7 7-7 7"/></svg></a></li>
+          
+        </ul>
+        
+      </div>
+    </div>
+  </div>
+</div>
+
+
+</main>
+  </div>
+</div>
+
+</div>
+<details class="proto-nav"><summary>Màn hình</summary><div class="panel"><h4>Người mua & công khai</h4><a href="index.html">Trang bìa prototype</a><a href="buy.html">Trang mua hàng</a><a href="buy-invalid.html">Link giới thiệu không hợp lệ</a><a href="buy-inactive.html">Thành viên bị khoá</a><a href="payment.html">Thanh toán</a><a href="order-result-paid.html">Đơn hàng đã thanh toán</a><a href="order-result-awaiting.html">Chờ đối soát chuyển khoản</a><a href="order-result-failed.html">Thanh toán thất bại</a><a href="order-result-rejected.html">Đơn bị từ chối đối soát</a><a href="order-result-later.html">Đã gửi mã qua SMS, đăng ký sau</a><a href="order-result-nocode.html">Đã thanh toán, kho hết mã</a><a href="order-lookup.html">Tra cứu đơn hàng</a><a href="login.html">Đăng nhập thành viên</a><a href="login-forgot.html">Quên mật khẩu</a><a href="register.html">Đăng ký thành viên</a><a href="register-pending.html">Hồ sơ chờ duyệt</a><a href="register-rejected.html">Hồ sơ bị từ chối</a><a href="policy.html">Chính sách</a><a href="403.html">Không có quyền truy cập</a><h4>Thành viên</h4><a href="dashboard.html">Tổng quan</a><a href="my-package.html">Gói của tôi</a><a href="wallet.html">Ví & rút tiền</a><a href="profile.html">Hồ sơ</a><h4>Quản trị</h4><a href="admin-login.html">Đăng nhập</a><a href="admin-dashboard.html" aria-current="page">Tổng quan</a><a href="agents.html">Thành viên</a><a href="orders.html">Đơn hàng & đối soát</a><a href="products.html">Sản phẩm & hoa hồng</a><a href="inventory.html">Kho mã & thiết bị</a><a href="ranks.html">Hạng & quy tắc</a><a href="withdrawals.html">Rút tiền & sổ hoa hồng</a><a href="registrations.html">Duyệt đăng ký</a><a href="admin-users.html">Tài khoản admin</a></div></details>
+
+<script>window.__ROUTE__ = "admin-dashboard";</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js" crossorigin="anonymous"></script>
+<script src="./config/business-rules.js"></script>
+<script src="./config/policies.js"></script>
+<script src="./mock/data.js"></script>
+<script src="./js/ui.js"></script>
+<script src="./js/tpl.js"></script>
+<script src="./js/templates.js"></script>
+<script src="./js/views-buyer.js"></script>
+<script src="./js/views-seller.js"></script>
+<script src="./js/views-admin.js"></script>
+<script>document.addEventListener("DOMContentLoaded", function () { try {
+  if (!Store.currentAdmin()) Store.adminLogin("head", "Homi@2026");
+} catch (e) { console.error(e); } });</script>
+<script src="./js/app.js"></script>
+</body>
+</html>

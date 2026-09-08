@@ -1,0 +1,50 @@
+<!-- login · Đăng nhập thành viên (SĐT + mật khẩu) · Quên mật khẩu (OTP) -->
+<div class="buyer-split">
+  <aside class="buyer-side">{{{ include('partials/intro-panel', intro) }}}</aside>
+  <div class="stack">
+    {% if reason === 'expired' %}
+    <div class="alert alert-warning" role="alert">{{{ icon('clock', 20) }}}<div><span class="alert-title">Phiên đăng nhập đã hết hạn</span>Vui lòng đăng nhập lại. Sau khi đăng nhập bạn sẽ quay về trang đang xem.</div></div>
+    {% endif %}
+    <div class="card"><div class="card-body" id="a05-body">
+      {% if forgot %}
+      <form novalidate onsubmit="Buyer.a05Forgot(event)">
+        {{{ UI.field({ id: 'fg-phone', label: 'Số điện thoại thành viên', required: true, type: 'tel', mono: true, placeholder: '0912 345 678', attrs: 'inputmode="numeric" autocomplete="tel"' }) }}}
+        <div id="a05-alert" hidden></div>
+        <div class="actions">
+          <button class="btn btn-primary btn-lg btn-block">{{{ icon('sms', 18) }}} Gửi OTP</button>
+          <a class="btn btn-ghost" href="#login">Quay lại đăng nhập</a>
+        </div>
+      </form>
+      {% else %}
+      <form novalidate onsubmit="Buyer.a05Submit(event)">
+        {{{ UI.field({ id: 'lg-phone', label: 'Số điện thoại', required: true, type: 'tel', mono: true, placeholder: '0912 345 678', attrs: 'inputmode="numeric" autocomplete="tel"' }) }}}
+        <div class="field mt-4" id="lg-pass-field">
+          <label class="field-label" for="lg-pass">Mật khẩu<span class="req">*</span></label>
+          <div class="input-affix">
+            <input class="input" type="password" id="lg-pass" autocomplete="current-password">
+            <button type="button" class="btn btn-ghost affix-btn" aria-label="Hiện mật khẩu" onclick="UI.togglePassword('lg-pass', this)">{{{ icon('eye', 20) }}}</button>
+          </div>
+          <div class="field-error" id="lg-pass-err"></div>
+        </div>
+        <div class="row-between mt-3">
+          <label class="check"><input type="checkbox" id="lg-remember"> Ghi nhớ đăng nhập ({{ CONFIG.session.rememberDays }} ngày)</label>
+          <a href="#login?view=forgot" class="btn-link">Quên mật khẩu?</a>
+        </div>
+        <div id="a05-alert" hidden></div>
+        <div class="actions"><button class="btn btn-primary btn-lg btn-block" id="lg-submit">{{{ icon('key', 18) }}} Đăng nhập</button></div>
+      </form>
+      <p class="text-center text-sm text-muted mt-4">Đã mua gói nhưng chưa có tài khoản? <a href="#register">Đăng ký thành viên</a><br><a href="#admin-login">Quản trị viên đăng nhập tại đây</a></p>
+      {% endif %}
+    </div></div>
+    <div class="demo-hint">Thành viên mẫu: <strong>0908123456</strong> / <strong>{{ CONFIG.demo.agentPassword }}</strong> (Lithium) · <strong>0912345678</strong> Gold · <strong>0987654321</strong> Copper · <strong>0977000111</strong> bị khoá · <strong>{{ demoPhone }}</strong> đã mua chưa đăng ký · <strong>0913000888</strong> hồ sơ chờ duyệt · <strong>0914000999</strong> bị từ chối</div>
+  </div>
+</div>
+
+{% block buyer/login-reset %}
+<h2 class="mb-4">Đặt mật khẩu mới</h2>
+<form novalidate onsubmit="Buyer.a05Reset(event, '{{ phone }}')">
+  {{{ UI.field({ id: 'rs-pw', label: 'Mật khẩu mới', type: 'password', required: true, hint: 'Tối thiểu 8 ký tự, có chữ và số' }) }}}
+  {{{ UI.field({ id: 'rs-pw2', label: 'Nhập lại mật khẩu mới', type: 'password', required: true }) }}}
+  <div class="actions"><button class="btn btn-primary btn-lg btn-block">Đặt lại mật khẩu</button></div>
+</form>
+{% endblock %}

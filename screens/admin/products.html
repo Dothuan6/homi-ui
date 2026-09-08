@@ -1,0 +1,117 @@
+<!-- products · Sản phẩm & bảng hoa hồng 6 hạng: list = [{ p, total, versions }], top = RULES.topRank() -->
+<div class="stack-lg">
+  <div class="alert alert-info">{{{ icon('info', 18) }}}<div class="text-sm">Mỗi gói có <strong>bảng hoa hồng theo 6 hạng</strong> (VNĐ/gói, tăng đơn điệu). Hoa hồng của một đơn = mức {{{ top.label }}}, chia theo chênh lệch hạng trên chuỗi tuyến; phần còn dư về công ty. Mỗi lần sửa lưu thành phiên bản có ngày hiệu lực.</div></div>
+
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>Mã</th><th>Tên gói</th><th class="num">Giá</th><th>Ảnh</th><th class="num">HH {{{ top.label }}}</th><th>Bảng HH</th><th>Cập nhật</th><th>Bán</th><th></th></tr></thead>
+    <tbody>
+    {% each row in list %}
+    {% set p = row.p %}
+      <tr>
+        <td class="mono text-strong">{{ p.id }}</td>
+        <td><span class="cell-main">{{ p.name }}</span><span class="cell-sub">{{{ esc(p.desc).slice(0, 70) }}}…</span></td>
+        <td class="num mono">{{ money(p.price) }}</td>
+        <td>{% if p.image %}<img src="{{ p.image }}" alt="" style="width:56px;height:36px;object-fit:cover;border-radius:4px">{% else %}—{% endif %}</td>
+        <td class="num mono">{{ money(row.total) }}</td>
+        <td><span class="text-sm">{{{ row.versions }}} phiên bản</span></td>
+        <td>{{ date(p.updatedAt) }}</td>
+        <td>{% if p.active %}<span class="badge badge-success">Đang bán</span>{% else %}<span class="badge badge-neutral">Tắt</span>{% endif %}</td>
+        <td><div class="row-actions">
+          <button class="btn btn-secondary btn-sm" onclick="Admin.packageForm('{{ p.id }}')">{{{ icon('edit', 14) }}} Sửa</button>
+          <button class="btn btn-secondary btn-sm" onclick="Admin.commissionTableModal('{{ p.id }}')">{{{ icon('layers', 14) }}} Bảng HH</button>
+          {% if p.active %}
+          <button class="btn btn-danger-outline btn-sm" onclick="Admin.togglePackage('{{ p.id }}', false)">Tắt bán</button>
+          {% else %}
+          <button class="btn btn-success btn-sm" onclick="Admin.togglePackage('{{ p.id }}', true)">Bật bán</button>
+          {% endif %}
+        </div></td>
+      </tr>
+    {% endeach %}
+    </tbody>
+  </table></div>
+
+  {% each row in list %}
+  <div class="card">
+    <div class="card-head"><h2>Bảng hoa hồng · {{ row.p.id }} {{ row.p.name }}</h2><button class="btn btn-primary btn-sm" onclick="Admin.commissionTableModal('{{ row.p.id }}')">{{{ icon('plus', 14) }}} Phiên bản mới</button></div>
+    <div class="card-body">{{{ include('admin/products-commission-table', row.table) }}}</div>
+  </div>
+  {% endeach %}
+</div>
+
+{% block admin/products-commission-table %}
+<!-- products · Bảng hoa hồng hiện hành + lịch sử phiên bản của một gói (view-model từ Admin.commissionTableVm) -->
+<!-- rows = [{ r, amount, diff }] · versions = [{ v, isCurrent, state: 'upcoming' | 'current' | 'replaced', cells: [{ short, changed, prevK, curK }] }] -->
+<div class="table-wrap"><table class="table" style="min-width:0">
+  <thead><tr><th>Hạng</th><th class="num">Mức hoa hồng</th><th class="num">Chênh lệch so với hạng dưới</th></tr></thead>
+  <tbody>
+  {% each row in rows %}
+    <tr><td>{{{ badge('rank', row.r.id) }}}</td><td class="num mono text-strong">{{ money(row.amount) }}</td><td class="num mono">{% if row.diff !== null %}+{{ money(row.diff) }}{% else %}—{% endif %}</td></tr>
+  {% endeach %}
+  </tbody>
+</table></div>
+
+<h3 class="mt-4 mb-2">Lịch sử phiên bản</h3>
+{% if !versions.length %}
+<p class="text-muted">Chưa có</p>
+{% endif %}
+{% each ver in versions %}
+{% set v = ver.v %}
+<div class="policy-version {{ ver.isCurrent ? 'is-current' : '' }}">
+  <div class="row-between">
+    <strong>v{{{ v.version }}}</strong>
+    {% if ver.state === 'upcoming' %}<span class="badge badge-info">Sắp hiệu lực</span>{% elif ver.state === 'current' %}<span class="badge badge-success">Đang áp dụng</span>{% else %}<span class="badge badge-neutral">Đã thay thế</span>{% endif %}
+  </div>
+  <div class="text-sm text-muted">Hiệu lực {{ date(v.effectiveFrom) }} · {{ v.by }} · {{ dt(v.at) }}</div>
+  <div class="text-sm mt-1">{% each cell, i in ver.cells %}{% if i %} · {% endif %}<span class="mono">{{{ cell.short }}} {% if cell.changed %}<span class="diff-del">{{{ cell.prevK }}}k</span> <span class="diff-add">{{{ cell.curK }}}k</span>{% else %}{{{ cell.curK }}}k{% endif %}</span>{% endeach %}</div>
+  {% if v.note %}<div class="text-sm text-muted mt-1">"{{ v.note }}"</div>{% endif %}
+</div>
+{% endeach %}
+{% endblock %}
+
+{% block admin/products-modal-package %}
+<!-- products · Modal thêm / sửa gói sản phẩm: p (gói hoặc mặc định), editing (true khi sửa) · part = 'body' | 'foot' -->
+{% if part === 'body' %}
+<form class="form-grid form-grid-2" novalidate>
+  {{{ UI.field({ id: 'pk-id', label: 'Mã gói', required: true, mono: true, value: p.id, attrs: editing ? 'readonly' : '' }) }}}
+  {{{ UI.field({ id: 'pk-name', label: 'Tên gói', required: true, value: p.name }) }}}
+  {{{ UI.field({ id: 'pk-price', label: 'Giá (đ)', required: true, mono: true, value: p.price, attrs: 'inputmode="numeric"' }) }}}
+  {{{ UI.field({ id: 'pk-image', label: 'Ảnh (đường dẫn)', value: p.image || '', placeholder: './public/product/og-cover.png' }) }}}
+  <div style="grid-column:1/-1">{{{ UI.field({ id: 'pk-full', label: 'Tên đầy đủ hiển thị', required: true, value: p.fullName }) }}}</div>
+  <div style="grid-column:1/-1">{{{ UI.field({ id: 'pk-desc', label: 'Mô tả', type: 'textarea', rows: 2, value: p.desc }) }}}</div>
+  <div style="grid-column:1/-1">{{{ UI.field({ id: 'pk-benefits', label: 'Quyền lợi (mỗi dòng một mục)', type: 'textarea', rows: 4, value: (p.benefits || []).join('\n') }) }}}</div>
+  {{{ UI.field({ id: 'pk-months', label: 'Thời hạn license (tháng, tuỳ chọn)', mono: true, value: p.licenseMonths || '' }) }}}
+  <label class="check"><input type="checkbox" id="pk-ship" {{{ p.hasShipping ? 'checked' : '' }}}> Có giao hàng vật lý</label>
+</form>
+{% if !editing %}<p class="text-caption mt-2">Sau khi tạo, thêm bảng hoa hồng 6 hạng bằng nút "Bảng HH".</p>{% endif %}
+{% elif part === 'foot' %}
+<button class="btn btn-secondary" onclick="UI.closeModal()">Huỷ</button>
+<button class="btn btn-primary" onclick="Admin.savePackage({{{ editing ? 'true' : 'false' }}})">Lưu</button>
+{% endif %}
+{% endblock %}
+
+{% block admin/products-modal-table %}
+<!-- products · Modal tạo phiên bản bảng hoa hồng mới: rows = [{ r, value, diff }], today · part = 'body' | 'foot' -->
+{% if part === 'body' %}
+<div class="table-wrap"><table class="table" style="min-width:0">
+  <thead><tr><th>Hạng</th><th>Mức hoa hồng (đ)</th><th class="num">Chênh lệch</th></tr></thead>
+  <tbody>
+  {% each row in rows %}
+    <tr>
+      <td>{{{ badge('rank', row.r.id) }}}</td>
+      <td><input class="input input-mono" id="ct-{{{ row.r.id }}}" value="{{{ row.value }}}" inputmode="numeric" oninput="Admin.ctRecalc()" aria-label="Mức {{{ row.r.label }}}"></td>
+      <td class="num mono" id="ct-diff-{{{ row.r.id }}}">{% if row.diff !== null %}+{{ money(row.diff) }}{% else %}—{% endif %}</td>
+    </tr>
+  {% endeach %}
+  </tbody>
+</table></div>
+<div class="field-error mt-2" id="ct-err"></div>
+<div class="form-grid form-grid-2 mt-4">
+  {{{ UI.field({ id: 'ct-eff', label: 'Ngày hiệu lực', required: true, type: 'date', value: today }) }}}
+  {{{ UI.field({ id: 'ct-note', label: 'Ghi chú phiên bản', placeholder: 'Lý do thay đổi…' }) }}}
+</div>
+<p class="text-caption mt-2">Đơn thanh toán từ ngày hiệu lực áp dụng bảng mới; hoa hồng đã ghi nhận giữ nguyên.</p>
+{% elif part === 'foot' %}
+<button class="btn btn-secondary" onclick="UI.closeModal()">Huỷ</button>
+<button class="btn btn-primary" onclick="Admin.saveCommissionTable('{{ p.id }}')">Lưu phiên bản</button>
+{% endif %}
+{% endblock %}

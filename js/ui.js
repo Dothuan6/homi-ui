@@ -219,6 +219,8 @@ const UI = {
     else { f.classList.remove('is-error'); e.innerHTML = ''; }
   },
   val: function(id) { const e = document.getElementById(id); return e ? String(e.value || '').trim() : ''; },
+  /** Dung lượng file dạng đọc được: 812 KB · 1,4 MB */
+  fileSize: function(bytes) { const b = Number(bytes) || 0; if (b < 1024) return b + ' B'; if (b < 1024 * 1024) return Math.round(b / 1024) + ' KB'; return (b / 1024 / 1024).toFixed(1).replace('.', ',') + ' MB'; },
   focusFirstError: function() { const f = document.querySelector('.field.is-error input, .field.is-error select, .field.is-error textarea'); if (f) f.focus(); },
   togglePassword: function(inputId, btn) {
     const i = document.getElementById(inputId); if (!i) return;

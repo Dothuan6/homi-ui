@@ -1,0 +1,137 @@
+<!-- wallet · Ví & rút tiền: hero số dư, panel rút tiền (#wd-panel), tab Lịch sử / Sổ hoa hồng
+     data: u, w, cw, wdStep, wdTab, wdCount, maxPerMonth, payoutNote, tabHtml -->
+<div class="stack-lg">
+  <div class="page-title"><div><h1>Ví & rút tiền</h1><p>Hoa hồng ghi nhận ngay khi đơn thanh toán · rút tối đa {{ maxPerMonth }} lần/tháng</p></div></div>
+  <div class="grid-2 grid-2-wide">
+    <div class="wallet-hero">
+      <div class="label">Số dư khả dụng</div>
+      <div class="amount">{{ money(w.available) }}</div>
+      <div class="split" style="grid-template-columns:repeat(3,1fr)">
+        <div><div class="label">Đã ghi nhận</div><div class="v">{{ money(w.recorded) }}</div></div>
+        <div><div class="label">Đang chờ duyệt rút</div><div class="v">{{ money(w.held) }}</div></div>
+        <div><div class="label">Đã rút</div><div class="v">{{ money(w.withdrawn) }}</div></div>
+      </div>
+      <button class="btn btn-accent btn-lg btn-block" onclick="Seller.wdStart()" {{{ cw.ok ? '' : 'disabled' }}}>{{{ icon('cash', 20) }}} Tạo yêu cầu rút tiền</button>
+      {% if !cw.ok %}<div class="text-sm mt-2" style="color:var(--sky-200)">{{ cw.message }}{% if cw.reason === 'bank' %} <a href="#profile" style="color:var(--teal-300)">Cập nhật hồ sơ</a>{% endif %}</div>{% endif %}
+    </div>
+    <div id="wd-panel">
+      {% if !wdStep %}
+      <div class="card card-soft">
+        <div class="card-body">
+          <h3>Quy định rút tiền</h3>
+          <ul class="pkg-benefits">
+            <li>{{{ icon('check', 16) }}}<span>Tối đa <strong>{{ maxPerMonth }} lần/tháng</strong>, số tiền không vượt quá số dư khả dụng.</span></li>
+            <li>{{{ icon('check', 16) }}}<span>Yêu cầu được <strong>duyệt 2 lớp</strong> bởi bộ phận quản trị; theo dõi tiến trình 0/2 → 1/2 → Đã duyệt.</span></li>
+            <li>{{{ icon('check', 16) }}}<span>{{ payoutNote }} vào tài khoản ngân hàng trong hồ sơ.</span></li>
+            <li>{{{ icon('check', 16) }}}<span>Nếu bị từ chối, số tiền hoàn về khả dụng và bạn thấy lý do tại đây.</span></li>
+          </ul>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="tabs" role="tablist">
+      <button class="tab {{ wdTab === 'requests' ? 'is-active' : '' }}" onclick="Seller.state.wdTab='requests'; App.reload()">{{{ icon('file', 18) }}} Lịch sử rút tiền <span class="count">{{ wdCount }}</span></button>
+      <button class="tab {{ wdTab === 'ledger' ? 'is-active' : '' }}" onclick="Seller.state.wdTab='ledger'; App.reload()">{{{ icon('history', 18) }}} Sổ hoa hồng</button>
+    </div>
+    <div class="card-body">{{{ tabHtml }}}</div>
+  </div>
+</div>
+
+{% block seller/wallet-ledger %}
+<!-- wallet · tab Sổ hoa hồng (tối đa 40 dòng) — data: rows [{ r, desc, sign, cls }] -->
+{% if !rows.length %}
+{{{ UI.empty('history', 'Chưa có biến động') }}}
+{% else %}
+<ul class="ledger">
+  {% each x in rows %}
+  <li>
+    <div>
+      <div class="ledger-desc">{{ x.desc }}</div>
+      <div class="ledger-meta">{{ dt(x.r.at) }} · <span class="mono">{{ x.r.ref }}</span></div>
+    </div>
+    <div class="ledger-amt {{ x.cls }}">{{ x.sign }}{{ money(x.r.amount) }}<span class="ledger-bal">Số dư {{ money(x.r.balance) }}</span></div>
+  </li>
+  {% endeach %}
+</ul>
+{% endif %}
+{% endblock %}
+
+{% block seller/wallet-requests %}
+<!-- wallet · tab Lịch sử rút tiền — data: list [{ w, maskedAccount, rejectReason, timelineHtml }] -->
+{% if !list.length %}
+{{{ UI.empty('cash', 'Chưa có yêu cầu rút tiền', 'Bấm "Tạo yêu cầu rút tiền" khi có số dư khả dụng.') }}}
+{% else %}
+<div class="stack">
+  {% each x in list %}
+  <div class="order-card">
+    <div class="order-card-head">
+      <div><div class="text-sm text-muted">Yêu cầu</div><div class="mono text-strong">{{ x.w.id }}</div></div>
+      <div class="text-right"><div class="text-strong">{{ money(x.w.amount) }}</div><div class="text-sm text-muted">{{ dt(x.w.createdAt) }}</div></div>
+    </div>
+    <div class="status-row">{{{ badge('withdrawal', x.w.status, true) }}}<span class="text-sm text-muted">Nhận về {{ x.w.bank.bankName }} · <span class="mono">{{ x.maskedAccount }}</span></span></div>
+    {% if x.w.status === 'REJECTED' %}
+    <div class="alert alert-error mt-3">{{{ icon('x-circle', 18) }}}<div class="text-sm"><span class="alert-title">Lý do từ chối</span>{{ x.rejectReason }}</div></div>
+    {% endif %}
+    <details class="feature mt-2">
+      <summary>Tiến trình duyệt</summary>
+      {{{ x.timelineHtml }}}
+    </details>
+  </div>
+  {% endeach %}
+</div>
+{% endif %}
+{% endblock %}
+
+{% block seller/wallet-withdraw %}
+<!-- wallet · panel rút tiền (#wd-panel) theo bước form / confirm / done
+     data: step, steps, u, w, d (draft), wd (yêu cầu vừa tạo), quick [số tiền gợi ý], maxPerMonth, payoutNoteLower -->
+{% if step === 'form' %}
+<div class="card">
+  <div class="card-head"><h2>Tạo yêu cầu rút tiền</h2><button class="btn btn-ghost btn-sm" onclick="Seller.wdCancel()">Huỷ</button></div>
+  <div class="card-body">
+    {{{ include('partials/seller-wd-steps', { steps: steps }) }}}
+    <form novalidate onsubmit="Seller.wdSubmitForm(event)">
+      {{{ UI.field({ id: 'wd-amount', label: 'Số tiền muốn rút', required: true, mono: true, value: d.amount, placeholder: '0', hint: 'Khả dụng ' + money(w.available), attrs: 'inputmode="numeric"' }) }}}
+      <div class="quick-amounts mt-2">
+        {% each a in quick %}
+        <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('wd-amount').value='{{ a }}'">{{ money(a) }}</button>
+        {% endeach %}
+        <button type="button" class="btn btn-secondary btn-sm" onclick="document.getElementById('wd-amount').value='{{ w.available }}'">Rút hết</button>
+      </div>
+      <p class="text-caption mt-3">Chỉ được {{ maxPerMonth }} yêu cầu/tháng. Số tiền được tạm giữ cho đến khi xử lý xong.</p>
+      <div class="actions"><button class="btn btn-primary btn-lg btn-block">Tiếp tục {{{ icon('arrow-right', 18) }}}</button></div>
+    </form>
+  </div>
+</div>
+{% elif step === 'confirm' %}
+<div class="card">
+  <div class="card-head"><h2>Xác nhận tài khoản nhận</h2><button class="btn btn-ghost btn-sm" onclick="Seller.wdCancel()">Huỷ</button></div>
+  <div class="card-body">
+    {{{ include('partials/seller-wd-steps', { steps: steps }) }}}
+    <div class="modal-summary">
+      <dl><dt>Số tiền</dt><dd>{{ money(d.amount) }}</dd><dt>Ngân hàng</dt><dd>{{ u.bank.bankName }}</dd><dt>Số tài khoản</dt><dd class="mono">{{ u.bank.accountNo }}</dd><dt>Chủ tài khoản</dt><dd>{{ u.bank.owner }}</dd></dl>
+    </div>
+    <p class="text-sm text-muted mt-3">Tài khoản lấy từ hồ sơ đăng ký. Sai thông tin? <a href="#profile">Sửa tại Hồ sơ</a> trước khi gửi.</p>
+    <div class="actions actions-row">
+      <button class="btn btn-secondary btn-lg" onclick="Seller.state.wdStep='form'; Seller.wdRender()">Quay lại</button>
+      <button class="btn btn-primary btn-lg" onclick="Seller.wdConfirm()">{{{ icon('check', 18) }}} Gửi yêu cầu</button>
+    </div>
+  </div>
+</div>
+{% elif step === 'done' %}
+<div class="card">
+  <div class="card-body">
+    {{{ include('partials/seller-wd-steps', { steps: steps }) }}}
+    <div class="text-center stack">
+      <div class="result-icon is-success" style="margin:0 auto">{{{ icon('check-circle', 34) }}}</div>
+      <h2>Đã gửi yêu cầu rút tiền</h2>
+      <p class="text-muted">Mã <span class="mono text-strong">{{ wd.id }}</span> · {{ money(wd.amount) }} · trạng thái <strong>Chờ duyệt (0/2)</strong>. Sau khi 2 lớp duyệt, công ty chi trả {{ payoutNoteLower }}.</p>
+      <div class="actions"><button class="btn btn-primary btn-lg" onclick="Seller.state.wdStep=null; Seller.state.wdTab='requests'; App.reload()">Xem lịch sử rút tiền</button></div>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}

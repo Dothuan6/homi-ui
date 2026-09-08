@@ -1,0 +1,322 @@
+{% block partials/admin-actions %}
+<!-- Nút hành động góc phải topbar admin, theo màn (screen = 'agents' | 'products' | 'inventory' | 'admin-users') -->
+{% if screen === 'agents' %}
+<button class="btn btn-primary" onclick="Admin.rootAgentModal()">{{{ icon('plus', 16) }}} Tạo thành viên gốc</button>
+{% elif screen === 'products' %}
+<button class="btn btn-primary" onclick="Admin.packageForm()">{{{ icon('plus', 16) }}} Thêm gói</button>
+{% elif screen === 'inventory' %}
+<button class="btn btn-secondary" onclick="Admin.importModal()">{{{ icon('upload', 16) }}} Nhập file</button>
+<button class="btn btn-primary" onclick="Admin.generateModal()">{{{ icon('plus', 16) }}} Sinh hàng loạt</button>
+{% elif screen === 'admin-users' %}
+<button class="btn btn-primary" onclick="Admin.adminForm()">{{{ icon('plus', 16) }}} Thêm tài khoản</button>
+{% endif %}
+{% endblock %}
+
+{% block partials/admin-approval-cell %}
+<!-- Ô "Tiến trình" duyệt 2 lớp (rút tiền / đăng ký): badge trạng thái + từng lượt xác nhận + lý do từ chối -->
+{{{ badge(kind, e.status) }}}
+{% each a in approvals %}
+<span class="cell-sub">{{{ icon('check', 12) }}} {{ a.by }} · {{ LABELS.role[a.role] ? LABELS.role[a.role].text : a.role }} · {{ dt(a.at) }}</span>
+{% endeach %}
+{% if rejection %}
+<span class="cell-sub text-error">{{ rejection.by }}: {{ rejection.reason || '' }}</span>
+{% endif %}
+{% endblock %}
+
+{% block partials/admin-audit-list %}
+<!-- Danh sách audit của một thực thể: list = Store.auditOf(entity, id) -->
+{% if list.length %}
+<ul class="timeline">
+  {% each a in list %}
+  <li><span class="timeline-time">{{ dt(a.at) }}</span><span class="timeline-text"><strong>{{ a.actor }}</strong> {% if a.from || a.to %}<span class="mono">{{ a.from || '—' }} → {{ a.to || '—' }}</span> {% endif %}{{ a.note || '' }}</span></li>
+  {% endeach %}
+</ul>
+{% else %}
+<p class="text-muted">Chưa có</p>
+{% endif %}
+{% endblock %}
+
+{% block partials/admin-period-seg %}
+<!-- Bộ chọn kỳ thống kê (tuần / tháng / quý) trên admin-dashboard -->
+<div class="seg" role="group" aria-label="Kỳ">
+  {% each p in periods %}
+  <button class="{{ period === p.id ? 'is-active' : '' }}" onclick="Admin.st.period='{{ p.id }}'; App.reload()">{{{ p.label }}}</button>
+  {% endeach %}
+</div>
+{% endblock %}
+
+{% block partials/admin-timeline %}
+<!-- Dòng thời gian đơn giản: rows = [{ at, text }] -->
+<ul class="timeline">
+  {% each r in rows %}
+  <li><span class="timeline-time">{{ dt(r.at) }}</span><span class="timeline-text">{{ r.text }}</span></li>
+  {% endeach %}
+</ul>
+{% endblock %}
+
+{% block partials/admin-tree %}
+<!-- Cây tuyến dưới (đệ quy): nodes = [{ user, sold, children }] -->
+{% if nodes.length %}
+<ul class="tree">
+  {% each n in nodes %}
+  <li>
+    <span class="tree-node"><strong>{{ n.user.fullName }}</strong> {{{ n.user.rank ? badge('rank', n.user.rank) : badge('userType', 'buyer') }}} <span class="text-sm text-muted">· {{ n.sold }} đơn · <span class="mono">{{ n.user.refCode || n.user.phone }}</span></span> <button class="btn-link" onclick="Admin.userDrawer('{{ n.user.id }}')">Xem</button></span>
+    {{{ include('partials/admin-tree', { nodes: n.children }) }}}
+  </li>
+  {% endeach %}
+</ul>
+{% endif %}
+{% endblock %}
+
+{% block partials/alert %}
+<div class="alert alert-{{ tone }}{% if cls %} {{ cls }}{% endif %}" role="alert">{{{ icon(ico, size || 22) }}}<div>{% if title %}<span class="alert-title">{{{ title }}}</span>{% endif %}{{{ text }}}</div></div>
+{% endblock %}
+
+{% block partials/btn-reload %}
+<button class="btn btn-secondary" onclick="App.reload()">{{{ icon('arrow-left', 16) }}} {{ label }}</button>
+{% endblock %}
+
+{% block partials/card-head %}
+<h2>{{ title }}</h2><span class="text-sm text-muted">{{ step }}</span>
+{% endblock %}
+
+{% block partials/intro-panel %}
+<div class="intro-panel">
+  <h1>{{{ title }}}</h1>
+  <p>{{{ desc }}}</p>
+  <ol class="intro-steps">{% each t in steps %}<li>{{{ t }}}</li>{% endeach %}</ol>
+</div>
+{% endblock %}
+
+{% block partials/order-info %}
+<dl class="dl">
+  <dt>Mã đơn hàng</dt><dd class="mono">{{ order.id }}</dd>
+  <dt>Gói</dt><dd>{{ pkgName }}</dd>
+  <dt>Số tiền</dt><dd>{{{ money(order.price) }}}</dd>
+  <dt>Phương thức</dt><dd>{{ LABELS.method[order.method] || '—' }}</dd>
+  <dt>Người nhận</dt><dd>{{ order.fullName }} · <span class="mono">{{ RULES.maskPhone(order.phone) }}</span></dd>
+  {% if shipping %}<dt>Giao hàng</dt><dd>{{{ badge('shipping', order.shipping) }}}</dd>{% endif %}
+</dl>
+{% endblock %}
+
+{% block partials/otp-frame %}
+<h2 class="text-center mb-4">{{ title }}</h2><div id="{{ id }}"></div>
+{% endblock %}
+
+{% block partials/pkg-header %}
+<div class="pkg">
+  <div class="pkg-icon">{{{ icon('watch', 30) }}}</div>
+  <div class="grow">
+    <{{{ tag }}} class="pkg-name">{{ pkg.name }}</{{{ tag }}}>
+    <div class="pkg-meta">{{ pkg.id }} · License {{ pkg.licenseMonths }} tháng{% if pkg.hasShipping %} · kèm đồng hồ HW01{% endif %}</div>
+  </div>
+  <div class="pkg-price">{{{ money(pkg.price) }}}</div>
+</div>
+{% endblock %}
+
+{% block partials/product-intro %}
+{% if !pc %}
+<div class="card"><div class="card-body">
+  <p class="text-sm text-muted">{{ pkg.desc }}</p>
+  <ul class="pkg-benefits">{% each b in pkg.benefits %}<li>{{{ icon('check', 16) }}}<span>{{ b }}</span></li>{% endeach %}</ul>
+</div></div>
+{% else %}
+<div class="card product-card">
+  <div class="gallery">
+    <div class="gallery-main" id="gallery-main" tabindex="0" role="group" aria-roledescription="carousel" aria-label="Ảnh giới thiệu gói {{ pkg.id }}">
+      <img id="gallery-img" src="{{ g0.src }}" alt="{{ g0.title }}" width="1890" height="1063" decoding="async" draggable="false">
+      <button class="gallery-nav gallery-nav-prev" aria-label="Ảnh trước" onclick="Buyer.galleryStep(-1)">{{{ icon('arrow-left', 18) }}}</button>
+      <button class="gallery-nav gallery-nav-next" aria-label="Ảnh kế tiếp" onclick="Buyer.galleryStep(1)">{{{ icon('arrow-right', 18) }}}</button>
+      <span class="gallery-caption" id="gallery-caption" aria-live="polite">{{ g0.title }}</span>
+    </div>
+    <div class="gallery-thumbs" role="tablist" aria-label="Chọn ảnh">
+      {% each g, i in pc.gallery %}
+      <button class="gallery-thumb {% if i === 0 %}is-active{% endif %}" role="tab" id="gthumb-{{ i }}" aria-selected="{{ i === 0 }}" title="{{ g.title }}" onclick="Buyer.galleryTo({{ i }})">
+        <img src="{{ g.thumb }}" alt="" loading="lazy" decoding="async" draggable="false"><span class="sr-only">{{ g.title }}</span>
+      </button>
+      {% endeach %}
+    </div>
+  </div>
+  <div class="card-body">
+    <p>{{ pc.lead }}</p>
+    <ul class="pkg-benefits">{% each b in pkg.benefits %}<li>{{{ icon('check', 16) }}}<span>{{ b }}</span></li>{% endeach %}</ul>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <h2 style="font-size:var(--fs-lg)">Chi tiết tính năng gói {{ pkg.id }}</h2>
+    <button class="btn btn-ghost btn-sm" id="feat-toggle" aria-expanded="false" aria-controls="feat-body" onclick="Buyer.toggleFeatures()">Xem chi tiết {{{ icon('chevron-down', 18) }}}</button>
+  </div>
+  <div class="card-body" id="feat-body" hidden>
+    <p class="text-sm text-muted">{{ pc.intro }}</p>
+    <div class="feature-list mt-3">
+      {% each f, i in pc.features %}
+      <details class="feature" {% if i === 0 %}open{% endif %}>
+        <summary>{{ i + 1 }}. {{ f.title }}</summary>
+        <ul>{% each t in f.items %}<li>{{ t }}</li>{% endeach %}</ul>
+      </details>
+      {% endeach %}
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block partials/reg-cta %}
+{% if el.ok %}
+<div class="row">
+  <span class="result-icon is-info" style="width:44px;height:44px;margin:0">{{{ icon('gift', 22) }}}</span>
+  <div class="grow"><h2 style="font-size:var(--fs-lg)">Trở thành thành viên HOMI365</h2>
+    <p class="text-sm text-muted">Được {{ ref ? ref.fullName : 'người giới thiệu' }} (hạng {{ refRankLabel }}) mời tham gia. Đăng ký hồ sơ để nhận link bán hàng cá nhân và hoa hồng theo hạng; hồ sơ được duyệt trong 1–2 ngày làm việc.</p></div>
+</div>
+<div class="actions actions-row">
+  <button class="btn btn-secondary btn-lg" onclick="Buyer.a03Later('{{ order.id }}', true)">Thoát ra</button>
+  <a class="btn btn-primary btn-lg" href="#register?order={{ order.id }}">{{{ icon('user', 18) }}} Đăng ký thành viên</a>
+</div>
+{% elif el.reason === 'agent' %}
+<div class="row">
+  <span class="result-icon is-info" style="width:44px;height:44px;margin:0">{{{ icon('user', 22) }}}</span>
+  <div class="grow"><h2 style="font-size:var(--fs-lg)">Bạn đã là thành viên HOMI365</h2><p class="text-sm text-muted">Đăng nhập để xem gói, mã kích hoạt và hoa hồng.</p></div>
+</div>
+<div class="actions"><a class="btn btn-primary btn-lg btn-block" href="#login">Đăng nhập thành viên</a></div>
+{% elif el.reason === 'pending' %}
+<div class="row">
+  <span class="result-icon is-info" style="width:44px;height:44px;margin:0">{{{ icon('clock', 22) }}}</span>
+  <div class="grow"><h2 style="font-size:var(--fs-lg)">Hồ sơ thành viên đang chờ duyệt</h2><p class="text-sm text-muted">Trạng thái: {{ label('approval', el.registration.status) }}. Chúng tôi sẽ gửi email khi hồ sơ được duyệt.</p></div>
+</div>
+<div class="actions"><a class="btn btn-secondary btn-lg btn-block" href="#register?state=pending&phone={{ order.phone }}">Xem trạng thái hồ sơ</a></div>
+{% else %}
+<div class="row">
+  <span class="result-icon is-info" style="width:44px;height:44px;margin:0">{{{ icon('check-circle', 22) }}}</span>
+  <div class="grow"><h2 style="font-size:var(--fs-lg)">Đơn hàng thành công</h2><p class="text-sm text-muted">Mã kích hoạt và hướng dẫn đã được gửi qua SMS/email. Bạn có thể đăng ký thành viên sau tại mục Đăng nhập thành viên khi đủ điều kiện.</p></div>
+</div>
+<div class="actions"><button class="btn btn-secondary btn-lg btn-block" onclick="Buyer.a03Later('{{ order.id }}', true)">Thoát ra</button></div>
+{% endif %}
+{% endblock %}
+
+{% block partials/seller-approval-timeline %}
+<!-- Tiến trình duyệt một yêu cầu rút tiền — data: rows [{ at, text }] -->
+<ul class="timeline mt-2">
+  {% each r in rows %}
+  <li><span class="timeline-time">{{ dt(r.at) }}</span><span class="timeline-text">{{ r.text }}</span></li>
+  {% endeach %}
+</ul>
+{% endblock %}
+
+{% block partials/seller-f1-table %}
+<!-- Bảng tuyến dưới trực tiếp (F1) — data: rows [{ d, sold, downCount }], canRecruit -->
+{% if !rows.length %}
+{{{ UI.empty('users', 'Chưa có tuyến dưới', canRecruit ? 'Khách mua qua link của bạn và đăng ký thành viên sẽ xuất hiện ở đây.' : 'Lên hạng Silver để được tuyển thành viên.') }}}
+{% else %}
+<div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Thành viên</th><th>Hạng</th><th class="num">Luỹ kế</th><th class="num">Bán tháng này</th><th class="num">Tuyến dưới</th><th>Tham gia</th><th>Trạng thái</th></tr></thead>
+    <tbody>
+      {% each r in rows %}
+      <tr>
+        <td><span class="cell-main">{{ r.d.fullName }}</span><span class="cell-sub mono">{{ r.phone }} · {{ r.d.refCode }}</span></td>
+        <td>{{{ badge('rank', r.d.rank) }}}</td>
+        <td class="num">{{ r.d.cumulativeSales }}</td>
+        <td class="num">{{ r.sold }}</td>
+        <td class="num">{{ r.downCount }}</td>
+        <td>{{ date(r.d.activatedAt || r.d.createdAt) }}</td>
+        <td>{{{ badge('user', r.d.status) }}}</td>
+      </tr>
+      {% endeach %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block partials/seller-period-seg %}
+<!-- Chọn kỳ thống kê (tuần / tháng / quý / tuỳ chọn) — data: periods, period, from, to -->
+<div class="row-wrap">
+  <div class="seg" role="group" aria-label="Kỳ thống kê">
+    {% each p in periods %}
+    <button class="{{ period === p.id ? 'is-active' : '' }}" onclick="Seller.setPeriod('{{ p.id }}')">{{ p.label }}</button>
+    {% endeach %}
+  </div>
+  {% if period === 'custom' %}
+  <div class="row">
+    <input type="date" class="input" style="min-height:40px;width:auto" id="rg-from" value="{{ from }}" aria-label="Từ ngày">
+    <span>–</span>
+    <input type="date" class="input" style="min-height:40px;width:auto" id="rg-to" value="{{ to }}" aria-label="Đến ngày">
+    <button class="btn btn-secondary btn-sm" onclick="Seller.applyRange()">Áp dụng</button>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block partials/seller-rank-ladder %}
+<!-- Thang 6 hạng: ngưỡng luỹ kế, quyền tuyển, trạng thái so với hạng hiện tại
+     data: rows [{ id, threshold, canRecruit, isCur, state: 'done'|'current'|'ready'|'missing', missing }], rr -->
+<div class="table-wrap">
+  <table class="table" style="min-width:0">
+    <thead><tr><th>Hạng</th><th class="num">Ngưỡng luỹ kế</th><th>Quyền tuyển</th><th>Trạng thái</th></tr></thead>
+    <tbody>
+      {% each r in rows %}
+      <tr class="{{ r.isCur ? 'is-selected' : '' }}">
+        <td>{{{ badge('rank', r.id) }}}</td>
+        <td class="num mono">{{ r.threshold }} gói</td>
+        <td>{% if r.canRecruit %}{{{ icon('check', 16, 'text-success') }}} Được tuyển{% else %}<span class="text-muted">Chỉ bán</span>{% endif %}</td>
+        <td>
+          {% if r.state === 'done' %}<span class="badge badge-success">Đã đạt</span>
+          {% elif r.state === 'current' %}<span class="badge badge-navy">Hạng hiện tại</span>
+          {% elif r.state === 'ready' %}<span class="badge badge-info">Đủ luỹ kế · chờ xét</span>
+          {% else %}<span class="text-sm text-muted">Còn thiếu <strong>{{ r.missing }}</strong> gói</span>{% endif %}
+        </td>
+      </tr>
+      {% endeach %}
+    </tbody>
+  </table>
+</div>
+<ul class="pkg-benefits mt-3">
+  <li>{{{ icon('check', 16) }}}<span>Lên hạng khi <strong>tổng gói bán luỹ kế</strong> đạt ngưỡng; xét tự động cuối tháng, có thể nhảy nhiều bậc.</span></li>
+  <li>{{{ icon('check', 16) }}}<span>Giữ hạng: bán tối thiểu <strong>{{ rr.minSalesPerMonth }} gói/tháng</strong>; không đạt sẽ giáng {{ rr.demoteSteps }} bậc (không dưới Copper).</span></li>
+  <li>{{{ icon('check', 16) }}}<span>Hoa hồng mỗi gói tính theo hạng tại thời điểm đơn thanh toán; hạng cao hơn tuyến dưới nhận thêm phần chênh lệch.</span></li>
+</ul>
+{% endblock %}
+
+{% block partials/seller-tree %}
+<!-- Cây tuyến dưới (gốc) — data: nodes [node], canRecruit. node = { lv, name, rank, cumulativeSales, soldMonth, phone, locked, children[] } -->
+{% if !nodes.length %}
+{{{ UI.empty('users', 'Chưa có tuyến dưới', canRecruit ? 'Khách mua qua link của bạn và đăng ký thành viên sẽ xuất hiện ở đây.' : 'Lên hạng Silver để được tuyển thành viên.') }}}
+{% else %}
+<ul class="tree">
+  {% each n in nodes %}
+  {{{ include('partials/seller-tree-node', { n: n }) }}}
+  {% endeach %}
+</ul>
+{% endif %}
+{% endblock %}
+
+{% block partials/seller-tree-node %}
+<!-- Một nút trong cây tuyến dưới (đệ quy qua include) — data: n = { lv, name, rank, cumulativeSales, soldMonth, phone, locked, children[] } -->
+<li>
+  <span class="tree-node">
+    <span class="badge badge-{{ n.lv === 1 ? 'navy' : n.lv === 2 ? 'info' : 'neutral' }} badge-plain">F{{ n.lv }}</span>
+    <strong>{{ n.name }}</strong>
+    {{{ badge('rank', n.rank) }}}
+    <span class="text-sm text-muted">· luỹ kế {{ n.cumulativeSales }} · tháng này {{ n.soldMonth }} · <span class="mono">{{ n.phone }}</span></span>
+    {% if n.locked %}{{{ badge('user', 'locked') }}}{% endif %}
+  </span>
+  {% if n.children.length %}
+  <ul class="tree">
+    {% each c in n.children %}
+    {{{ include('partials/seller-tree-node', { n: c }) }}}
+    {% endeach %}
+  </ul>
+  {% endif %}
+</li>
+{% endblock %}
+
+{% block partials/seller-wd-steps %}
+<!-- Thanh 3 bước rút tiền: Số tiền → Tài khoản → Đã gửi — data: steps [{ k, l, active, done }] -->
+<div class="steps mb-4">
+  {% each s, i in steps %}
+  <div class="step {{ s.active ? 'is-active' : '' }} {{ s.done ? 'is-done' : '' }}"><span class="step-dot">{% if s.done %}{{{ icon('check', 14) }}}{% else %}{{ i + 1 }}{% endif %}</span><span>{{ s.l }}</span></div>{% if i < 2 %}<span class="step-line"></span>{% endif %}
+  {% endeach %}
+</div>
+{% endblock %}

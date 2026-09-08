@@ -1,8 +1,0 @@
-<!-- Ô "Tiến trình" duyệt 2 lớp (rút tiền / đăng ký): badge trạng thái + từng lượt xác nhận + lý do từ chối -->
-{{{ badge(kind, e.status) }}}
-{% each a in approvals %}
-<span class="cell-sub">{{{ icon('check', 12) }}} {{ a.by }} · {{ LABELS.role[a.role] ? LABELS.role[a.role].text : a.role }} · {{ dt(a.at) }}</span>
-{% endeach %}
-{% if rejection %}
-<span class="cell-sub text-error">{{ rejection.by }}: {{ rejection.reason || '' }}</span>
-{% endif %}

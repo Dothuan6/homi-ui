@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="HOMI365">
+  <title>HOMI365 favicon — nền trong suốt</title>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M8 30 L32 8 L56 30 V54 A2 2 0 0 1 54 56 H10 A2 2 0 0 1 8 54 Z"
+          stroke="#1E3A66" stroke-width="6"/>
+    <path d="M32 49 C25.5 43 20.5 38.8 20.5 34.2 C20.5 30.6 23.3 27.8 26.9 27.8 C29.2 27.8 31.2 29 32 30.7 C32.8 29 34.8 27.8 37.1 27.8 C40.7 27.8 43.5 30.6 43.5 34.2 C43.5 38.8 38.5 43 32 49 Z"
+          stroke="#1BA3BE" stroke-width="5"/>
+  </g>
+</svg>

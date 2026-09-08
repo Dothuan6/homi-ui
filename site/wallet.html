@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thành viên · Ví & rút tiền · HOMI365</title>
+  <meta name="theme-color" content="#1E3A66">
+  <link rel="icon" href="./public/image/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./css/tokens.css">
+  <link rel="stylesheet" href="./css/base.css">
+  <link rel="stylesheet" href="./css/components.css">
+  <link rel="stylesheet" href="./css/buyer.css">
+  <link rel="stylesheet" href="./css/seller.css">
+  <link rel="stylesheet" href="./css/admin.css">
+  <style>
+  .proto-nav{position:fixed;right:16px;bottom:16px;z-index:9999;font:13px/1.4 system-ui,sans-serif}
+  .proto-nav>summary{list-style:none;cursor:pointer;background:#1E3A66;color:#fff;padding:8px 14px;
+    border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.25);user-select:none}
+  .proto-nav>summary::-webkit-details-marker{display:none}
+  .proto-nav[open]>summary{border-radius:8px 8px 0 0}
+  .proto-nav .panel{background:#fff;border:1px solid #d8dee9;border-radius:8px;padding:12px 14px;
+    max-height:70vh;overflow:auto;min-width:230px;box-shadow:0 8px 28px rgba(0,0,0,.18)}
+  .proto-nav h4{margin:10px 0 4px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#6b7a90}
+  .proto-nav h4:first-child{margin-top:0}
+  .proto-nav a{display:block;padding:3px 0;color:#1E3A66;text-decoration:none}
+  .proto-nav a:hover{text-decoration:underline}
+  .proto-nav a[aria-current]{font-weight:700}
+  </style>
+</head>
+<body>
+<!-- Nội dung dựng sẵn: xem được ngay cả khi tắt JS. Có JS thì app thật render đè lên. -->
+<div id="app-root">
+
+<div class="seller">
+  <header class="seller-header">
+    <div class="seller-header-inner">
+      <a href="dashboard.html" class="brand" aria-label="HOMI365"><span class="brand " aria-label="HOMI365"><svg width="34" height="34" viewBox="0 0 100 100" aria-hidden="true"><g fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 46 L50 13 L86 46 V85 A3 3 0 0 1 83 88 H17 A3 3 0 0 1 14 85 Z" stroke="var(--navy-600)" stroke-width="7"/><path d="M50 76 C40 67 32.5 60.5 32.5 54 C32.5 49 36.5 45 41.5 45 C45.3 45 48.6 47.2 50 50 C51.4 47.2 54.7 45 58.5 45 C63.5 45 67.5 49 67.5 54 C67.5 60.5 60 67 50 76 Z" stroke="var(--teal-500)" stroke-width="6"/></g></svg><span class="brand-word" style="font-size:23px">HOMI<span class="n365">365</span></span></span></a>
+      <nav class="seller-nav-top" aria-label="Điều hướng thành viên">
+        <a href="dashboard.html" class=""><svg class="ico " width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg><span>Tổng quan</span></a><a href="my-package.html" class=""><svg class="ico " width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16.5 9.4L7.5 4.2M21 16V8a2 2 0 00-1-1.7l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.7l7 4a2 2 0 002 0l7-4a2 2 0 001-1.7z"/><path d="M3.3 7L12 12l8.7-5M12 22V12"/></svg><span>Gói của tôi</span></a><a href="wallet.html" class="is-active"><svg class="ico " width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M16 12h5M16 10v4"/></svg><span>Ví &amp; rút tiền</span></a>
+      </nav>
+      <div class="seller-user">
+        <button class="seller-user-btn" id="seller-user-btn" aria-haspopup="true" aria-expanded="false">
+          <span class="avatar" aria-hidden="true">A</span>
+          <span class="seller-user-name">Nguyễn Văn An</span>
+          <span class="badge badge-success ">Lithium</span><svg class="ico " width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="seller-menu" id="seller-menu" hidden>
+          <div class="seller-menu-head">
+            <div class="name">Nguyễn Văn An</div>
+            <div class="sub">090•••456 · AN7K2Q</div>
+            <div class="mt-1"><span class="badge badge-success ">Lithium</span></div>
+          </div>
+          <a href="profile.html"><svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg> Hồ sơ của tôi</a>
+          <button class="danger"><svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg> Đăng xuất</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="seller-main"><!-- wallet · Ví & rút tiền: hero số dư, panel rút tiền (#wd-panel), tab Lịch sử / Sổ hoa hồng
+     data: u, w, cw, wdStep, wdTab, wdCount, maxPerMonth, payoutNote, tabHtml -->
+<div class="stack-lg">
+  <div class="page-title"><div><h1>Ví & rút tiền</h1><p>Hoa hồng ghi nhận ngay khi đơn thanh toán · rút tối đa 1 lần/tháng</p></div></div>
+  <div class="grid-2 grid-2-wide">
+    <div class="wallet-hero">
+      <div class="label">Số dư khả dụng</div>
+      <div class="amount">90.400.000đ</div>
+      <div class="split" style="grid-template-columns:repeat(3,1fr)">
+        <div><div class="label">Đã ghi nhận</div><div class="v">98.400.000đ</div></div>
+        <div><div class="label">Đang chờ duyệt rút</div><div class="v">5.000.000đ</div></div>
+        <div><div class="label">Đã rút</div><div class="v">3.000.000đ</div></div>
+      </div>
+      <button class="btn btn-accent btn-lg btn-block" ><svg class="ico " width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 12h.01M18 12h.01"/></svg> Tạo yêu cầu rút tiền</button>
+      
+    </div>
+    <div id="wd-panel">
+      
+      <div class="card card-soft">
+        <div class="card-body">
+          <h3>Quy định rút tiền</h3>
+          <ul class="pkg-benefits">
+            <li><svg class="ico " width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg><span>Tối đa <strong>1 lần/tháng</strong>, số tiền không vượt quá số dư khả dụng.</span></li>
+            <li><svg class="ico " width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg><span>Yêu cầu được <strong>duyệt 2 lớp</strong> bởi bộ phận quản trị; theo dõi tiến trình 0/2 → 1/2 → Đã duyệt.</span></li>
+            <li><svg class="ico " width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg><span>Chi trả đầu tháng kế tiếp vào tài khoản ngân hàng trong hồ sơ.</span></li>
+            <li><svg class="ico " width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg><span>Nếu bị từ chối, số tiền hoàn về khả dụng và bạn thấy lý do tại đây.</span></li>
+          </ul>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="tabs" role="tablist">
+      <button class="tab is-active"><svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h8"/></svg> Lịch sử rút tiền <span class="count">2</span></button>
+      <button class="tab "><svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 109-9 9.7 9.7 0 00-6.5 2.5L3 8"/><path d="M3 3v5h5M12 7v5l3 2"/></svg> Sổ hoa hồng</button>
+    </div>
+    <div class="card-body">
+<!-- wallet · tab Lịch sử rút tiền — data: list [{ w, maskedAccount, rejectReason, timelineHtml }] -->
+
+<div class="stack">
+  
+  <div class="order-card">
+    <div class="order-card-head">
+      <div><div class="text-sm text-muted">Yêu cầu</div><div class="mono text-strong">WD0002</div></div>
+      <div class="text-right"><div class="text-strong">5.000.000đ</div><div class="text-sm text-muted">11:03 05/08/2026</div></div>
+    </div>
+    <div class="status-row"><span class="badge badge-navy badge-lg">Đã duyệt – chờ chi trả</span><span class="text-sm text-muted">Nhận về Vietcombank · <span class="mono">0123•••789</span></span></div>
+    
+    <details class="feature mt-2">
+      <summary>Tiến trình duyệt</summary>
+      
+<!-- Tiến trình duyệt một yêu cầu rút tiền — data: rows [{ at, text }] -->
+<ul class="timeline mt-2">
+  
+  <li><span class="timeline-time">11:03 05/08/2026</span><span class="timeline-text">Tạo yêu cầu</span></li>
+  
+  <li><span class="timeline-time">09:13 06/08/2026</span><span class="timeline-text">Xác nhận lớp 1 — Head Admin</span></li>
+  
+</ul>
+
+    </details>
+  </div>
+  
+  <div class="order-card">
+    <div class="order-card-head">
+      <div><div class="text-sm text-muted">Yêu cầu</div><div class="mono text-strong">WD0001</div></div>
+      <div class="text-right"><div class="text-strong">3.000.000đ</div><div class="text-sm text-muted">10:38 07/07/2026</div></div>
+    </div>
+    <div class="status-row"><span class="badge badge-success badge-lg">Đã chi trả</span><span class="text-sm text-muted">Nhận về Vietcombank · <span class="mono">0123•••789</span></span></div>
+    
+    <details class="feature mt-2">
+      <summary>Tiến trình duyệt</summary>
+      
+<!-- Tiến trình duyệt một yêu cầu rút tiền — data: rows [{ at, text }] -->
+<ul class="timeline mt-2">
+  
+  <li><span class="timeline-time">10:38 07/07/2026</span><span class="timeline-text">Tạo yêu cầu</span></li>
+  
+  <li><span class="timeline-time">09:56 08/07/2026</span><span class="timeline-text">Xác nhận lớp 1 — Admin Specialist</span></li>
+  
+  <li><span class="timeline-time">11:58 09/07/2026</span><span class="timeline-text">Xác nhận lớp 2 — Admin Specialist</span></li>
+  
+  <li><span class="timeline-time">09:09 24/07/2026</span><span class="timeline-text">Đã chi trả</span></li>
+  
+</ul>
+
+    </details>
+  </div>
+  
+</div>
+
+</div>
+  </div>
+</div>
+
+
+
+
+
+
+</main>
+
+  <nav class="seller-nav-bottom" aria-label="Điều hướng thành viên">
+    <a href="dashboard.html" class=""><svg class="ico " width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg><span>Tổng quan</span></a><a href="my-package.html" class=""><svg class="ico " width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16.5 9.4L7.5 4.2M21 16V8a2 2 0 00-1-1.7l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.7l7 4a2 2 0 002 0l7-4a2 2 0 001-1.7z"/><path d="M3.3 7L12 12l8.7-5M12 22V12"/></svg><span>Gói của tôi</span></a><a href="wallet.html" class="is-active"><svg class="ico " width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M16 12h5M16 10v4"/></svg><span>Ví &amp; rút tiền</span></a>
+  </nav>
+</div>
+
+</div>
+<details class="proto-nav"><summary>Màn hình</summary><div class="panel"><h4>Người mua & công khai</h4><a href="index.html">Trang bìa prototype</a><a href="buy.html">Trang mua hàng</a><a href="buy-invalid.html">Link giới thiệu không hợp lệ</a><a href="buy-inactive.html">Thành viên bị khoá</a><a href="payment.html">Thanh toán</a><a href="order-result-paid.html">Đơn hàng đã thanh toán</a><a href="order-result-awaiting.html">Chờ đối soát chuyển khoản</a><a href="order-result-failed.html">Thanh toán thất bại</a><a href="order-result-rejected.html">Đơn bị từ chối đối soát</a><a href="order-result-later.html">Đã gửi mã qua SMS, đăng ký sau</a><a href="order-result-nocode.html">Đã thanh toán, kho hết mã</a><a href="order-lookup.html">Tra cứu đơn hàng</a><a href="login.html">Đăng nhập thành viên</a><a href="login-forgot.html">Quên mật khẩu</a><a href="register.html">Đăng ký thành viên</a><a href="register-pending.html">Hồ sơ chờ duyệt</a><a href="register-rejected.html">Hồ sơ bị từ chối</a><a href="policy.html">Chính sách</a><a href="403.html">Không có quyền truy cập</a><h4>Thành viên</h4><a href="dashboard.html">Tổng quan</a><a href="my-package.html">Gói của tôi</a><a href="wallet.html" aria-current="page">Ví & rút tiền</a><a href="profile.html">Hồ sơ</a><h4>Quản trị</h4><a href="admin-login.html">Đăng nhập</a><a href="admin-dashboard.html">Tổng quan</a><a href="agents.html">Thành viên</a><a href="orders.html">Đơn hàng & đối soát</a><a href="products.html">Sản phẩm & hoa hồng</a><a href="inventory.html">Kho mã & thiết bị</a><a href="ranks.html">Hạng & quy tắc</a><a href="withdrawals.html">Rút tiền & sổ hoa hồng</a><a href="registrations.html">Duyệt đăng ký</a><a href="admin-users.html">Tài khoản admin</a></div></details>
+
+<script>window.__ROUTE__ = "wallet";</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js" crossorigin="anonymous"></script>
+<script src="./config/business-rules.js"></script>
+<script src="./config/policies.js"></script>
+<script src="./mock/data.js"></script>
+<script src="./js/ui.js"></script>
+<script src="./js/tpl.js"></script>
+<script src="./js/templates.js"></script>
+<script src="./js/views-buyer.js"></script>
+<script src="./js/views-seller.js"></script>
+<script src="./js/views-admin.js"></script>
+<script>document.addEventListener("DOMContentLoaded", function () { try {
+  if (!Store.currentAgent()) Store.loginAgent("0908123456", "Homi@123", true);
+} catch (e) { console.error(e); } });</script>
+<script src="./js/app.js"></script>
+</body>
+</html>

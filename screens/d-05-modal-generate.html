@@ -1,9 +1,0 @@
-<!-- D-05 · Modal sinh mã hàng loạt · part = 'body' | 'foot' -->
-{% if part === 'body' %}
-{{{ UI.field({ id: 'gen-n', label: 'Số lượng', required: true, mono: true, value: 100, attrs: 'inputmode="numeric"' }) }}}
-<div class="mt-4">{{{ UI.field({ id: 'gen-sku', label: 'Mã sản phẩm thiết bị', required: true, mono: true, value: CONFIG.stock.deviceSku }) }}}</div>
-<p class="text-caption mt-2">Serial sinh tự động dạng {{{ CONFIG.stock.deviceSku }}}-000001; mã kích hoạt {{{ CONFIG.stock.codePrefix }}}-XXXX-XXXX-XXXX không trùng.</p>
-{% elif part === 'foot' %}
-<button class="btn btn-secondary" onclick="UI.closeModal()">Huỷ</button>
-<button class="btn btn-primary" onclick="Admin.generate()">Sinh mã</button>
-{% endif %}

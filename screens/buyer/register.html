@@ -1,0 +1,124 @@
+<!-- register · Đăng ký thành viên: kiểm tra điều kiện → hồ sơ + T&C → OTP → chờ duyệt -->
+<div class="buyer-split">
+  <aside class="buyer-side">{{{ include('partials/intro-panel', intro) }}}</aside>
+  <div class="stack" id="a06-col">{{{ body }}}</div>
+</div>
+
+{% block buyer/register-blocked %}
+<!-- Không đủ điều kiện đăng ký (chưa mua / người giới thiệu Copper / bị từ chối / đã là thành viên) -->
+<div class="card"><div class="card-body stack text-center">
+  <div class="result-icon {{ iconClass }}" style="margin:0 auto">{{{ icon(ico, 34) }}}</div>
+  <h2>{{ title }}</h2>
+  <p class="text-muted">{{{ desc }}}</p>
+  {% if agent %}
+  <div class="actions"><a class="btn btn-primary btn-lg" href="#login">Đăng nhập</a></div>
+  {% else %}
+  <div class="actions actions-row">
+    <a class="btn btn-secondary btn-lg" href="#register">Dùng số khác</a>
+    <a class="btn btn-primary btn-lg" href="#order-lookup?phone={{ phone }}">Tra cứu đơn hàng</a>
+  </div>
+  {% endif %}
+</div></div>
+{% endblock %}
+
+{% block buyer/register-check %}
+<div class="card"><div class="card-body">
+  <h2 class="mb-3">Kiểm tra điều kiện đăng ký</h2>
+  <form novalidate onsubmit="Buyer.a06Lookup(event)">
+    {{{ UI.field({ id: 'rg-phone', label: 'Số điện thoại đã mua gói', required: true, type: 'tel', mono: true, placeholder: '0912 345 678', attrs: 'inputmode="numeric"' }) }}}
+    <div class="actions"><button class="btn btn-primary btn-lg btn-block">{{{ icon('search', 18) }}} Kiểm tra</button></div>
+  </form>
+</div></div>
+<div class="demo-hint">SĐT mẫu: <strong>{{ phoneOk }}</strong> đủ điều kiện · <strong>{{ phoneCopper }}</strong> người giới thiệu Copper · <strong>0999999999</strong> chưa mua · <strong>0913000888</strong> đang chờ duyệt · <strong>0914000999</strong> bị từ chối</div>
+{% endblock %}
+
+{% block buyer/register-done %}
+<!-- Đăng ký đã gửi (bước 3/3) -->
+<div class="stack text-center">
+  <div class="result-icon is-success" style="margin:0 auto">{{{ icon('check-circle', 34) }}}</div>
+  <h2>Hồ sơ đã gửi — {{{ badge('approval', 'PENDING_0', true) }}}</h2>
+  <p class="text-muted">Mã hồ sơ <span class="mono text-strong">{{ regId }}</span>. Bộ phận quản trị duyệt 2 lớp trong 1–2 ngày làm việc.</p>
+  <div class="alert alert-info" style="text-align:left">{{{ icon('sms', 20) }}}<div class="text-sm">Khi được duyệt, email từ <strong>{{ CONFIG.email.from }}</strong> gửi tới <strong>{{ email }}</strong> gồm: link giới thiệu, link mua hàng cá nhân <span class="mono">{{ alias }}</span> và cổng thành viên.</div></div>
+  <div class="actions actions-row">
+    <a class="btn btn-secondary btn-lg" href="#register?state=pending&phone={{ phone }}">Xem trạng thái hồ sơ</a>
+    <a class="btn btn-primary btn-lg" href="#home">Về trang chủ</a>
+  </div>
+</div>
+{% endblock %}
+
+{% block buyer/register-form %}
+<!-- Hồ sơ thành viên (bước 1/3) -->
+<div class="card">
+  <div class="card-head"><h2>Hồ sơ thành viên</h2><span class="text-sm text-muted">Bước 1/3</span></div>
+  <div class="card-body" id="a06-body">
+    {% if rejReason !== null %}
+    <div class="alert alert-warning mb-4">{{{ icon('warning', 18) }}}<div class="text-sm"><span class="alert-title">Hồ sơ trước bị từ chối</span>{{ rejReason }}. Vui lòng kiểm tra và nộp lại.</div></div>
+    {% endif %}
+    <div class="alert alert-info mb-4">{{{ icon('users', 18) }}}<div class="text-sm">Người giới thiệu: <strong>{{ ref.fullName }}</strong> · {{ RULES.rank(ref.rank).label }} · đơn <span class="mono">{{ o.id }}</span>. Bạn sẽ thuộc tuyến của người này (khoá tại thời điểm mua).</div></div>
+
+    <form novalidate onsubmit="Buyer.a06Submit(event, '{{ phone }}')">
+      {{{ UI.field({ id: 'rg-name', label: 'Họ và tên', required: true, value: d.fullName, hint: 'Dùng để tạo link mua hàng cá nhân', attrs: 'oninput="Buyer.a06Alias(\'' + phone + '\')"' }) }}}
+      <div class="text-sm text-muted mt-1">Link cá nhân dự kiến: <span class="mono text-strong" id="rg-alias">{{ alias }}</span></div>
+      <div class="form-grid form-grid-2 mt-4">
+        {{{ UI.field({ id: 'rg-email', label: 'Email', required: true, type: 'email', value: d.email }) }}}
+        {{{ UI.field({ id: 'rg-phone2', label: 'Số điện thoại', value: phone, mono: true, attrs: 'readonly' }) }}}
+      </div>
+
+      <h3 class="mt-6 mb-2">Tài khoản nhận hoa hồng</h3>
+      <div class="form-grid form-grid-2">
+        {{{ UI.field({ id: 'rg-bank', label: 'Ngân hàng', required: true, type: 'select', value: d.bankName, options: bankOptions }) }}}
+        {{{ UI.field({ id: 'rg-acc', label: 'Số tài khoản', required: true, mono: true, value: d.accountNo, attrs: 'inputmode="numeric"' }) }}}
+      </div>
+      <div class="mt-4">{{{ UI.field({ id: 'rg-owner', label: 'Chủ tài khoản', required: true, value: d.owner, placeholder: 'NGUYEN VAN A', hint: 'Viết in hoa không dấu, trùng họ tên' }) }}}</div>
+
+      <h3 class="mt-6 mb-2">Mật khẩu đăng nhập</h3>
+      <div class="form-grid form-grid-2">
+        {{{ UI.field({ id: 'rg-pw', label: 'Mật khẩu', required: true, type: 'password', hint: 'Tối thiểu 8 ký tự, có chữ và số' }) }}}
+        {{{ UI.field({ id: 'rg-pw2', label: 'Nhập lại mật khẩu', required: true, type: 'password' }) }}}
+      </div>
+
+      <h3 class="mt-6 mb-2">Điều khoản &amp; điều kiện <span class="badge badge-navy badge-plain">v{{ tc.version }}</span></h3>
+      <div class="tc-box" tabindex="0">{{ tc.text }}</div>
+      <label class="check mt-3"><input type="checkbox" id="rg-tc"> Tôi đã đọc và đồng ý với Điều khoản &amp; điều kiện phiên bản {{ tc.version }}</label>
+      <div class="field-error" id="rg-tc-err"></div>
+      <div id="a06-alert" hidden></div>
+      <div class="actions"><button class="btn btn-primary btn-lg btn-block">{{{ icon('sms', 18) }}} Gửi OTP &amp; nộp hồ sơ</button></div>
+    </form>
+  </div>
+</div>
+{% endblock %}
+
+{% block buyer/register-status %}
+<!-- Trạng thái hồ sơ đăng ký: chờ duyệt / đã duyệt / bị từ chối -->
+<div class="card"><div class="card-body stack">
+  <div class="text-center">
+    <div class="result-icon {% if reg.status === 'APPROVED' %}is-success{% elif reg.status === 'REJECTED' %}is-error{% else %}is-pending{% endif %}" style="margin:0 auto">{{{ icon(reg.status === 'APPROVED' ? 'check-circle' : reg.status === 'REJECTED' ? 'x-circle' : 'clock', 34) }}}</div>
+    <h2 class="mt-3">{% if reg.status === 'APPROVED' %}Hồ sơ đã được duyệt{% elif reg.status === 'REJECTED' %}Hồ sơ bị từ chối{% else %}Hồ sơ đang chờ duyệt{% endif %}</h2>
+    <div class="mt-2">{{{ badge('approval', reg.status, true) }}}</div>
+  </div>
+
+  <div class="steps" style="justify-content:center">
+    {% each s, i in steps %}
+    <div class="step {% if s.done %}is-done{% endif %}"><span class="step-dot">{% if s.done %}{{{ icon('check', 14) }}}{% else %}{{ i + 1 }}{% endif %}</span><span>{{ s.label }}</span></div>
+    {% if i < steps.length - 1 %}<span class="step-line"></span>{% endif %}
+    {% endeach %}
+  </div>
+
+  <dl class="dl">
+    <dt>Mã hồ sơ</dt><dd class="mono">{{ reg.id }}</dd>
+    <dt>Nộp lúc</dt><dd>{{{ dt(reg.createdAt) }}}</dd>
+    <dt>Người giới thiệu</dt><dd>{{ referrerName || '—' }}</dd>
+  </dl>
+
+  {% if rej %}
+  <div class="alert alert-error">{{{ icon('x-circle', 18) }}}<div><span class="alert-title">Lý do từ chối</span>{{ rej.reason || '' }}</div></div>
+  {% else %}
+  <div class="alert alert-info">{{{ icon('sms', 18) }}}<div class="text-sm">Khi được duyệt, bạn nhận email từ <strong>{{ CONFIG.email.from }}</strong> gồm link giới thiệu, link mua hàng cá nhân và cổng thành viên.</div></div>
+  {% endif %}
+
+  <div class="actions actions-row">
+    {% if reg.status === 'REJECTED' && CONFIG.rules.rejectedCanResubmit %}<a class="btn btn-primary btn-lg" href="#register?phone={{ phone }}&resubmit=1">Nộp lại hồ sơ</a>{% endif %}
+    {% if reg.status === 'APPROVED' %}<a class="btn btn-primary btn-lg" href="#login">Đăng nhập thành viên</a>{% else %}<a class="btn btn-secondary btn-lg" href="#login">Về đăng nhập</a>{% endif %}
+  </div>
+</div></div>
+{% endblock %}

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quản trị · Kho mã & thiết bị · HOMI365</title>
+  <meta name="theme-color" content="#1E3A66">
+  <link rel="icon" href="./public/image/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./css/tokens.css">
+  <link rel="stylesheet" href="./css/base.css">
+  <link rel="stylesheet" href="./css/components.css">
+  <link rel="stylesheet" href="./css/buyer.css">
+  <link rel="stylesheet" href="./css/seller.css">
+  <link rel="stylesheet" href="./css/admin.css">
+  <style>
+  .proto-nav{position:fixed;right:16px;bottom:16px;z-index:9999;font:13px/1.4 system-ui,sans-serif}
+  .proto-nav>summary{list-style:none;cursor:pointer;background:#1E3A66;color:#fff;padding:8px 14px;
+    border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.25);user-select:none}
+  .proto-nav>summary::-webkit-details-marker{display:none}
+  .proto-nav[open]>summary{border-radius:8px 8px 0 0}
+  .proto-nav .panel{background:#fff;border:1px solid #d8dee9;border-radius:8px;padding:12px 14px;
+    max-height:70vh;overflow:auto;min-width:230px;box-shadow:0 8px 28px rgba(0,0,0,.18)}
+  .proto-nav h4{margin:10px 0 4px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#6b7a90}
+  .proto-nav h4:first-child{margin-top:0}
+  .proto-nav a{display:block;padding:3px 0;color:#1E3A66;text-decoration:none}
+  .proto-nav a:hover{text-decoration:underline}
+  .proto-nav a[aria-current]{font-weight:700}
+  </style>
+</head>
+<body>
+<!-- Nội dung dựng sẵn: xem được ngay cả khi tắt JS. Có JS thì app thật render đè lên. -->
+<div id="app-root">
+
+<div class="admin">
+  <aside class="admin-sidebar" id="admin-sidebar">
+    <div class="admin-sidebar-brand"><span class="brand brand-invert" aria-label="HOMI365"><svg width="30" height="30" viewBox="0 0 100 100" aria-hidden="true"><g fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 46 L50 13 L86 46 V85 A3 3 0 0 1 83 88 H17 A3 3 0 0 1 14 85 Z" stroke="#FFFFFF" stroke-width="7"/><path d="M50 76 C40 67 32.5 60.5 32.5 54 C32.5 49 36.5 45 41.5 45 C45.3 45 48.6 47.2 50 50 C51.4 47.2 54.7 45 58.5 45 C63.5 45 67.5 49 67.5 54 C67.5 60.5 60 67 50 76 Z" stroke="var(--teal-300)" stroke-width="6"/></g></svg><span class="brand-word" style="font-size:20px">HOMI<span class="n365">365</span></span></span><span class="sub">Quản trị HOMI365</span></div>
+    <nav class="admin-nav" aria-label="Menu quản trị">
+      
+        
+        <a href="admin-dashboard.html" class="">
+          <svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1z"/></svg><span>Tổng quan</span>
+          <span class="nav-code">admin-dashboard</span>
+        </a>
+        
+      
+        
+        <div class="admin-nav-group">Vận hành</div>
+        
+      
+        
+        <a href="registrations.html" class="">
+          <svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg><span>Duyệt đăng ký thành viên</span>
+          <span class="nav-badge">2</span>
+        </a>
+        
+      
+        
+        <a href="withdrawals.html" class="">
+          <svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="3"/><path d="M6 12h.01M18 12h.01"/></svg><span>Rút tiền &amp; sổ hoa hồng</span>
+          <span class="nav-badge">3</span>
+        </a>
+        
+      
+        
+        <a href="orders.html" class="">
+          <svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.1L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.5-6.9A2 2 0 0016.8 4H7.2a2 2 0 00-1.7 1.1z"/></svg><span>Đơn hàng &amp; đối soát</span>
+          <span class="nav-badge">4</span>
+        </a>
+        
+      
+        
+        <a href="agents.html" class="">
+          <svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2 20a7 7 0 0114 0M16 4a3.5 3.5 0 010 7M22 20a7 7 0 00-6-6.9"/></svg><span>Thành viên</span>
+          <span class="nav-code">agents</span>
+        </a>
+        
+      
+        
+        <a href="inventory.html" class="is-active">
+          <svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M10.85 12.15L19 4M18 5l2 2M15 8l2 2"/></svg><span>Kho mã &amp; thiết bị</span>
+          <span class="nav-code">inventory</span>
+        </a>
+        
+      
+        
+        <div class="admin-nav-group">Cấu hình</div>
+        
+      
+        
+        <a href="products.html" class="">
+          <svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16.5 9.4L7.5 4.2M21 16V8a2 2 0 00-1-1.7l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.7l7 4a2 2 0 002 0l7-4a2 2 0 001-1.7z"/><path d="M3.3 7L12 12l8.7-5M12 22V12"/></svg><span>Sản phẩm &amp; hoa hồng</span>
+          <span class="nav-code">products</span>
+        </a>
+        
+      
+        
+        <a href="ranks.html" class="">
+          <svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.8-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1.1-1.5 1.7 1.7 0 00-1.8.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.8 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1.1 1.7 1.7 0 00-.3-1.8l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.8.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.8-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.8V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"/></svg><span>Hạng &amp; quy tắc</span>
+          <span class="nav-code">ranks</span>
+        </a>
+        
+      
+        
+        <a href="admin-users.html" class="">
+          <svg class="ico " width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>Tài khoản admin</span>
+          <span class="nav-code">admin-users</span>
+        </a>
+        
+      
+    </nav>
+    <div class="admin-sidebar-foot">
+      <div class="who">Trưởng bộ phận</div>
+      <div class="role">Head Admin · head</div>
+      <button class="btn btn-sm btn-secondary"><svg class="ico " width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg> Đăng xuất</button>
+    </div>
+  </aside>
+
+  <div class="admin-content">
+    <div class="admin-topbar">
+      <div class="row">
+        <button class="btn btn-icon btn-secondary admin-menu-btn" aria-label="Mở menu"><svg class="ico " width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+        <div><div class="crumb">inventory</div><h1>Kho mã & thiết bị</h1></div>
+      </div>
+      <div class="row">
+<!-- Nút hành động góc phải topbar admin, theo màn (screen = 'agents' | 'products' | 'inventory' | 'admin-users') -->
+
+<button class="btn btn-secondary"><svg class="ico " width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg> Nhập file</button>
+<button class="btn btn-primary"><svg class="ico " width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> Sinh hàng loạt</button>
+
+</div>
+    </div>
+    <main class="admin-main"><!-- inventory · Kho mã & thiết bị: cảnh báo, thống kê, bộ lọc + vùng bảng (bảng render động bằng d-05-table) -->
+<!-- cnt = { IN_STOCK, ASSIGNED, ACTIVATED } · low · pendingOrders · total · pct · f = Admin.st.codes -->
+<div class="stack-lg">
+  
+  
+  <div class="alert alert-error" role="alert"><svg class="ico " width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7.9 2h8.2L22 7.9v8.2L16.1 22H7.9L2 16.1V7.9z"/><path d="M12 8v4m0 4h.01"/></svg><div class="row-between grow"><span><span class="alert-title">1 đơn đã thanh toán chờ gắn mã</span></span><button class="btn btn-primary btn-sm" >Gắn mã cho đơn chờ</button></div></div>
+  
+
+  <div class="stat-grid" style="grid-template-columns:repeat(4,1fr)">
+    <div class="stat "><div class="stat-label"><svg class="ico " width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15" r="4"/><path d="M10.85 12.15L19 4M18 5l2 2M15 8l2 2"/></svg> Sẵn hàng</div><div class="stat-value ">1.116</div><div class="progress mt-2 "><span style="width:93%"></span></div></div>
+    <div class="stat"><div class="stat-label"><svg class="ico " width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.1L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.5-6.9A2 2 0 0016.8 4H7.2a2 2 0 00-1.7 1.1z"/></svg> Đã gắn đơn hàng</div><div class="stat-value">33</div></div>
+    <div class="stat"><div class="stat-label"><svg class="ico " width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2" width="14" height="20" rx="2"/><path d="M12 18h.01"/></svg> Đã kích hoạt</div><div class="stat-value">51</div></div>
+    <div class="stat stat-navy"><div class="stat-label">Σ tổng</div><div class="stat-value">1.200</div><div class="stat-sub">1116 + 33 + 51 = 1200 ✓</div></div>
+  </div>
+
+  <div class="card"><div class="card-body">
+    <div class="table-toolbar">
+      <div class="field field-search"><label class="field-label" for="k-q">Tìm mã / serial / đơn / lô</label><input class="input input-mono" id="k-q" value=""></div>
+      <div class="field"><label class="field-label" for="k-status">Trạng thái</label><select class="select" id="k-status"><option value="">Tất cả</option><option value="IN_STOCK" >Sẵn hàng</option><option value="ASSIGNED" >Đã gắn đơn hàng</option><option value="ACTIVATED" >Đã kích hoạt</option></select></div>
+      <div class="toolbar-actions"><button class="btn btn-secondary"><svg class="ico " width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg> Xuất Excel</button></div>
+    </div>
+    <div id="k-table"><div class="table-wrap" aria-busy="true"><span class="sr-only">Đang tải dữ liệu…</span><table class="table"><tbody><tr><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td></tr><tr><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td></tr><tr><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td></tr><tr><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td></tr><tr><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td></tr><tr><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td></tr><tr><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td></tr><tr><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td><td><span class="skeleton"></span></td></tr></tbody></table></div></div>
+  </div></div>
+</div>
+
+
+
+
+
+
+
+
+</main>
+  </div>
+</div>
+
+</div>
+<details class="proto-nav"><summary>Màn hình</summary><div class="panel"><h4>Người mua & công khai</h4><a href="index.html">Trang bìa prototype</a><a href="buy.html">Trang mua hàng</a><a href="buy-invalid.html">Link giới thiệu không hợp lệ</a><a href="buy-inactive.html">Thành viên bị khoá</a><a href="payment.html">Thanh toán</a><a href="order-result-paid.html">Đơn hàng đã thanh toán</a><a href="order-result-awaiting.html">Chờ đối soát chuyển khoản</a><a href="order-result-failed.html">Thanh toán thất bại</a><a href="order-result-rejected.html">Đơn bị từ chối đối soát</a><a href="order-result-later.html">Đã gửi mã qua SMS, đăng ký sau</a><a href="order-result-nocode.html">Đã thanh toán, kho hết mã</a><a href="order-lookup.html">Tra cứu đơn hàng</a><a href="login.html">Đăng nhập thành viên</a><a href="login-forgot.html">Quên mật khẩu</a><a href="register.html">Đăng ký thành viên</a><a href="register-pending.html">Hồ sơ chờ duyệt</a><a href="register-rejected.html">Hồ sơ bị từ chối</a><a href="policy.html">Chính sách</a><a href="403.html">Không có quyền truy cập</a><h4>Thành viên</h4><a href="dashboard.html">Tổng quan</a><a href="my-package.html">Gói của tôi</a><a href="wallet.html">Ví & rút tiền</a><a href="profile.html">Hồ sơ</a><h4>Quản trị</h4><a href="admin-login.html">Đăng nhập</a><a href="admin-dashboard.html">Tổng quan</a><a href="agents.html">Thành viên</a><a href="orders.html">Đơn hàng & đối soát</a><a href="products.html">Sản phẩm & hoa hồng</a><a href="inventory.html" aria-current="page">Kho mã & thiết bị</a><a href="ranks.html">Hạng & quy tắc</a><a href="withdrawals.html">Rút tiền & sổ hoa hồng</a><a href="registrations.html">Duyệt đăng ký</a><a href="admin-users.html">Tài khoản admin</a></div></details>
+
+<script>window.__ROUTE__ = "inventory";</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js" crossorigin="anonymous"></script>
+<script src="./config/business-rules.js"></script>
+<script src="./config/policies.js"></script>
+<script src="./mock/data.js"></script>
+<script src="./js/ui.js"></script>
+<script src="./js/tpl.js"></script>
+<script src="./js/templates.js"></script>
+<script src="./js/views-buyer.js"></script>
+<script src="./js/views-seller.js"></script>
+<script src="./js/views-admin.js"></script>
+<script>document.addEventListener("DOMContentLoaded", function () { try {
+  if (!Store.currentAdmin()) Store.adminLogin("head", "Homi@2026");
+} catch (e) { console.error(e); } });</script>
+<script src="./js/app.js"></script>
+</body>
+</html>

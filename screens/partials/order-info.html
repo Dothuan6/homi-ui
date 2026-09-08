@@ -1,8 +1,0 @@
-<dl class="dl">
-  <dt>Mã đơn hàng</dt><dd class="mono">{{ order.id }}</dd>
-  <dt>Gói</dt><dd>{{ pkgName }}</dd>
-  <dt>Số tiền</dt><dd>{{{ money(order.price) }}}</dd>
-  <dt>Phương thức</dt><dd>{{ LABELS.method[order.method] || '—' }}</dd>
-  <dt>Người nhận</dt><dd>{{ order.fullName }} · <span class="mono">{{ RULES.maskPhone(order.phone) }}</span></dd>
-  {% if shipping %}<dt>Giao hàng</dt><dd>{{{ badge('shipping', order.shipping) }}}</dd>{% endif %}
-</dl>

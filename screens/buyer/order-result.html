@@ -1,0 +1,132 @@
+{% block buyer/order-result-awaiting %}
+<!-- (d) AWAITING_RECONCILE — polling -->
+<div class="stack">
+  <div class="card"><div class="card-body stack">
+    <div class="result-hero">
+      <div class="result-icon is-pending pulse">{{{ icon('clock', 40) }}}</div>
+      <h1>Đang chờ xác nhận chuyển khoản</h1>
+      <p>Chúng tôi đang đối soát giao dịch của bạn. Trang này tự cập nhật mỗi {{ CONFIG.order.reconcilePollSeconds }} giây — bạn có thể đóng trang và tra cứu lại sau.</p>
+    </div>
+    {% if order.transferProof %}
+    <div class="alert alert-success" style="text-align:left">{{{ icon('check-circle', 20) }}}<div>Đã nhận biên lai <strong>{{ order.transferProof.name }}</strong>. Bộ phận vận hành sẽ đối chiếu và liên hệ nếu số tiền hoặc nội dung chưa khớp.</div></div>
+    {% endif %}
+    {{{ info }}}
+    <div class="text-caption text-center" id="poll-status" aria-live="polite">Đang kiểm tra…</div>
+    <div class="actions actions-row">
+      <a class="btn btn-secondary btn-lg" href="#order-lookup">Tra cứu đơn sau</a>
+      <button class="btn btn-outline btn-lg" onclick="App.reload()">{{{ icon('refresh', 18) }}} Kiểm tra ngay</button>
+    </div>
+  </div></div>
+  <div class="demo-hint">Mô phỏng: admin xác nhận/từ chối tại <a href="#orders" target="_blank">orders</a> (mở tab mới) — trang này sẽ tự chuyển.
+    <button class="btn-link" onclick="Store.confirmReconcile('{{ order.id }}'); App.reload()">Giả lập admin xác nhận</button> ·
+    <button class="btn-link" onclick="Store.rejectReconcile('{{ order.id }}', 'Không tìm thấy giao dịch khớp'); App.reload()">Giả lập từ chối</button>
+  </div>
+</div>
+{% endblock %}
+
+{% block buyer/order-result-failed %}
+<!-- (c) FAILED + Thử lại (nếu còn hạn) -->
+<div class="card"><div class="card-body stack">
+  <div class="result-hero">
+    <div class="result-icon is-error">{{{ icon('x-circle', 40) }}}</div>
+    <h1>Thanh toán thất bại</h1>
+    <p>{{ order.failReason || 'Giao dịch không thành công.' }}</p>
+  </div>
+  {{{ info }}}
+  {% if canRetry %}
+  <div class="row-between"><span class="text-sm text-muted">Đơn còn hiệu lực</span>{{{ UI.countdown.markup('a03-countdown') }}}</div>
+  {% else %}
+  <div class="alert alert-warning">{{{ icon('clock', 20) }}}<div>Đơn đã hết thời gian giữ. Vui lòng đặt lại.</div></div>
+  {% endif %}
+  <div class="actions actions-row">
+    <a class="btn btn-secondary btn-lg" href="#order-lookup">Tra cứu đơn</a>
+    {% if canRetry %}
+    <button class="btn btn-primary btn-lg" onclick="Store.retryOrder('{{ order.id }}'); App.navigate('payment')">{{{ icon('refresh', 18) }}} Thử lại</button>
+    {% else %}
+    <button class="btn btn-primary btn-lg" onclick="App.navigate('buy')">Đặt lại</button>
+    {% endif %}
+  </div>
+</div></div>
+{% endblock %}
+
+{% block buyer/order-result-later %}
+<!-- (b) Để sau → xác nhận đã gửi SMS -->
+<div class="card"><div class="card-body stack text-center">
+  <div class="result-icon is-success" style="margin:0 auto">{{{ icon('sms', 34) }}}</div>
+  <h1>Đã gửi mã kích hoạt qua SMS</h1>
+  <p class="text-muted">Tin nhắn chứa mã kích hoạt và hướng dẫn sử dụng đã gửi tới <strong class="mono">{{ RULES.maskPhone(order.phone) }}</strong> (trong vòng 1 phút).</p>
+  <div class="alert alert-info" style="text-align:left">{{{ icon('info', 20) }}}<div>Bạn có thể đăng ký thành viên sau bằng chính số điện thoại này tại mục <strong>Đăng nhập thành viên</strong> (nếu người giới thiệu đủ điều kiện), hoặc tra cứu đơn hàng để xem lại mã.</div></div>
+  <div class="actions actions-row">
+    <a class="btn btn-secondary btn-lg" href="#login">Đăng nhập thành viên</a>
+    <a class="btn btn-primary btn-lg" href="#order-lookup">Tra cứu đơn hàng</a>
+  </div>
+</div></div>
+{% endblock %}
+
+{% block buyer/order-result-nocode %}
+<!-- (f) Kho mã hết → chờ cấp -->
+<div class="card"><div class="card-body stack">
+  <div class="result-hero">
+    <div class="result-icon is-success">{{{ icon('check-circle', 40) }}}</div>
+    <h1>Thanh toán thành công</h1>
+    <p>Đơn hàng đã được ghi nhận.</p>
+  </div>
+  <div class="alert alert-warning">{{{ icon('clock', 22) }}}<div><span class="alert-title">Mã kích hoạt đang chờ cấp</span>Mã kích hoạt sẽ được gửi qua SMS tới <strong class="mono">{{ RULES.maskPhone(order.phone) }}</strong> trong thời gian sớm nhất. Bạn cũng có thể xem mã tại mục tra cứu đơn hàng.</div></div>
+  {{{ info }}}
+  <div class="card card-tint"><div class="card-body">{{{ cta }}}</div></div>
+</div></div>
+{% endblock %}
+
+{% block buyer/order-result-paid %}
+<!-- (a) PAID — mã đơn + mã kích hoạt + mời đăng ký thành viên -->
+<div class="buyer-split buyer-split-rev">
+  <div class="card"><div class="card-body">
+    <div class="result-hero">
+      <div class="result-icon is-success">{{{ icon('check-circle', 40) }}}</div>
+      <h1>Thanh toán thành công</h1>
+      <p>Cảm ơn bạn đã mua {{ pkg.name }}. Đồng hồ HW01 sẽ được giao tới địa chỉ đã đăng ký.</p>
+    </div>
+    <div class="code-box code-box-lg code-box-navy mt-4">
+      <div class="grow"><span class="code-label">Mã kích hoạt của bạn</span><span class="code-value">{{ order.licenseCode }}</span></div>
+      <button class="btn btn-icon btn-secondary" aria-label="Sao chép mã kích hoạt" onclick="UI.copy('{{ order.licenseCode }}', 'Đã sao chép mã kích hoạt.')">{{{ icon('copy', 20) }}}</button>
+    </div>
+    <p class="text-sm text-muted mt-2">Nhập mã này trong ứng dụng HOMI365 trên điện thoại để kích hoạt gói. Mã chỉ dùng được trên 1 thiết bị.</p>
+    <div class="mt-4">{{{ info }}}</div>
+  </div></div>
+  <aside class="buyer-side"><div class="card card-tint"><div class="card-body">{{{ cta }}}</div></div></aside>
+</div>
+{% endblock %}
+
+{% block buyer/order-result-reg-prompt %}
+<!-- Popup mời đăng ký thành viên — thân modal (hiện 1 lần/đơn) -->
+<div class="text-center mb-3"><span class="result-icon is-info" style="margin:0 auto">{{{ icon('gift', 32) }}}</span></div>
+<p>Bạn được <strong>{{ ref.fullName }}</strong> (hạng {{ rankLabel }}) mời tham gia chương trình thành viên. Đăng ký hồ sơ để nhận <strong>link bán hàng cá nhân</strong> và <strong>hoa hồng theo hạng</strong> cho mỗi gói bán được.</p>
+<ul class="pkg-benefits mt-3">
+  <li>{{{ icon('check', 16) }}}<span>Thông tin điền sẵn từ đơn hàng, chỉ cần thêm tài khoản ngân hàng và mật khẩu.</span></li>
+  <li>{{{ icon('check', 16) }}}<span>Hồ sơ được duyệt trong 1–2 ngày làm việc, nhận email kích hoạt.</span></li>
+  <li>{{{ icon('check', 16) }}}<span>Không đăng ký vẫn giữ nguyên đơn hàng và mã kích hoạt.</span></li>
+</ul>
+{% endblock %}
+
+{% block buyer/order-result-reg-prompt-foot %}
+<button class="btn btn-secondary btn-lg" onclick="UI.closeModal()">Thoát ra, để sau</button>
+<a class="btn btn-primary btn-lg" href="#register?order={{ order.id }}" onclick="UI.closeModal()">{{{ icon('user', 18) }}} Đăng ký thành viên</a>
+{% endblock %}
+
+{% block buyer/order-result-rejected %}
+<!-- (e) Admin từ chối đối soát -->
+<div class="card"><div class="card-body stack">
+  <div class="result-hero">
+    <div class="result-icon is-error">{{{ icon('x-circle', 40) }}}</div>
+    <h1>Chuyển khoản chưa được xác nhận</h1>
+    <p>Bộ phận đối soát không tìm thấy giao dịch khớp với đơn hàng này.</p>
+  </div>
+  <div class="alert alert-error">{{{ icon('warning', 20) }}}<div><span class="alert-title">Lý do</span>{{ order.rejectReason || '—' }}</div></div>
+  {{{ info }}}
+  <div class="alert alert-info">{{{ icon('phone', 20) }}}<div>Nếu bạn đã chuyển khoản, vui lòng liên hệ <strong>{{ CONFIG.brand.supportHotline }}</strong> kèm ảnh chụp giao dịch và mã đơn <span class="mono">{{ order.id }}</span> để được hỗ trợ.</div></div>
+  <div class="actions actions-row">
+    <a class="btn btn-secondary btn-lg" href="#order-lookup">Tra cứu đơn</a>
+    <button class="btn btn-primary btn-lg" onclick="App.navigate('buy')">Đặt đơn mới</button>
+  </div>
+</div></div>
+{% endblock %}

@@ -1,0 +1,96 @@
+<!-- registrations · Duyệt đăng ký thành viên: bộ lọc + vùng bảng (bảng render động bằng d-09-table) -->
+<div class="card"><div class="card-body">
+  <div class="alert alert-info mb-4">{{{ icon('info', 18) }}}<div class="text-sm">Duyệt <strong>2 lớp</strong> (người thứ 2 phải khác người thứ 1; Head Admin tự chốt). Khi <strong>Đã duyệt</strong>: tạo tài khoản thành viên hạng Copper, sinh ref_code + link cá nhân, gửi email kích hoạt. Duyệt không ảnh hưởng đơn, tuyến và hoa hồng đã ghi.</div></div>
+  <div class="table-toolbar">
+    <div class="field field-search"><label class="field-label" for="rg-q">Tìm kiếm</label><input class="input" id="rg-q" placeholder="Họ tên, SĐT, email" value="{{ f.q }}" oninput="Admin.st.regs.q=this.value; Admin.st.regs.page=1; Admin.renderRegs()"></div>
+    <div class="field"><label class="field-label" for="rg-status">Trạng thái</label><select class="select" id="rg-status" onchange="Admin.st.regs.status=this.value; Admin.st.regs.page=1; Admin.renderRegs()"><option value="">Tất cả</option>{% each k in Object.keys(LABELS.approval) %}<option value="{{ k }}" {{ f.status === k ? 'selected' : '' }}>{{{ LABELS.approval[k].text }}}</option>{% endeach %}</select></div>
+  </div>
+  <div id="rg-table">{{{ UI.skeletonTable(7, 5) }}}</div>
+</div></div>
+
+{% block admin/registrations-drawer %}
+<!-- registrations · Drawer chi tiết hồ sơ đăng ký: r, ref, refRankLabel, o (đơn gốc), agent, mail, timeline (html), audit (html), canApprove · part = 'title' | 'body' | 'foot' -->
+{% if part === 'title' %}
+<h2>{{ r.fullName }}</h2>
+<div class="row-wrap mt-1">{{{ badge('approval', r.status, true) }}}<span class="mono text-sm text-muted">{{ r.id }}</span></div>
+
+{% elif part === 'body' %}
+<div class="section">
+  <div class="section-title">Hồ sơ đã nộp</div>
+  <dl class="dl">
+    <dt>SĐT</dt><dd class="mono">{{ r.phone }}</dd>
+    <dt>Email</dt><dd>{{ r.email }}</dd>
+    <dt>Ngân hàng</dt><dd>{{ r.bank.bankName }} · <span class="mono">{{ r.bank.accountNo }}</span> · {{ r.bank.owner }}</dd>
+    <dt>T&C</dt><dd>v{{ r.tcVersion }} · {{ dt(r.tcAt) }}</dd>
+    <dt>Nộp lúc</dt><dd>{{ dt(r.createdAt) }}</dd>
+  </dl>
+</div>
+<div class="section">
+  <div class="section-title">Người giới thiệu & đơn gốc</div>
+  <dl class="dl">
+    <dt>Người giới thiệu</dt><dd>{% if ref %}{{ ref.fullName }} · <span class="mono">{{ ref.refCode }}</span> · {{{ badge('rank', ref.rank) }}} (lúc nộp: {{{ refRankLabel }}}){% else %}—{% endif %}</dd>
+    <dt>Đơn</dt><dd>{% if o %}<span class="mono">{{ o.id }}</span> · {{ money(o.price) }} · {{ date(o.paidAt) }}{% else %}—{% endif %}</dd>
+  </dl>
+</div>
+<div class="section">
+  <div class="section-title">Tiến trình</div>
+  {{{ timeline }}}
+</div>
+{% if agent %}
+<div class="section">
+  <div class="section-title">Đã kích hoạt</div>
+  <dl class="dl">
+    <dt>ref_code</dt><dd class="mono">{{ agent.refCode }}</dd>
+    <dt>Link cá nhân</dt><dd class="mono">{{ RULES.publicPurchaseUrl(agent.purchaseAlias) }}</dd>
+    <dt>Hạng</dt><dd>{{{ badge('rank', agent.rank) }}}</dd>
+  </dl>
+  {% if mail %}
+  <div class="alert alert-success mt-3">{{{ icon('sms', 18) }}}<div class="text-sm"><span class="alert-title">Email kích hoạt (mock) → {{ mail.to }}</span><pre style="white-space:pre-wrap;font-family:inherit;margin-top:6px">{{ mail.body }}</pre></div></div>
+  {% endif %}
+</div>
+{% endif %}
+<div class="section">
+  <div class="section-title">Audit</div>
+  {{{ audit }}}
+</div>
+
+{% elif part === 'foot' %}
+{% if r.status.startsWith('PENDING') %}
+<button class="btn btn-danger-outline" onclick="Admin.regReject('{{ r.id }}')">Từ chối</button>
+<button class="btn btn-success" {{{ canApprove ? '' : 'disabled' }}} onclick="Admin.regApprove('{{ r.id }}')">Xác nhận</button>
+{% endif %}
+{% if agent %}<button class="btn btn-secondary" onclick="Admin.userDrawer('{{ agent.id }}')">Xem thành viên</button>{% endif %}
+{% endif %}
+{% endblock %}
+
+{% block admin/registrations-table %}
+<!-- registrations · Bảng hồ sơ đăng ký: rows = [{ r, ref, refRankLabel, cb, cell }], pg = UI.paginate(...) -->
+{% if !rows.length %}
+{{{ UI.empty('user', 'Không có hồ sơ', 'Chưa có đăng ký nào ở trạng thái này.') }}}
+{% else %}
+<div class="table-wrap"><table class="table">
+  <thead><tr><th>Mã</th><th>Người đăng ký</th><th>Người giới thiệu</th><th>Đơn gốc</th><th>Ngày nộp</th><th>Tiến trình</th><th>Hành động</th></tr></thead>
+  <tbody>
+  {% each row in rows %}
+  {% set r = row.r %}
+    <tr>
+      <td class="mono">{{ r.id }}</td>
+      <td><span class="cell-main">{{ r.fullName }}</span><span class="cell-sub mono">{{ r.phone }}</span><span class="cell-sub">{{ r.email }}</span></td>
+      <td>{% if row.ref %}{{ row.ref.fullName }}<span class="cell-sub"><span class="mono">{{ row.ref.refCode }}</span> · {{{ row.refRankLabel }}} lúc nộp</span>{% else %}—{% endif %}</td>
+      <td><button class="btn-link mono" onclick="Admin.orderDrawer('{{ r.orderId }}')">{{ r.orderId }}</button></td>
+      <td>{{ dt(r.createdAt) }}</td>
+      <td>{{{ row.cell }}}</td>
+      <td><div class="row-actions">
+        {% if r.status.startsWith('PENDING') %}
+        <button class="btn btn-success btn-sm" {{{ row.cb.ok ? '' : 'disabled' }}} title="{{{ row.cb.why || '' }}}" onclick="Admin.regApprove('{{ r.id }}')">Xác nhận</button>
+        <button class="btn btn-danger-outline btn-sm" onclick="Admin.regReject('{{ r.id }}')">Từ chối</button>
+        {% endif %}
+        <button class="btn btn-secondary btn-sm" onclick="Admin.regDrawer('{{ r.id }}')">Chi tiết</button>
+      </div></td>
+    </tr>
+  {% endeach %}
+  </tbody>
+</table></div>
+{{{ UI.pagination(pg, 'Admin.gotoRegs') }}}
+{% endif %}
+{% endblock %}

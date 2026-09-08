@@ -1,0 +1,41 @@
+<!-- admin-users · Tài khoản admin (Head Admin): me = admin đang đăng nhập, list = Store.adminUsers() -->
+<div class="card"><div class="card-body">
+  <div class="table-wrap"><table class="table">
+    <thead><tr><th>Tên đăng nhập</th><th>Họ tên</th><th>Vai trò</th><th>Trạng thái</th><th>Tạo bởi</th><th></th></tr></thead>
+    <tbody>
+    {% each a in list %}
+      <tr>
+        <td class="mono text-strong">{{ a.username }}{% if a.username === me.username %} <span class="badge badge-navy badge-plain">bạn</span>{% endif %}</td>
+        <td>{{ a.fullName }}</td>
+        <td>{{{ badge('role', a.role) }}}</td>
+        <td>{{{ badge('adminStatus', a.status) }}}</td>
+        <td>{{ a.createdBy }}<span class="cell-sub">{{ date(a.createdAt) }}</span></td>
+        <td><div class="row-actions">
+          <button class="btn btn-secondary btn-sm" onclick="Admin.adminForm('{{ a.username }}')">{{{ icon('edit', 14) }}} Sửa</button>
+          {% if a.username !== me.username %}
+            {% if a.status === 'active' %}
+            <button class="btn btn-danger-outline btn-sm" onclick="Admin.setAdminStatus('{{ a.username }}', 'disabled')">Vô hiệu</button>
+            {% else %}
+            <button class="btn btn-success btn-sm" onclick="Admin.setAdminStatus('{{ a.username }}', 'active')">Kích hoạt</button>
+            {% endif %}
+          {% endif %}
+        </div></td>
+      </tr>
+    {% endeach %}
+    </tbody>
+  </table></div>
+  <p class="text-caption mt-3">Head Admin không thể tự hạ vai trò hoặc vô hiệu chính mình. Specialist truy cập màn này bị từ chối (403).</p>
+</div></div>
+
+{% block admin/users-form %}
+<!-- admin-users · Modal thêm / sửa tài khoản admin: a (tài khoản đang sửa hoặc null), me · part = 'body' | 'foot' -->
+{% if part === 'body' %}
+{{{ UI.field({ id: 'am-user', label: 'Tên đăng nhập', required: true, mono: true, value: a ? a.username : '', attrs: a ? 'readonly' : '' }) }}}
+<div class="mt-4">{{{ UI.field({ id: 'am-name', label: 'Họ tên', required: true, value: a ? a.fullName : '' }) }}}</div>
+<div class="mt-4">{{{ UI.field({ id: 'am-role', label: 'Vai trò', type: 'select', value: a ? a.role : 'SPECIALIST', options: [{ value: 'SPECIALIST', label: LABELS.role.SPECIALIST.text }, { value: 'HEAD', label: LABELS.role.HEAD.text }], attrs: a && a.username === me.username ? 'disabled' : '' }) }}}</div>
+<div class="mt-4">{{{ UI.field({ id: 'am-pw', label: a ? 'Đặt lại mật khẩu (để trống nếu giữ)' : 'Mật khẩu', required: !a, type: 'password' }) }}}</div>
+{% elif part === 'foot' %}
+<button class="btn btn-secondary" onclick="UI.closeModal()">Huỷ</button>
+<button class="btn btn-primary" onclick="Admin.saveAdmin({{{ a ? 'true' : 'false' }}})">Lưu</button>
+{% endif %}
+{% endblock %}

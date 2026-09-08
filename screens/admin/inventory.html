@@ -1,0 +1,108 @@
+<!-- inventory · Kho mã & thiết bị: cảnh báo, thống kê, bộ lọc + vùng bảng (bảng render động bằng d-05-table) -->
+<!-- cnt = { IN_STOCK, ASSIGNED, ACTIVATED } · low · pendingOrders · total · pct · f = Admin.st.codes -->
+<div class="stack-lg">
+  {% if low %}
+  <div class="alert alert-warning" role="alert">{{{ icon('warning', 20) }}}<div><span class="alert-title">Kho sắp cạn</span>Còn {{{ cnt.IN_STOCK }}} mã sẵn hàng (ngưỡng {{{ CONFIG.stock.lowThreshold }}}).</div></div>
+  {% endif %}
+  {% if pendingOrders %}
+  <div class="alert alert-error" role="alert">{{{ icon('alert-octagon', 20) }}}<div class="row-between grow"><span><span class="alert-title">{{{ pendingOrders }}} đơn đã thanh toán chờ gắn mã</span></span><button class="btn btn-primary btn-sm" {{{ cnt.IN_STOCK ? '' : 'disabled' }}} onclick="UI.toast('Đã gắn mã cho ' + Store.fulfilPendingLicenses() + ' đơn.'); App.reload()">Gắn mã cho đơn chờ</button></div></div>
+  {% endif %}
+
+  <div class="stat-grid" style="grid-template-columns:repeat(4,1fr)">
+    <div class="stat {{ low ? 'stat-accent' : '' }}"><div class="stat-label">{{{ icon('key', 16) }}} Sẵn hàng</div><div class="stat-value {{ low ? 'text-warning' : '' }}">{{{ num(cnt.IN_STOCK) }}}</div><div class="progress mt-2 {{ low ? 'is-low' : '' }}"><span style="width:{{{ pct }}}%"></span></div></div>
+    <div class="stat"><div class="stat-label">{{{ icon('inbox', 16) }}} Đã gắn đơn hàng</div><div class="stat-value">{{{ num(cnt.ASSIGNED) }}}</div></div>
+    <div class="stat"><div class="stat-label">{{{ icon('device', 16) }}} Đã kích hoạt</div><div class="stat-value">{{{ num(cnt.ACTIVATED) }}}</div></div>
+    <div class="stat stat-navy"><div class="stat-label">Σ tổng</div><div class="stat-value">{{{ num(total) }}}</div><div class="stat-sub">{{{ cnt.IN_STOCK }}} + {{{ cnt.ASSIGNED }}} + {{{ cnt.ACTIVATED }}} = {{{ total }}} ✓</div></div>
+  </div>
+
+  <div class="card"><div class="card-body">
+    <div class="table-toolbar">
+      <div class="field field-search"><label class="field-label" for="k-q">Tìm mã / serial / đơn / lô</label><input class="input input-mono" id="k-q" value="{{ f.q }}" oninput="Admin.st.codes.q=this.value; Admin.st.codes.page=1; Admin.renderCodes()"></div>
+      <div class="field"><label class="field-label" for="k-status">Trạng thái</label><select class="select" id="k-status" onchange="Admin.st.codes.status=this.value; Admin.st.codes.page=1; Admin.renderCodes()"><option value="">Tất cả</option>{% each k in ['IN_STOCK', 'ASSIGNED', 'ACTIVATED'] %}<option value="{{ k }}" {{ f.status === k ? 'selected' : '' }}>{{{ LABELS.license[k].text }}}</option>{% endeach %}</select></div>
+      <div class="toolbar-actions"><button class="btn btn-secondary" onclick="Admin.exportCodes()">{{{ icon('download', 16) }}} Xuất Excel</button></div>
+    </div>
+    <div id="k-table">{{{ UI.skeletonTable(7, 8) }}}</div>
+  </div></div>
+</div>
+
+{% block admin/inventory-drawer %}
+<!-- inventory · Drawer chi tiết mã kích hoạt: c = Store.codeInfo, o (đơn), a (thành viên bán), stepIdx · part = 'title' | 'body' | 'foot' -->
+{% if part === 'title' %}
+<h2 class="mono">{{ c.code }}</h2>
+<div class="row-wrap mt-1">{{{ badge('license', c.status, true) }}}<span class="mono text-sm text-muted">{{ c.deviceSku }} · {{ c.deviceSerial || '' }}</span></div>
+
+{% elif part === 'body' %}
+<div class="section">
+  <div class="section-title">Vòng đời (một chiều)</div>
+  <div class="steps">
+    {% each s, i in ['IN_STOCK', 'ASSIGNED', 'ACTIVATED'] %}
+    <div class="step {{ c.status === s ? 'is-active' : '' }} {{ stepIdx > i ? 'is-done' : '' }}"><span class="step-dot">{{{ i + 1 }}}</span><span>{{{ LABELS.license[s].text }}}</span></div>
+    {% if i < 2 %}<span class="step-line"></span>{% endif %}
+    {% endeach %}
+  </div>
+  <dl class="dl mt-4">
+    <dt>Nhập kho</dt><dd>{{ dt(c.stockedAt) }} · lô {{ c.batch }}</dd>
+    <dt>Gắn đơn</dt><dd>{% if c.assignedAt %}{{ dt(c.assignedAt) }} · <span class="mono">{{ c.orderId }}</span>{% else %}—{% endif %}</dd>
+    <dt>Thành viên bán</dt><dd>{% if a %}{{ a.fullName }} · {{{ badge('rank', a.rank) }}}{% else %}—{% endif %}</dd>
+    <dt>Người mua</dt><dd>{% if o %}{{ o.fullName }} · <span class="mono">{{ o.phone }}</span>{% else %}—{% endif %}</dd>
+    <dt>Kích hoạt</dt><dd>{% if c.activatedAt %}{{ dt(c.activatedAt) }} · {{ c.device.name }} · <span class="mono">{{ c.device.deviceId }}</span>{% else %}—{% endif %}</dd>
+  </dl>
+</div>
+
+{% elif part === 'foot' %}
+{% if c.status === 'ASSIGNED' %}
+<button class="btn btn-primary" onclick="Store.activateCode('{{ c.code }}', { name: 'Samsung Galaxy A54 (mô phỏng)' }); UI.toast('Đã mô phỏng kích hoạt từ app.'); Admin.renderCodes(); Admin.codeDrawer('{{ c.code }}')">{{{ icon('device', 16) }}} Mô phỏng kích hoạt từ app</button>
+{% endif %}
+{% if o %}<button class="btn btn-secondary" onclick="Admin.orderDrawer('{{ o.id }}')">Xem đơn</button>{% endif %}
+{% endif %}
+{% endblock %}
+
+{% block admin/inventory-modal-generate %}
+<!-- inventory · Modal sinh mã hàng loạt · part = 'body' | 'foot' -->
+{% if part === 'body' %}
+{{{ UI.field({ id: 'gen-n', label: 'Số lượng', required: true, mono: true, value: 100, attrs: 'inputmode="numeric"' }) }}}
+<div class="mt-4">{{{ UI.field({ id: 'gen-sku', label: 'Mã sản phẩm thiết bị', required: true, mono: true, value: CONFIG.stock.deviceSku }) }}}</div>
+<p class="text-caption mt-2">Serial sinh tự động dạng {{{ CONFIG.stock.deviceSku }}}-000001; mã kích hoạt {{{ CONFIG.stock.codePrefix }}}-XXXX-XXXX-XXXX không trùng.</p>
+{% elif part === 'foot' %}
+<button class="btn btn-secondary" onclick="UI.closeModal()">Huỷ</button>
+<button class="btn btn-primary" onclick="Admin.generate()">Sinh mã</button>
+{% endif %}
+{% endblock %}
+
+{% block admin/inventory-modal-import %}
+<!-- inventory · Modal nhập mã từ file / dán danh sách · part = 'body' | 'foot' -->
+{% if part === 'body' %}
+<div class="dropzone" onclick="document.getElementById('imp-file').click()">{{{ icon('upload', 28) }}}<div class="mt-2">Chọn file .csv (mỗi dòng: mã kích hoạt;serial thiết bị)</div><input type="file" id="imp-file" accept=".csv,.txt" hidden onchange="Admin.readImportFile(this)"></div>
+<div class="mt-4">{{{ UI.field({ id: 'imp-sku', label: 'Mã sản phẩm thiết bị', mono: true, value: CONFIG.stock.deviceSku }) }}}</div>
+<div class="mt-4">{{{ UI.field({ id: 'imp-text', label: 'Hoặc dán danh sách', type: 'textarea', rows: 5, placeholder: 'HOMI-AB12-CD34-EF56;HW01-001301\nHOMI-…' }) }}}</div>
+{% elif part === 'foot' %}
+<button class="btn btn-secondary" onclick="UI.closeModal()">Huỷ</button>
+<button class="btn btn-primary" onclick="Admin.importCodes()">Nhập vào kho</button>
+{% endif %}
+{% endblock %}
+
+{% block admin/inventory-table %}
+<!-- inventory · Bảng kho mã: rows = [{ c, a (thành viên bán), hasOrder }], pg = UI.paginate(...) -->
+{% if !rows.length %}
+{{{ UI.empty('key', 'Không có mã phù hợp', 'Thử đổi bộ lọc hoặc từ khoá.') }}}
+{% else %}
+<div class="table-wrap"><table class="table">
+  <thead><tr><th>Mã sản phẩm</th><th>Mã kích hoạt</th><th>Đơn</th><th>Thành viên bán</th><th>Ngày nhập kho</th><th>Trạng thái</th><th></th></tr></thead>
+  <tbody>
+  {% each row in rows %}
+  {% set c = row.c %}
+    <tr>
+      <td><span class="cell-main mono">{{ c.deviceSku }}</span><span class="cell-sub mono">{{ c.deviceSerial || '' }}</span></td>
+      <td class="mono">{{ c.code }}</td>
+      <td>{% if c.orderId %}{% if row.hasOrder %}<button class="btn-link mono" onclick="Admin.orderDrawer('{{ c.orderId }}')">{{ c.orderId }}</button>{% else %}<span class="mono">{{ c.orderId }}</span>{% endif %}{% else %}—{% endif %}</td>
+      <td>{% if row.a %}{{ row.a.fullName }}{% else %}—{% endif %}</td>
+      <td>{{ date(c.stockedAt) }}<span class="cell-sub mono">{{ c.batch }}</span></td>
+      <td>{{{ badge('license', c.status) }}}</td>
+      <td><div class="row-actions"><button class="btn btn-secondary btn-sm" onclick="Admin.codeDrawer('{{ c.code }}')">Chi tiết</button></div></td>
+    </tr>
+  {% endeach %}
+  </tbody>
+</table></div>
+{{{ UI.pagination(pg, 'Admin.gotoCodes') }}}
+{% endif %}
+{% endblock %}

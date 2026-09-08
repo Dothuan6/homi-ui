@@ -1,0 +1,81 @@
+<!-- order-lookup · Tra cứu đơn hàng (không cần đăng nhập) -->
+<div class="buyer-split">
+  <aside class="buyer-side">{{{ include('partials/intro-panel', intro) }}}</aside>
+  <div class="stack">
+    <div class="card"><div class="card-body" id="a04-body">
+      <div class="seg mb-4" role="tablist">
+        <button role="tab" aria-selected="{{ mode === 'phone' }}" class="{% if mode === 'phone' %}is-active{% endif %}" onclick="Buyer._a04Mode='phone'; App.reload()">Số điện thoại + OTP</button>
+        <button role="tab" aria-selected="{{ mode === 'order' }}" class="{% if mode === 'order' %}is-active{% endif %}" onclick="Buyer._a04Mode='order'; App.reload()">Mã đơn hàng</button>
+      </div>
+      {% if mode === 'phone' %}
+      <form novalidate onsubmit="Buyer.a04Phone(event)">
+        {{{ UI.field({ id: 'lk-phone', label: 'Số điện thoại đã mua', required: true, type: 'tel', mono: true, placeholder: '0912 345 678', value: prefill, attrs: 'inputmode="numeric" autocomplete="tel"' }) }}}
+        <div class="field-hint mt-2">Xác thực OTP để xem đầy đủ, bao gồm mã kích hoạt.</div>
+        <div class="actions"><button class="btn btn-primary btn-lg btn-block" id="lk-submit">{{{ icon('sms', 18) }}} Gửi OTP</button></div>
+      </form>
+      {% else %}
+      <form novalidate onsubmit="Buyer.a04Order(event)">
+        {{{ UI.field({ id: 'lk-order', label: 'Mã đơn hàng', required: true, mono: true, placeholder: 'HM260904001', hint: 'In trên màn kết quả thanh toán và trong SMS.', attrs: 'autocapitalize="characters"' }) }}}
+        <div class="alert alert-neutral mt-4">{{{ icon('info', 18) }}}<div class="text-sm">Tra cứu bằng mã đơn chỉ hiển thị trạng thái. Mã kích hoạt chỉ hiện khi xác thực OTP số điện thoại mua (BR-08).</div></div>
+        <div class="actions"><button class="btn btn-primary btn-lg btn-block">{{{ icon('search', 18) }}} Tra cứu</button></div>
+      </form>
+      {% endif %}
+    </div></div>
+    <div class="demo-hint">SĐT mẫu có đơn: <strong>{{ demoPhone }}</strong> (chưa có TK seller) · <strong>0908123456</strong> (seller) · mã đơn: <strong>{{ demoOrderId }}</strong></div>
+  </div>
+</div>
+
+{% block buyer/order-lookup-card %}
+<div class="order-card">
+  <div class="order-card-head">
+    <div><div class="text-sm text-muted">Mã đơn</div><div class="mono text-strong">{{ o.id }}</div></div>
+    <div class="text-right"><div class="text-sm text-muted">{{{ date(o.createdAt) }}}</div><div class="text-strong">{{{ money(o.price) }}}</div></div>
+  </div>
+  <div class="status-row">
+    <span class="text-sm text-muted">Thanh toán:</span>{{{ badge('orderStatus', o.status) }}}
+    <span class="text-sm text-muted">Giao hàng:</span>{{{ badge('shipping', o.shipping) }}}
+  </div>
+  {% if o.status === 'PAID' %}
+    {% if verified %}
+      {% if o.licenseCode %}
+      <div class="code-box mt-3">
+        <div class="grow"><span class="code-label">Mã kích hoạt {% if activated %}· đã kích hoạt{% else %}· chưa dùng{% endif %}</span><span class="code-value">{{ o.licenseCode }}</span></div>
+        <button class="btn btn-secondary btn-icon" aria-label="Sao chép mã" onclick="UI.copy('{{ o.licenseCode }}', 'Đã sao chép mã kích hoạt.')">{{{ icon('copy', 18) }}}</button>
+      </div>
+      {% else %}
+      <div class="alert alert-warning mt-3">{{{ icon('clock', 18) }}}<div class="text-sm">Mã kích hoạt đang chờ cấp, sẽ gửi qua SMS.</div></div>
+      {% endif %}
+    {% else %}
+    <div class="code-box mt-3"><div class="grow"><span class="code-label">Mã kích hoạt</span><span class="code-value">••••-••••-••••</span></div>{{{ icon('lock', 18, 'text-muted') }}}</div>
+    {% endif %}
+  {% endif %}
+  {% if o.status === 'AWAITING_RECONCILE' %}<p class="text-sm text-muted mt-3">Đang chờ đối soát chuyển khoản. Mã kích hoạt được cấp sau khi xác nhận.</p>{% endif %}
+  {% if o.status === 'REJECTED' %}<p class="text-sm text-error mt-3">Từ chối đối soát: {{ o.rejectReason || '' }}</p>{% endif %}
+</div>
+{% endblock %}
+
+{% block buyer/order-lookup-result %}
+<!-- Kết quả tra cứu: danh sách đơn + CTA đăng ký / trạng thái hồ sơ -->
+<div class="row-between mb-3"><h2>{{ orders.length }} đơn hàng</h2><button class="btn btn-ghost btn-sm" onclick="App.reload()">{{{ icon('arrow-left', 16) }}} Tra cứu khác</button></div>
+{% if !verified %}
+<div class="alert alert-neutral mb-3">{{{ icon('lock', 18) }}}<div class="text-sm">Mã kích hoạt được ẩn. Tra cứu bằng SĐT + OTP để xem.</div></div>
+{% endif %}
+
+{% each o in orders %}
+{{{ include('buyer/order-lookup-card', { o: o, verified: verified, activated: o.licenseCode && Store.codeInfo(o.licenseCode) && Store.codeInfo(o.licenseCode).status === 'ACTIVATED' }) }}}
+{% endeach %}
+
+{% if el.ok %}
+<div class="card card-tint mt-4"><div class="card-body">
+  <h3>Đăng ký thành viên HOMI365</h3>
+  <p class="text-sm text-muted mt-1">Số điện thoại này đã mua gói qua {{ el.referrer.fullName }} (hạng {{ RULES.rank(el.referrer.rank).label }}). Đăng ký hồ sơ để nhận link bán hàng và hoa hồng theo hạng.</p>
+  <div class="actions"><a class="btn btn-primary btn-lg btn-block" href="#register?phone={{ phone }}">{{{ icon('user', 18) }}} Đăng ký thành viên</a></div>
+</div></div>
+{% endif %}
+{% if el.reason === 'pending' %}
+<div class="alert alert-info mt-4">{{{ icon('clock', 18) }}}<div class="text-sm">Hồ sơ thành viên của bạn đang {{ label('approval', el.registration.status).toLowerCase() }}. <a href="#register?state=pending&phone={{ phone }}">Xem trạng thái</a></div></div>
+{% endif %}
+{% if isSeller %}
+<div class="actions"><a class="btn btn-outline btn-lg btn-block" href="#login">Đăng nhập Dashboard thành viên</a></div>
+{% endif %}
+{% endblock %}

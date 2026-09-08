@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Không có quyền truy cập · HOMI365</title>
+  <meta name="theme-color" content="#1E3A66">
+  <link rel="icon" href="./public/image/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="./css/tokens.css">
+  <link rel="stylesheet" href="./css/base.css">
+  <link rel="stylesheet" href="./css/components.css">
+  <link rel="stylesheet" href="./css/buyer.css">
+  <link rel="stylesheet" href="./css/seller.css">
+  <link rel="stylesheet" href="./css/admin.css">
+  <style>
+  .proto-nav{position:fixed;right:16px;bottom:16px;z-index:9999;font:13px/1.4 system-ui,sans-serif}
+  .proto-nav>summary{list-style:none;cursor:pointer;background:#1E3A66;color:#fff;padding:8px 14px;
+    border-radius:999px;box-shadow:0 4px 14px rgba(0,0,0,.25);user-select:none}
+  .proto-nav>summary::-webkit-details-marker{display:none}
+  .proto-nav[open]>summary{border-radius:8px 8px 0 0}
+  .proto-nav .panel{background:#fff;border:1px solid #d8dee9;border-radius:8px;padding:12px 14px;
+    max-height:70vh;overflow:auto;min-width:230px;box-shadow:0 8px 28px rgba(0,0,0,.18)}
+  .proto-nav h4{margin:10px 0 4px;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#6b7a90}
+  .proto-nav h4:first-child{margin-top:0}
+  .proto-nav a{display:block;padding:3px 0;color:#1E3A66;text-decoration:none}
+  .proto-nav a:hover{text-decoration:underline}
+  .proto-nav a[aria-current]{font-weight:700}
+  </style>
+</head>
+<body>
+<!-- Nội dung dựng sẵn: xem được ngay cả khi tắt JS. Có JS thì app thật render đè lên. -->
+<div id="app-root">
+
+<div class="error-page">
+  <div class="card error-card">
+    <div class="card-body stack">
+      <div class="result-icon is-error" style="margin:0 auto"><svg class="ico " width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg></div>
+      <div class="error-code">403 · FORBIDDEN</div>
+      
+      <h1>Bạn không có quyền truy cập khu vực quản trị</h1>
+      <p class="text-muted">Phiên hiện tại là phiên thành viên. Khu vực quản trị yêu cầu tài khoản quản trị viên đăng nhập bằng tên đăng nhập và mật khẩu.</p>
+      <div class="actions actions-row">
+        <a class="btn btn-secondary btn-lg" href="dashboard.html">Về Dashboard thành viên</a>
+        <a class="btn btn-primary btn-lg" href="admin-login.html">Đăng nhập quản trị</a>
+      </div>
+      
+    </div>
+  </div>
+</div>
+
+</div>
+<details class="proto-nav"><summary>Màn hình</summary><div class="panel"><h4>Người mua & công khai</h4><a href="index.html">Trang bìa prototype</a><a href="buy.html">Trang mua hàng</a><a href="buy-invalid.html">Link giới thiệu không hợp lệ</a><a href="buy-inactive.html">Thành viên bị khoá</a><a href="payment.html">Thanh toán</a><a href="order-result-paid.html">Đơn hàng đã thanh toán</a><a href="order-result-awaiting.html">Chờ đối soát chuyển khoản</a><a href="order-result-failed.html">Thanh toán thất bại</a><a href="order-result-rejected.html">Đơn bị từ chối đối soát</a><a href="order-result-later.html">Đã gửi mã qua SMS, đăng ký sau</a><a href="order-result-nocode.html">Đã thanh toán, kho hết mã</a><a href="order-lookup.html">Tra cứu đơn hàng</a><a href="login.html">Đăng nhập thành viên</a><a href="login-forgot.html">Quên mật khẩu</a><a href="register.html">Đăng ký thành viên</a><a href="register-pending.html">Hồ sơ chờ duyệt</a><a href="register-rejected.html">Hồ sơ bị từ chối</a><a href="policy.html">Chính sách</a><a href="403.html" aria-current="page">Không có quyền truy cập</a><h4>Thành viên</h4><a href="dashboard.html">Tổng quan</a><a href="my-package.html">Gói của tôi</a><a href="wallet.html">Ví & rút tiền</a><a href="profile.html">Hồ sơ</a><h4>Quản trị</h4><a href="admin-login.html">Đăng nhập</a><a href="admin-dashboard.html">Tổng quan</a><a href="agents.html">Thành viên</a><a href="orders.html">Đơn hàng & đối soát</a><a href="products.html">Sản phẩm & hoa hồng</a><a href="inventory.html">Kho mã & thiết bị</a><a href="ranks.html">Hạng & quy tắc</a><a href="withdrawals.html">Rút tiền & sổ hoa hồng</a><a href="registrations.html">Duyệt đăng ký</a><a href="admin-users.html">Tài khoản admin</a></div></details>
+
+<script>window.__ROUTE__ = "403";</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js" crossorigin="anonymous"></script>
+<script src="./config/business-rules.js"></script>
+<script src="./config/policies.js"></script>
+<script src="./mock/data.js"></script>
+<script src="./js/ui.js"></script>
+<script src="./js/tpl.js"></script>
+<script src="./js/templates.js"></script>
+<script src="./js/views-buyer.js"></script>
+<script src="./js/views-seller.js"></script>
+<script src="./js/views-admin.js"></script>
+<script src="./js/app.js"></script>
+</body>
+</html>

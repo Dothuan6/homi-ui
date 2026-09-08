@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 408 104" width="408" height="104" role="img" aria-label="HOMI365">
+  <title>HOMI365 — logo ngang, bản một màu trắng cho nền navy</title>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14 46 L50 13 L86 46 V85 A3 3 0 0 1 83 88 H17 A3 3 0 0 1 14 85 Z" stroke="#FFFFFF" stroke-width="7"/>
+    <path d="M50 76 C40 67 32.5 60.5 32.5 54 C32.5 49 36.5 45 41.5 45 C45.3 45 48.6 47.2 50 50 C51.4 47.2 54.7 45 58.5 45 C63.5 45 67.5 49 67.5 54 C67.5 60.5 60 67 50 76 Z" stroke="#4FB8CE" stroke-width="6"/>
+  </g>
+  <text x="106" y="74" font-family="Archivo, 'Arial Black', 'Helvetica Neue', Arial, sans-serif" font-size="62" font-weight="700" letter-spacing="-1.5">
+    <tspan fill="#FFFFFF">HOMI</tspan><tspan fill="#4FB8CE">365</tspan>
+  </text>
+</svg>

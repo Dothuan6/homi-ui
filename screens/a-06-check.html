@@ -1,8 +1,0 @@
-<div class="card"><div class="card-body">
-  <h2 class="mb-3">Kiểm tra điều kiện đăng ký</h2>
-  <form novalidate onsubmit="Buyer.a06Lookup(event)">
-    {{{ UI.field({ id: 'rg-phone', label: 'Số điện thoại đã mua gói', required: true, type: 'tel', mono: true, placeholder: '0912 345 678', attrs: 'inputmode="numeric"' }) }}}
-    <div class="actions"><button class="btn btn-primary btn-lg btn-block">{{{ icon('search', 18) }}} Kiểm tra</button></div>
-  </form>
-</div></div>
-<div class="demo-hint">SĐT mẫu: <strong>{{ phoneOk }}</strong> đủ điều kiện · <strong>{{ phoneCopper }}</strong> người giới thiệu Copper · <strong>0999999999</strong> chưa mua · <strong>0913000888</strong> đang chờ duyệt · <strong>0914000999</strong> bị từ chối</div>

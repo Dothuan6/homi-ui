@@ -146,7 +146,7 @@ const SEED = (function () {
   // Gói của chính các thành viên (mua trước khi thành thành viên)
   users.filter(u => u.type === 'agent').forEach((u, i) => { const o = addOrder(mkOrder(u.referrerId || 'U001', new Date(new Date(u.createdAt).getTime() - 2 * 86400000).toISOString(), { fullName: u.fullName, phone: u.phone, email: u.email, address: u.address, sellerId: u.referrerId, refCode: u.referrerId ? userById(u.referrerId).refCode : null })); o.paidAt = new Date(new Date(o.createdAt).getTime() + 4 * 60000).toISOString(); finalizePaid(o, { activated: true, shipping: 'DELIVERED' }); });
   // Đơn chờ đối soát + callback muộn
-  [['U001', 2], ['U002', 5], ['U004', 26]].forEach(([sid, h]) => { const createdAt = new Date(now.getTime() - h * 3600000).toISOString(); const o = addOrder(mkOrder(sid, createdAt, { method: 'bank', status: 'AWAITING_RECONCILE', shipping: 'NONE' })); o.transferClaimedAt = new Date(new Date(createdAt).getTime() + 6 * 60000).toISOString(); });
+  [['U001', 2], ['U002', 5], ['U004', 26]].forEach(([sid, h]) => { const createdAt = new Date(now.getTime() - h * 3600000).toISOString(); const o = addOrder(mkOrder(sid, createdAt, { method: 'bank', status: 'AWAITING_RECONCILE', shipping: 'NONE' })); o.transferClaimedAt = new Date(new Date(createdAt).getTime() + 6 * 60000).toISOString(); o.transferProof = { name: 'bien-lai-' + o.id + '.jpg', size: (600 + Math.floor(Math.random() * 900)) + ' KB', at: o.transferClaimedAt }; });
   const late = addOrder(mkOrder('U002', daysAgo(1, 10), { fullName: 'Nguyễn Văn Tuấn', phone: '0918777666', flags: { lateCallback: true } }));
   late.paidAt = new Date(new Date(late.createdAt).getTime() + 17 * 60000).toISOString(); finalizePaid(late, { activated: false, shipping: 'PENDING' });
   orders.sort((a, b) => a.createdAt < b.createdAt ? 1 : -1);
@@ -316,7 +316,8 @@ const Store = {
   expireOrder: function(id) { const o = this.order(id); if (o && o.status === 'PENDING_PAYMENT') { o.status = 'EXPIRED'; this.save(); } return o; },
   failOrder: function(id, reason) { return this.setOrder(id, { status: 'FAILED', method: 'gateway', failReason: reason || 'Người mua huỷ giao dịch trên cổng', failedAt: this.nowIso() }); },
   retryOrder: function(id) { return this.setOrder(id, { status: 'PENDING_PAYMENT', method: null }); },
-  claimTransfer: function(id) { return this.setOrder(id, { status: 'AWAITING_RECONCILE', method: 'bank', transferClaimedAt: this.nowIso() }); },
+  /** Khách báo đã chuyển khoản. proof = { name, size, at } — mock, chỉ giữ tên và dung lượng file. */
+  claimTransfer: function(id, proof) { return this.setOrder(id, { status: 'AWAITING_RECONCILE', method: 'bank', transferClaimedAt: this.nowIso(), transferProof: proof || null }); },
   /** PAID (idempotent — 6.1.C-5): cấp mã ASSIGNED, ghép Customer theo SĐT, hoa hồng ngay, cumulativeSales +1. */
   markPaid: function(id, method, extra) {
     const o = this.order(id); if (!o) return null; if (o.status === 'PAID') return o;
@@ -418,7 +419,7 @@ const Store = {
     if (reg.id) reg.agentId = u.id;
     this.d().clicks[u.id] = this.d().clicks[u.id] || [];
     this.addLog(u.id, 'Kích hoạt tài khoản thành viên (hạng ' + RULES.rank(rank).label + ')');
-    this.d().emails.unshift({ to: u.email, from: CONFIG.email.from, at: this.nowIso(), subject: 'HOMI365 · Tài khoản thành viên đã được kích hoạt', body: `Chào ${u.fullName},\n\nTài khoản thành viên HOMI365 của bạn đã được duyệt.\n• Link giới thiệu: ${RULES.referralUrl(u.refCode)}\n• Link mua hàng cá nhân: ${RULES.publicPurchaseUrl(u.purchaseAlias)}\n• Cổng thành viên: ${CONFIG.brand.baseUrl}/#A-05\nĐăng nhập bằng số điện thoại ${u.phone} và mật khẩu bạn đã đặt.` });
+    this.d().emails.unshift({ to: u.email, from: CONFIG.email.from, at: this.nowIso(), subject: 'HOMI365 · Tài khoản thành viên đã được kích hoạt', body: `Chào ${u.fullName},\n\nTài khoản thành viên HOMI365 của bạn đã được duyệt.\n• Link giới thiệu: ${RULES.referralUrl(u.refCode)}\n• Link mua hàng cá nhân: ${RULES.publicPurchaseUrl(u.purchaseAlias)}\n• Cổng thành viên: ${CONFIG.brand.baseUrl}/#login\nĐăng nhập bằng số điện thoại ${u.phone} và mật khẩu bạn đã đặt.` });
     if (CONFIG.demo.seedNewAgent && !o.noSeed) this.seedDemoActivity(u);
     this.save(); return u;
   },

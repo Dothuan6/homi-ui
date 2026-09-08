@@ -1,0 +1,78 @@
+<!-- admin-dashboard · Tổng quan: thống kê kỳ, biểu đồ doanh thu, job xét hạng, việc cần làm -->
+<div class="stack-lg">
+  <div class="row-between">
+    <p class="text-muted">Số liệu {{{ days }}} ngày gần nhất</p>
+    {{{ include('partials/admin-period-seg', { period: period, periods: periods }) }}}
+  </div>
+
+  <div class="stat-grid stat-grid-6">
+    <div class="stat stat-navy"><div class="stat-label">{{{ icon('bars', 16) }}} Doanh thu</div><div class="stat-value">{{{ money(s.revenue) }}}</div><div class="stat-sub">{{{ s.paid }}} đơn thanh toán · về công ty {{{ money(s.companyCommission) }}}</div></div>
+    <div class="stat"><div class="stat-label">{{{ icon('inbox', 16) }}} Số đơn</div><div class="stat-value">{{{ num(s.orders) }}}</div></div>
+    <div class="stat"><div class="stat-label">{{{ icon('users', 16) }}} Thành viên mới</div><div class="stat-value">{{{ num(s.newAgents) }}}</div><div class="stat-sub">{{{ totalAgents }}} thành viên tổng</div></div>
+    <div class="stat stat-clickable {{ s.regPending ? 'stat-accent' : '' }}" onclick="App.navigate('registrations')"><div class="stat-label">{{{ icon('user', 16) }}} Đăng ký chờ duyệt</div><div class="stat-value {{ s.regPending ? 'text-warning' : '' }}">{{{ num(s.regPending) }}}</div></div>
+    <div class="stat stat-clickable" onclick="App.navigate('withdrawals?tab=withdraw')"><div class="stat-label">{{{ icon('cash', 16) }}} Rút tiền chờ duyệt</div><div class="stat-value {{ s.withdrawPending ? 'text-warning' : '' }}">{{{ num(s.withdrawPending) }}}</div><div class="stat-sub">{{{ s.withdrawApproved }}} chờ chi trả</div></div>
+    <div class="stat stat-clickable" onclick="App.navigate('inventory')"><div class="stat-label">{{{ icon('key', 16) }}} Mã còn trong kho</div><div class="stat-value {{ s.stock <= CONFIG.stock.lowThreshold ? 'text-warning' : '' }}">{{{ num(s.stock) }}}</div></div>
+  </div>
+
+  <div class="split-2">
+    <div class="stack">
+      <div class="card">
+        <div class="card-head"><h2>Doanh thu theo ngày (triệu đồng)</h2></div>
+        <div class="card-body">{{{ UI.chart.combo(series, { height: 240, barName: 'triệu đ', yFormat: (v) => Math.round(v), accent: true, aria: 'Doanh thu theo ngày' }) }}}</div>
+      </div>
+      <div class="card">
+        <div class="card-head"><h2>Job xét hạng cuối tháng</h2><span class="text-sm text-muted">{{ rules.rankRules.jobTime || CONFIG.rankRules.jobTime }} · tự động</span></div>
+        <div class="card-body">
+          <p><strong>{{{ s.noSaleAgents }}}</strong> thành viên chưa bán đủ {{{ rules.rankRules.minSalesPerMonth }}} gói trong tháng này (sẽ giáng 1 bậc nếu không phát sinh đơn). Thành viên đủ luỹ kế sẽ được thăng thẳng lên hạng tương ứng.</p>
+          {% if head %}
+          <div class="actions actions-row"><button class="btn btn-primary" onclick="Admin.runJob()">{{{ icon('zap', 18) }}} Chạy xét hạng ngay (mô phỏng)</button></div>
+          {% else %}
+          <p class="text-caption mt-2">Chỉ Head Admin mới chạy thủ công.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><h2>Việc cần làm</h2><span class="badge badge-warning">{{{ todo.length }}}</span></div>
+      <div class="card-body">
+        {% if todo.length %}
+        <ul class="todo-list">
+          {% each t in todo %}
+          <li><span class="todo-count">{{{ t.count }}}</span><div class="todo-text">{{{ t.title }}}<small>{{{ t.sub }}}</small></div><a class="btn btn-secondary btn-sm" href="#{{{ t.href }}}">Xử lý {{{ icon('arrow-right', 14) }}}</a></li>
+          {% endeach %}
+        </ul>
+        {% else %}
+        {{{ UI.empty('check-circle', 'Không có việc tồn đọng') }}}
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% block admin/dashboard-job-result %}
+<!-- admin-dashboard · Modal kết quả job xét hạng (r = Store.runMonthEndJob) · part = 'body' | 'foot' -->
+{% if part === 'body' %}
+<div class="stack">
+  <div class="alert alert-success">{{{ icon('check-circle', 18) }}}<div><strong>{{{ r.promoted.length }}}</strong> thăng hạng · <strong>{{{ r.demoted.length }}}</strong> giáng hạng</div></div>
+  {% if r.promoted.length %}
+  <h3>Thăng hạng</h3>
+  <ul class="stack-sm" style="padding-left:18px">
+    {% each p in r.promoted %}
+    <li>{{ p.user.fullName }}: {{{ RULES.rank(p.from).label }}} → <strong>{{{ RULES.rank(p.to).label }}}</strong> (luỹ kế {{{ p.user.cumulativeSales }}})</li>
+    {% endeach %}
+  </ul>
+  {% endif %}
+  {% if r.demoted.length %}
+  <h3>Giáng hạng</h3>
+  <ul class="stack-sm" style="padding-left:18px">
+    {% each p in r.demoted %}
+    <li>{{ p.user.fullName }}: {{{ RULES.rank(p.from).label }}} → <strong>{{{ RULES.rank(p.to).label }}}</strong></li>
+    {% endeach %}
+  </ul>
+  {% endif %}
+</div>
+{% elif part === 'foot' %}
+<button class="btn btn-primary" onclick="UI.closeModal(); App.reload()">Đóng</button>
+{% endif %}
+{% endblock %}
