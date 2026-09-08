@@ -38,6 +38,8 @@
 .site-footer-inner { max-width: var(--buyer-max); margin: 0 auto; padding: 28px 24px; display: grid; grid-template-columns: 1fr; gap: 20px; font-size: var(--fs-sm); color: var(--text-muted); }
 @media (min-width: 720px) { .site-footer-inner { grid-template-columns: 1.6fr 1fr 1.2fr 1fr; gap: 28px; } }
 .site-footer .footer-title { font-family: var(--font-display); font-weight: 700; color: var(--navy-900); margin-bottom: 8px; }
+/* Cột thương hiệu: mô tả giá trị cốt lõi — hạn chế bề rộng để không thành một dòng quá dài */
+.site-footer .footer-about { max-width: 46ch; line-height: 1.55; }
 .site-footer a { display: block; color: var(--text-muted); padding: 4px 0; min-height: 32px; }
 .site-footer a:hover { color: var(--accent); }
 .buyer-footer { text-align: center; padding: 16px; font-size: var(--fs-xs); color: var(--text-caption); }

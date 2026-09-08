@@ -109,7 +109,7 @@
     </div>
   </main>
 
-  <footer class="buyer-footer">{{ CONFIG.brand.company }}</footer>
+  <footer class="buyer-footer">{{ CONFIG.brand.name }} — {{ CONFIG.brand.tagline }} · {{ CONFIG.brand.company }}</footer>
 </div>
 {% endblock %}
 
@@ -209,8 +209,10 @@
     <div class="site-footer-inner">
       <div>
         {{{ UI.logo({ size: 28 }) }}}
-        <p class="mt-2">{{ CONFIG.brand.company }}</p>
-        <p>Hỗ trợ <strong>{{ CONFIG.brand.supportHotline }}</strong> · {{ CONFIG.brand.supportHours }}</p>
+        <p class="mt-2 text-strong">{{ CONFIG.brand.name }} — {{ CONFIG.brand.tagline }}</p>
+        <p class="footer-about mt-2">{{ CONFIG.brand.about }}</p>
+        <p class="mt-2">Hỗ trợ <strong>{{ CONFIG.brand.supportHotline }}</strong> · {{ CONFIG.brand.supportHours }}</p>
+        <p class="text-caption mt-2">{{ CONFIG.brand.company }}</p>
       </div>
       <div>
         <div class="footer-title">Khách hàng</div>

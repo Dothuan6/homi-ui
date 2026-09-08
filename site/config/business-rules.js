@@ -14,6 +14,10 @@ const CONFIG = {
     publicDomain: 'Homi365.com.vn',
     supportHotline: '1900 6868',
     supportHours: '08:00 – 20:00 hằng ngày',
+    name: 'Homi365',
+    tagline: 'Giải pháp chăm sóc y tế từ xa cho cá nhân, gia đình và tổ chức',
+    about: 'Khách hàng dùng đồng hồ thông minh theo dõi các chỉ số sức khoẻ theo thời gian thực. Từ dữ liệu đó, Homi365 tư vấn, chăm sóc và can thiệp đúng lúc cho người lớn tuổi hoặc người đang mắc bệnh — như gói CN02 · Bác sĩ 24/7 hỗ trợ tư vấn sức khoẻ.',
+    /** Pháp nhân trên hoá đơn / hợp đồng — giữ tách khỏi tên thương hiệu. */
     company: 'CÔNG TY TNHH GIẢI PHÁP CÔNG NGHỆ HUY GIÁP',
     baseUrl: 'https://homi-dev-ui.netlify.app',  // bản deploy demo; khi lên tên miền thật đổi thành https://homi365.com.vn và bỏ '#' trong referralUrl/purchaseUrl
     /** Logo thương hiệu dùng ở header + footer (nền sáng). Nền tối vẫn dùng logo vẽ bằng SVG trong UI.logo. */
